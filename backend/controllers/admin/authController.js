@@ -32,14 +32,10 @@ export const signup = async (req, res, next) => {
   }
 };
 
-const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000; // For cookie maxAge
-
-
 // Login Controller
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-
     const user = await AdminAuth.findOne({ where: { email } });
     if (!user) return res.status(401).json({ error: 'Invalid email' });
 
@@ -57,6 +53,7 @@ export const login = async (req, res, next) => {
       refresh_token_expiry: expiryDate
     });
 
+    // Set cookies
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -64,11 +61,10 @@ export const login = async (req, res, next) => {
       sameSite: 'strict',
       path: '/'
     });
-
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: TWO_WEEKS,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: 'strict',
       path: '/'
     });
@@ -79,54 +75,132 @@ export const login = async (req, res, next) => {
   }
 };
 
+
 // Refresh Token Controller
 export const refreshToken = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
-    if (!token) return res.status(401).json({ error: 'Refresh token required' });
+    if (!token) {
+      return res.status(401).json({ error: "Refresh token required" });
+    }
 
-    const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET || 'yourrefreshtokensecret');
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET || "yourrefreshtokensecret");
+    } catch (e) {
+      return res.status(403).json({ error: "Invalid refresh token" });
+    }
 
     const user = await AdminAuth.findOne({ where: { id: payload.userId, refresh_token: token } });
-    if (!user) return res.status(403).json({ error: 'Invalid refresh token' });
+    if (!user) {
+      return res.status(403).json({ error: "Invalid refresh token" });
+    }
 
     const now = new Date();
     if (!user.refresh_token_expiry || user.refresh_token_expiry < now) {
-      return res.status(403).json({ error: 'Refresh token expired' });
+      return res.status(403).json({ error: "Refresh token expired" });
     }
 
-    const accessToken = generateAccessToken(user);
+    // ✅ Only rotate refresh token if close to expiry (1 day left)
+    const expiryDate = new Date(user.refresh_token_expiry);
+    const needsRotation = expiryDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000;
 
-    res.cookie('accessToken', accessToken, {
+    let newRefreshToken = token;
+    let newExpiryDate = expiryDate;
+
+    if (needsRotation) {
+      newRefreshToken = generateRefreshToken(user);
+      newExpiryDate = new Date();
+      newExpiryDate.setDate(newExpiryDate.getDate() + 7);
+
+      await user.update({
+        refresh_token: newRefreshToken,
+        refresh_token_expiry: newExpiryDate,
+      });
+    }
+
+    const newAccessToken = generateAccessToken(user);
+
+    // Cookie options
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 15 * 60 * 1000,
-      sameSite: 'strict',
-      path: '/'
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    };
+
+    res.cookie("accessToken", newAccessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
-    res.status(200).json({ message: 'Access token refreshed' });
+    res.cookie("refreshToken", newRefreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.status(200).json({ message: "Access token refreshed" });
   } catch (err) {
-    return res.status(403).json({ error: 'Invalid refresh token' });
+    next(err);
   }
 };
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const token = req.cookies.accessToken;
+    if (!token) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ error: 'Invalid token' });
+      }
+
+      const user = await AdminAuth.findByPk(decoded.userId, {
+        attributes: ['id', 'email']
+      });
+      console.log(user);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json(user);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 
 // Logout Controller
 export const logout = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
-    if (!token) return res.status(400).json({ error: 'Refresh token required' });
+    if (!token) return res.status(401).json({ error: 'Refresh token required' });
 
     const user = await AdminAuth.findOne({ where: { refresh_token: token } });
-    if (!user) return res.status(400).json({ error: 'Invalid token' });
+    if (!user) return res.status(401).json({ error: 'Invalid token' });
 
     await user.update({ refresh_token: null, refresh_token_expiry: null });
 
-    res.clearCookie('accessToken', { path: '/' });
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/'
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/'
+    });
 
     res.status(200).json({ message: 'Logged out successfully' });
   } catch (err) {
     next(err);
   }
 };
+
