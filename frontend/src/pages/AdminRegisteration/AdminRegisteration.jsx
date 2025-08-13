@@ -86,7 +86,6 @@ const AdminRegistration = () => {
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
   };
 
-  // Update field and clear error for that field on change
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
@@ -135,21 +134,18 @@ const AdminRegistration = () => {
             Create Admin Account
           </h2>
 
-          {/* Server error */}
           {serverError && (
             <div className="bg-red-100 text-red-700 border border-red-400 rounded p-3 text-center font-semibold">
               {serverError}
             </div>
           )}
 
-          {/* Success message */}
           {success && (
             <div className="bg-green-100 text-green-700 border border-green-400 rounded p-3 text-center font-semibold">
               {success}
             </div>
           )}
 
-          {/* Email */}
           <div>
             <label htmlFor="email" className={labelClass}>
               Email <span className="text-red-600">*</span>
@@ -169,7 +165,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* Password */}
           <div>
             <label htmlFor="password" className={labelClass}>
               Password <span className="text-red-600">*</span>
@@ -189,7 +184,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* Account Type */}
           <div>
             <label htmlFor="account_type" className={labelClass}>
               Account Type <span className="text-red-600">*</span>
@@ -213,7 +207,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* Company Name */}
           <div>
             <label htmlFor="company_name" className={labelClass}>
               Company Name <span className="text-red-600">*</span>
@@ -233,7 +226,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* Country */}
           <div>
             <label htmlFor="country" className={labelClass}>
               Country <span className="text-red-600">*</span>
@@ -253,7 +245,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* Time Zone */}
           <div>
             <label htmlFor="time_zone" className={labelClass}>
               Time Zone <span className="text-red-600">*</span>
@@ -273,7 +264,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* First Name */}
           <div>
             <label htmlFor="first_name" className={labelClass}>
               First Name <span className="text-red-600">*</span>
@@ -293,7 +283,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* Last Name */}
           <div>
             <label htmlFor="last_name" className={labelClass}>
               Last Name <span className="text-red-600">*</span>
@@ -313,7 +302,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* Username */}
           <div>
             <label htmlFor="username" className={labelClass}>
               Username <span className="text-red-600">*</span>
@@ -333,7 +321,6 @@ const AdminRegistration = () => {
             )}
           </div>
 
-          {/* Phone */}
           <div>
             <label htmlFor="phone" className={labelClass}>
               Phone <span className="text-red-600">*</span>
