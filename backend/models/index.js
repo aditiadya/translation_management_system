@@ -28,7 +28,6 @@ const files = fs.readdirSync(__dirname).filter(
 );
 
 for (const file of files) {
-  // THIS IS THE KEY CHANGE:
   const module = await import(pathToFileURL(path.join(__dirname, file)));
   const model = module.default;
   db[model.name] = model;

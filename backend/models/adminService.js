@@ -25,7 +25,7 @@ const AdminService = sequelize.define(
   },
   {
     tableName: "admin_services",
-    timestamps: true,
+    timestamps: false,
   }
 );
 

@@ -1,13 +1,24 @@
+// middlewares/authMiddleware.js
 import jwt from 'jsonwebtoken';
+import db from '../models/index.js';
+const { AdminAuth } = db;
 
-export const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.sendStatus(401);
+export const authenticateToken = async (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+    if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
-  jwt.verify(token, process.env.JWT_SECRET || 'yoursecret', (err, user) => {
-    if (err) return res.sendStatus(403);
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || 'yoursecret');
+
+    const user = await AdminAuth.findByPk(decoded.userId, {
+      attributes: ['id', 'email']
+    });
+
+    if (!user) return res.status(401).json({ error: 'User not found' });
+
     req.user = user;
     next();
-  });
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
 };
