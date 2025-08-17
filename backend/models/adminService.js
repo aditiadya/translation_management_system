@@ -29,4 +29,14 @@ const AdminService = sequelize.define(
   }
 );
 
+AdminService.associate = (models) => {
+  if (models.AdminAuth) {
+    AdminService.belongsTo(models.AdminAuth, {
+      foreignKey: "email",
+      targetKey: "email",
+      as: "admin",
+    });
+  }
+};
+
 export default AdminService;

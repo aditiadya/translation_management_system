@@ -1,7 +1,6 @@
 import db from '../../models/index.js';
 const { AdminLanguagePair } = db;
 
-
 export const getAllLanguagePairs = async (req, res) => {
   try {
     const pairs = await AdminLanguagePair.findAll({ where: { email: req.user.email } });
