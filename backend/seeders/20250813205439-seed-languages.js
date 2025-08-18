@@ -7,9 +7,6 @@ export default {
       name: ISO6391.getName(code) || code,
     }));
 
-    // If you want to avoid duplicates on re-run, clear table first (optional):
-    // await queryInterface.bulkDelete('languages', null, {});
-
     await queryInterface.bulkInsert('languages', rows, {});
   },
 

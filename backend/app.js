@@ -10,8 +10,6 @@ import adminUnitsRoutes from "./routes/adminUnitsRoutes.js";
 import adminCurrencyRoutes from "./routes/adminCurrencyRoutes.js";
 import adminPaymentMethodRoutes from "./routes/adminPaymentMethodRoutes.js";
 
-
-
 const app = express();
 
 const corsOptions = {

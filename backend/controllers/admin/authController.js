@@ -53,7 +53,6 @@ export const login = async (req, res, next) => {
       refresh_token_expiry: expiryDate
     });
 
-    // Set cookies
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -101,7 +100,6 @@ export const refreshToken = async (req, res, next) => {
       return res.status(403).json({ error: "Refresh token expired" });
     }
 
-    // ✅ Only rotate refresh token if close to expiry (1 day left)
     const expiryDate = new Date(user.refresh_token_expiry);
     const needsRotation = expiryDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000;
 
@@ -121,7 +119,6 @@ export const refreshToken = async (req, res, next) => {
 
     const newAccessToken = generateAccessToken(user);
 
-    // Cookie options
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -131,12 +128,12 @@ export const refreshToken = async (req, res, next) => {
 
     res.cookie("accessToken", newAccessToken, {
       ...cookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", newRefreshToken, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({ message: "Access token refreshed" });
