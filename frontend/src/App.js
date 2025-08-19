@@ -5,6 +5,7 @@ import LoginPage from "./pages/AdminLogin/AdminLogin";
 import Dashboard from "./pages/Dashboard/Dashboard";
 // import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
+import SetupWizardPage from "./pages/SetupWizard/SetupWizardPage";
 
 const App = () => (
   <AuthProvider>
@@ -14,6 +15,7 @@ const App = () => (
         <Route path="/create-account" element={<AdminRegisteration />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<Dashboard/>} />
+        <Route path="/setup" element={<SetupWizardPage/>} />
       </Routes>
     </Router>
   </AuthProvider>

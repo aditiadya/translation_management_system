@@ -9,5 +9,5 @@ export default {
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.removeColumn("admin_auth", "setup_completed");
-  },
+  }
 };

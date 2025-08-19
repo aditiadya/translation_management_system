@@ -8,7 +8,7 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    api.get("/me")
+    api.get("/auth/me")
       .then((res) => setUser(res.data))
       .catch(() => setUser(null));
   }, []);

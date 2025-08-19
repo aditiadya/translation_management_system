@@ -6,7 +6,7 @@ const LogoutButton = ({ onLogout }) => {
 
   const handleLogout = async () => {
     try {
-      await api.post("/logout");
+      await api.post("auth/logout");
       onLogout();
       navigate("/");
     } catch (err) {

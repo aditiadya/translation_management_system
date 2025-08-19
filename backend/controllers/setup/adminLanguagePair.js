@@ -3,7 +3,13 @@ const { AdminLanguagePair } = db;
 
 export const getAllLanguagePairs = async (req, res) => {
   try {
-    const pairs = await AdminLanguagePair.findAll({ where: { email: req.user.email } });
+    const pairs = await AdminLanguagePair.findAll({
+      where: { email: req.user.email },
+      include: [
+        { model: db.Language, as: "sourceLanguage", attributes: ["id", "name"] },
+        { model: db.Language, as: "targetLanguage", attributes: ["id", "name"] },
+      ],
+    });
     res.status(200).json(pairs);
   } catch (error) {
     res.status(500).json({ error: error.message });

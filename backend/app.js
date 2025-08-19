@@ -9,6 +9,9 @@ import adminSpecializationRoutes from "./routes/adminSpecializationRoutes.js";
 import adminUnitsRoutes from "./routes/adminUnitsRoutes.js";
 import adminCurrencyRoutes from "./routes/adminCurrencyRoutes.js";
 import adminPaymentMethodRoutes from "./routes/adminPaymentMethodRoutes.js";
+import languageRoutes from "./routes/languageRoutes.js";
+import currencyRoutes from "./routes/currencyRoutes.js";
+
 
 const app = express();
 
@@ -31,5 +34,8 @@ app.use("/api/admin-specializations", adminSpecializationRoutes);
 app.use("/api/admin-units", adminUnitsRoutes);
 app.use("/api/admin-currencies", adminCurrencyRoutes);
 app.use("/api/admin/payment-methods", adminPaymentMethodRoutes);
+app.use("/api/languages", languageRoutes);
+app.use("/api/currencies", currencyRoutes);
+app.use("/api/admin", authRoutes);
 
 export default app;
