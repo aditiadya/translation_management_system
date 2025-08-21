@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
-import api from '../utils/axiosInstance';
+import React, { createContext, useState, useEffect } from "react";
+import api from "../utils/axiosInstance";
 
 export const AuthContext = createContext();
 
@@ -8,9 +8,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/auth/me', { withCredentials: true })
-      .then(res => setUser(res.data))
-      .catch(() => setUser(null))
+    api
+      .get("/auth/me", { withCredentials: true })
+      .then((res) => {
+        console.log("AuthContext /auth/me response:", res.data);
+        setUser(res.data);
+      })
+      .catch(err  => {
+        console.error("AuthContext /auth/me error:", err);
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 

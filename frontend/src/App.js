@@ -3,7 +3,7 @@ import HomePage from "./pages/Homepage/Homepage";
 import AdminRegisteration from "./pages/AdminRegisteration/AdminRegisteration";
 import LoginPage from "./pages/AdminLogin/AdminLogin";
 import Dashboard from "./pages/Dashboard/Dashboard";
-// import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import SetupWizardPage from "./pages/SetupWizard/SetupWizardPage";
 
@@ -14,8 +14,22 @@ const App = () => (
         <Route path="/" element={<HomePage />} />
         <Route path="/create-account" element={<AdminRegisteration />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/setup" element={<SetupWizardPage/>} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setup"
+          element={
+            <ProtectedRoute>
+              <SetupWizardPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   </AuthProvider>

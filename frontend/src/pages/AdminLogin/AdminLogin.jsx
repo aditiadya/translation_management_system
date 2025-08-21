@@ -3,7 +3,7 @@ import Navbar from "../../components/Navbar/Navbar";
 import Button from "../../components/Button/Button";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosInstance";
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from "../../context/AuthContext";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -48,10 +48,25 @@ const AdminLogin = () => {
     if (!validate()) return;
 
     try {
-      const response = await api.post("/auth/login", form);
-      setUser(response.data.user); 
-      navigate("/dashboard");
+      const response = await api.post("/auth/login", form, {
+        withCredentials: true,
+      });
+      console.log("Login response:", response.data);
+
+      const meRes = await api.get("/auth/me", { withCredentials: true });
+      console.log("Fetched current user:", meRes.data);
+
+      setUser(meRes.data);
+
+      if (response.data.setup_completed) {
+        console.log("Navigating to dashboard...");
+        navigate("/dashboard");
+      } else {
+        console.log("Navigating to setup...");
+        navigate("/setup");
+      }
     } catch (err) {
+      console.error("Login error:", err.response?.data || err);
       setServerError(err.response?.data?.error || "Login failed");
     }
   };
@@ -86,7 +101,10 @@ const AdminLogin = () => {
           )}
 
           <div>
-            <label htmlFor="email" className="block text-gray-700 font-bold mb-1">
+            <label
+              htmlFor="email"
+              className="block text-gray-700 font-bold mb-1"
+            >
               Email <span className="text-red-600">*</span>
             </label>
             <input
@@ -105,7 +123,10 @@ const AdminLogin = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-gray-700 font-bold mb-1">
+            <label
+              htmlFor="password"
+              className="block text-gray-700 font-bold mb-1"
+            >
               Password <span className="text-red-600">*</span>
             </label>
             <input

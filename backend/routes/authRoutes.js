@@ -4,7 +4,7 @@ import {
   login,
   refreshToken,
   logout,
-  getCurrentUser,
+  getCurrentUser
 } from "../controllers/admin/authController.js";
 import { validateSignup } from "../middlewares/validateSignup.js";
 import { validateLogin } from "../middlewares/validateLogin.js";

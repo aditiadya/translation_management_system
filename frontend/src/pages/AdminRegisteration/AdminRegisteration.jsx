@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import Button from "../../components/Button/Button";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const AdminRegistration = () => {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const AdminRegistration = () => {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Full form validation, runs on submit
   const validate = () => {
@@ -48,6 +51,11 @@ const AdminRegistration = () => {
     if (!form.phone) currentErrors.phone = "Phone is required.";
     else if (!/^\+?[0-9\s\-]{7,15}$/.test(form.phone))
       currentErrors.phone = "Phone number is invalid.";
+
+    if (!captchaValue)
+      currentErrors.captcha = "Please verify you are not a robot.";
+    if (!acceptedTerms)
+      currentErrors.terms = "You must accept the Privacy Policy and Terms.";
 
     setErrors(currentErrors);
     return Object.keys(currentErrors).length === 0;
@@ -121,17 +129,19 @@ const AdminRegistration = () => {
 
   const labelClass = "block text-gray-700 font-bold mb-1";
 
+  // console.log("KEY:", REACT_APP_RECAPTCHA_SITE_KEY);
+
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-white flex justify-center items-center p-6">
         <form
-          className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full space-y-5"
+          className="bg-white rounded-lg shadow-lg p-8 max-w-xl w-full space-y-5"
           onSubmit={handleSubmit}
           noValidate
         >
           <h2 className="text-2xl font-extrabold text-gray-900 text-center">
-            Create Admin Account
+            Sign up
           </h2>
 
           {serverError && (
@@ -147,198 +157,227 @@ const AdminRegistration = () => {
           )}
 
           <div>
-            <label htmlFor="email" className={labelClass}>
-              Email <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("email")}
+            <h3 className="text-lg font-bold text-gray-800 border-b pb-1 mb-5">
+              Account Details
+            </h3>
+            <div className="space-y-4 pl-2 pr-2">
+              <div>
+                <label htmlFor="account_type" className={labelClass}>
+                  Account Type <span className="text-red-600">*</span>
+                </label>
+                <select
+                  id="account_type"
+                  name="account_type"
+                  value={form.account_type}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={inputClass("account_type")}
+                >
+                  <option value="" disabled>
+                    Select account type...
+                  </option>
+                  <option value="freelance">Freelance</option>
+                  <option value="enterprise">Enterprise</option>
+                </select>
+                {errors.account_type && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.account_type}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="company_name" className={labelClass}>
+                  Company Name <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="company_name"
+                  id="company_name"
+                  placeholder="Company Name"
+                  value={form.company_name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={inputClass("company_name")}
+                />
+                {errors.company_name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.company_name}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="country" className={labelClass}>
+                  Country <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="country"
+                  id="country"
+                  placeholder="Country"
+                  value={form.country}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={inputClass("country")}
+                />
+                {errors.country && (
+                  <p className="text-red-500 text-sm mt-1">{errors.country}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ACCOUNT OWNER DETAILS */}
+          <div>
+            <h3 className="text-lg font-bold text-gray-800 border-b pt-2 pb-1 mb-5">
+              Account Owner Details
+            </h3>
+            <div className="space-y-4 pl-2 pr-2">
+              <div>
+                <label htmlFor="first_name" className={labelClass}>
+                  First Name <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="first_name"
+                  id="first_name"
+                  placeholder="First Name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={inputClass("first_name")}
+                />
+                {errors.first_name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.first_name}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="last_name" className={labelClass}>
+                  Last Name <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="last_name"
+                  id="last_name"
+                  placeholder="Last Name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={inputClass("last_name")}
+                />
+                {errors.last_name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.last_name}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="email" className={labelClass}>
+                  Email <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  placeholder="Email"
+                  value={form.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={inputClass("email")}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="phone" className={labelClass}>
+                  Phone <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  id="phone"
+                  placeholder="Phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={inputClass("phone")}
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="time_zone" className={labelClass}>
+                  Time Zone <span className="text-red-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="time_zone"
+                  id="time_zone"
+                  placeholder="Time Zone"
+                  value={form.time_zone}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={inputClass("time_zone")}
+                />
+                {errors.time_zone && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.time_zone}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* CAPTCHA */}
+          <div className="pl-2 pr-2">
+            <ReCAPTCHA
+              sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+              onChange={(value) => setCaptchaValue(value)}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            {errors.captcha && (
+              <p className="text-red-500 text-sm mt-1">{errors.captcha}</p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="password" className={labelClass}>
-              Password <span className="text-red-600">*</span>
-            </label>
+          {/* TERMS & PRIVACY */}
+          <div className="flex items-center pl-2 pr-2">
             <input
-              type="password"
-              name="password"
-              id="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("password")}
+              type="checkbox"
+              id="terms"
+              checked={acceptedTerms}
+              onChange={() => setAcceptedTerms(!acceptedTerms)}
+              className="mr-2"
             />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="account_type" className={labelClass}>
-              Account Type <span className="text-red-600">*</span>
+            <label htmlFor="terms" className="text-sm text-gray-700">
+              I have read and accept the{" "}
+              <Link
+                to="/privacy-policy"
+                className="text-blue-600 hover:underline"
+              >
+                Privacy Policy
+              </Link>{" "}
+              and{" "}
+              <Link
+                to="/terms-of-service"
+                className="text-blue-600 hover:underline"
+              >
+                Terms of Service
+              </Link>
+              .
             </label>
-            <select
-              id="account_type"
-              name="account_type"
-              value={form.account_type}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("account_type")}
-            >
-              <option value="" disabled>
-                Select account type...
-              </option>
-              <option value="freelance">Freelance</option>
-              <option value="enterprise">Enterprise</option>
-            </select>
-            {errors.account_type && (
-              <p className="text-red-500 text-sm mt-1">{errors.account_type}</p>
-            )}
           </div>
-
-          <div>
-            <label htmlFor="company_name" className={labelClass}>
-              Company Name <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              name="company_name"
-              id="company_name"
-              placeholder="Company Name"
-              value={form.company_name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("company_name")}
-            />
-            {errors.company_name && (
-              <p className="text-red-500 text-sm mt-1">{errors.company_name}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="country" className={labelClass}>
-              Country <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              name="country"
-              id="country"
-              placeholder="Country"
-              value={form.country}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("country")}
-            />
-            {errors.country && (
-              <p className="text-red-500 text-sm mt-1">{errors.country}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="time_zone" className={labelClass}>
-              Time Zone <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              name="time_zone"
-              id="time_zone"
-              placeholder="Time Zone"
-              value={form.time_zone}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("time_zone")}
-            />
-            {errors.time_zone && (
-              <p className="text-red-500 text-sm mt-1">{errors.time_zone}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="first_name" className={labelClass}>
-              First Name <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              name="first_name"
-              id="first_name"
-              placeholder="First Name"
-              value={form.first_name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("first_name")}
-            />
-            {errors.first_name && (
-              <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="last_name" className={labelClass}>
-              Last Name <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              name="last_name"
-              id="last_name"
-              placeholder="Last Name"
-              value={form.last_name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("last_name")}
-            />
-            {errors.last_name && (
-              <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="username" className={labelClass}>
-              Username <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="text"
-              name="username"
-              id="username"
-              placeholder="Username"
-              value={form.username}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("username")}
-            />
-            {errors.username && (
-              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="phone" className={labelClass}>
-              Phone <span className="text-red-600">*</span>
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              id="phone"
-              placeholder="Phone"
-              value={form.phone}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={inputClass("phone")}
-            />
-            {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-            )}
-          </div>
+          {errors.terms && (
+            <p className="text-red-500 text-sm mt-1">{errors.terms}</p>
+          )}
 
           <div className="flex justify-center">
             <Button type="submit">Sign Up</Button>

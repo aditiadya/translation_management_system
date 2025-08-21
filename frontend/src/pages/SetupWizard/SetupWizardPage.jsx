@@ -21,7 +21,6 @@ const SetupWizardPage = () => {
       const result = await response.json();
       console.log(result);
 
-      // redirect to dashboard
       window.location.href = "/dashboard";
     } catch (err) {
       console.error("Error submitting wizard:", err);
