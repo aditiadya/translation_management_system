@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from 'crypto';
 import db from "../../models/index.js";
-const { AdminAuth, AdminDetails } = db;
+const { AdminAuth, AdminDetails, AdminProfile, AdminTerms } = db;
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -12,42 +13,86 @@ export const signup = async (req, res, next) => {
   try {
     const {
       email,
-      password,
       account_type,
       company_name,
       country,
       time_zone,
       first_name,
       last_name,
-      username,
       phone,
+      terms_accepted,
     } = req.body;
 
     const existing = await AdminAuth.findOne({ where: { email } });
-    if (existing)
+    if (existing) {
       return res.status(409).json({ error: "Email already registered" });
+    }
 
-    const password_hash = await bcrypt.hash(password, 12);
+    if (!terms_accepted) {
+      return res
+        .status(400)
+        .json({ error: "You must accept the terms and conditions" });
+    }
+
+    const activationToken = crypto.randomBytes(32).toString("hex");
 
     const adminAuth = await AdminAuth.create({
       email,
-      password_hash,
-      setup_completed: false,
+      activation_token: activationToken,
+      is_active: false,
+    });
+
+    await AdminProfile.create({
+      admin_id: adminAuth.id,
+    });
+
+    await AdminTerms.create({
+      admin_id: adminAuth.id,
+      terms_accepted: true,
+      accepted_at: new Date(),
     });
 
     await AdminDetails.create({
       id: adminAuth.id,
       account_type,
-      company_name,
+      company_name: account_type === "enterprise" ? company_name : null,
       country,
       time_zone,
       first_name,
       last_name,
-      username,
       phone,
     });
 
-    return res.status(201).json({ message: "Admin registered successfully" });
+    res.status(200).json({
+      message: "Account Registered Successfully. Activation needed!",
+      activationToken,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Set username and password (Account Activation)
+export const activateAccount = async (req, res, next) => {
+  try {
+    const { token } = req.params; 
+    const { username, password } = req.body;
+
+    const adminAuth = await AdminAuth.findOne({ where: { activation_token: token } });
+    if (!adminAuth) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
+
+    const password_hash = await bcrypt.hash(password, 12);
+
+    adminAuth.username = username;
+    adminAuth.password_hash = password_hash;
+    adminAuth.is_active = true;
+    adminAuth.activation_token = null;
+    await adminAuth.save();
+
+    res.status(200).json({ message: "Account activated successfully" });
+
   } catch (err) {
     next(err);
   }
@@ -91,8 +136,7 @@ export const login = async (req, res, next) => {
     });
 
     res.status(200).json({
-        message: "Login successful",
-        setup_completed: user.setup_completed,
+        message: "Login successful"
     });
   } catch (err) {
     next(err);
@@ -166,9 +210,8 @@ export const refreshToken = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ 
-      message: "Access token refreshed", 
-      setup_completed: user.setup_completed 
+    res.status(200).json({
+      message: "Access token refreshed"
     });
   } catch (err) {
     next(err);
@@ -188,14 +231,26 @@ export const getCurrentUser = async (req, res) => {
       }
 
       const user = await AdminAuth.findByPk(decoded.userId, {
-        attributes: ["id", "email", "setup_completed"],
+        attributes: ["id", "email"],
+        include: [
+          {
+            model: AdminProfile,
+            attributes: ["setup_completed"],
+          },
+        ],
       });
-      console.log(user);
+
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      res.json(user);
+      const response = {
+        id: user.id,
+        email: user.email,
+        setup_completed: user.AdminProfile?.setup_completed || false,
+      };
+
+      res.json(response);
     });
   } catch (error) {
     console.error(error);

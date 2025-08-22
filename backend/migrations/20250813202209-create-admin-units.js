@@ -10,7 +10,7 @@ export default {
         type: Sequelize.STRING(100),
         allowNull: false,
         references: {
-          model: "admin_auth", // references the admin_auth table
+          model: "admin_auth",
           key: "email",
         },
         onUpdate: "CASCADE",

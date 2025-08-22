@@ -43,7 +43,6 @@ export default {
         type: Sequelize.STRING(32),
         allowNull: false
       }
-      // add timestamps here if needed
     });
   },
   down: async (queryInterface, Sequelize) => {

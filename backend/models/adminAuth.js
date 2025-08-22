@@ -16,9 +16,14 @@ const AdminAuth = sequelize.define(
     },
     password_hash: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
-    setup_completed: {
+    activation_token: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
+    is_active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
@@ -45,5 +50,22 @@ const AdminAuth = sequelize.define(
     timestamps: true,
   }
 );
+
+
+AdminAuth.associate = (models) => {
+  if (models.AdminProfile) {
+    AdminAuth.hasOne(models.AdminProfile, {
+      foreignKey: "admin_id",
+      as: "profile",
+    });
+  }
+
+  if (models.AdminTerms) {
+    AdminAuth.hasOne(models.AdminTerms, {
+      foreignKey: "admin_id",
+      as: "terms",
+    });
+  }
+};
 
 export default AdminAuth;

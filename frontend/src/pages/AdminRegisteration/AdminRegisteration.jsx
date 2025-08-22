@@ -129,7 +129,6 @@ const AdminRegistration = () => {
 
   const labelClass = "block text-gray-700 font-bold mb-1";
 
-  // console.log("KEY:", REACT_APP_RECAPTCHA_SITE_KEY);
 
   return (
     <>

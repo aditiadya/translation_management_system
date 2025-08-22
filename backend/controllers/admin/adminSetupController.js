@@ -1,12 +1,16 @@
 import db from "../../models/index.js";
-const { AdminAuth } = db;
+const { AdminProfile } = db;
 
 export const markSetupCompleted = async (req, res) => {
   try {
-    const email = req.user.email;
-    const user = await AdminAuth.findOne({ where: { email } });
+    const userId = req.user.id;
+    const user = await AdminProfile.findOne({ where: { userId } });
 
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.setup_completed) {
+      return res.status(200).json({ message: "Setup already completed" });
+    }
 
     user.setup_completed = true;
     await user.save();

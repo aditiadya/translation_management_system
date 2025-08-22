@@ -18,7 +18,7 @@ const AdminDetails = sequelize.define('AdminDetails', {
   },
   company_name: {
     type: DataTypes.STRING(128),
-    allowNull: false
+    allowNull: true
   },
   country: {
     type: DataTypes.STRING(100),
@@ -38,7 +38,7 @@ const AdminDetails = sequelize.define('AdminDetails', {
   },
   username: {
     type: DataTypes.STRING(64),
-    allowNull: false
+    allowNull: true
   },
   phone: {
     type: DataTypes.STRING(32),

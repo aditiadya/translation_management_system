@@ -4,10 +4,12 @@ import {
   login,
   refreshToken,
   logout,
-  getCurrentUser
+  getCurrentUser,
+  activateAccount
 } from "../controllers/admin/authController.js";
 import { validateSignup } from "../middlewares/validateSignup.js";
 import { validateLogin } from "../middlewares/validateLogin.js";
+import { validateActivation } from "../middlewares/validateActivation.js";
 import { markSetupCompleted } from "../controllers/admin/adminSetupController.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
 
@@ -19,5 +21,6 @@ router.post("/refresh", refreshToken);
 router.post("/logout", logout);
 router.get("/me", getCurrentUser);
 router.patch("/setup-completed", authenticateToken, markSetupCompleted);
+router.post('/activate/:token', validateActivation, activateAccount);
 
 export default router;
