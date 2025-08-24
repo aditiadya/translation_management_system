@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import crypto from 'crypto';
+import crypto from "crypto";
+import { Op } from "sequelize";
 import db from "../../models/index.js";
 const { AdminAuth, AdminDetails, AdminProfile, AdminTerms } = db;
 import {
@@ -75,24 +76,102 @@ export const signup = async (req, res, next) => {
 // Set username and password (Account Activation)
 export const activateAccount = async (req, res, next) => {
   try {
-    const { token } = req.params; 
+    const { token } = req.params;
     const { username, password } = req.body;
 
-    const adminAuth = await AdminAuth.findOne({ where: { activation_token: token } });
+    const adminAuth = await AdminAuth.findOne({
+      where: { activation_token: token },
+    });
+
     if (!adminAuth) {
       return res.status(400).json({ error: "Invalid or expired token" });
     }
 
+    if (adminAuth.is_active) {
+      return res
+        .status(400)
+        .json({ error: "Account already activated. Please login." });
+    }
+
+    const existingUsername = await AdminDetails.findOne({
+      where: { username },
+    });
+    if (existingUsername) {
+      return res.status(400).json({ error: "Username already taken" });
+    }
+
     const password_hash = await bcrypt.hash(password, 12);
 
-    adminAuth.username = username;
+    const adminDetails = await AdminDetails.findOne({
+      where: { id: adminAuth.id },
+    });
+
+    if (adminDetails) {
+      adminDetails.username = username;
+      await adminDetails.save();
+    } else {
+      await AdminDetails.create({
+        id: adminAuth.id,
+        username,
+        account_type: "enterprise",
+        country: "Unknown",
+        time_zone: "UTC",
+        first_name: "N/A",
+        last_name: "N/A",
+        phone: "N/A",
+      });
+    }
+
     adminAuth.password_hash = password_hash;
     adminAuth.is_active = true;
     adminAuth.activation_token = null;
     await adminAuth.save();
 
-    res.status(200).json({ message: "Account activated successfully" });
+    const fakeReq = {
+      body: {
+        identifier: username,
+        password,
+      },
+      cookies: req.cookies,
+    };
 
+    const fakeRes = {
+      cookie: res.cookie.bind(res), 
+      status: (code) => {
+        fakeRes.statusCode = code;
+        return fakeRes;
+      },
+      json: (data) => res.status(fakeRes.statusCode || 200).json(data),
+    };
+
+    await login(fakeReq, fakeRes, next);
+
+    res.status(200).json({ message: "Account activated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const verifyActivationToken = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+
+    const adminAuth = await AdminAuth.findOne({
+      where: { activation_token: token },
+    });
+
+    if (!adminAuth) {
+      return res
+        .status(400)
+        .json({ valid: false, error: "Invalid or expired token" });
+    }
+
+    if (adminAuth.is_active) {
+      return res.status(200).json({ valid: true, is_active: true });
+    }
+
+    return res.status(200).json({ valid: true, is_active: false });
   } catch (err) {
     next(err);
   }
@@ -101,9 +180,22 @@ export const activateAccount = async (req, res, next) => {
 // Login Controller
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    const user = await AdminAuth.findOne({ where: { email } });
-    if (!user) return res.status(401).json({ error: "Invalid email" });
+    const { identifier, password } = req.body;
+
+    let user = await AdminAuth.findOne({
+      where: { email: identifier },
+    });
+
+    if (!user) {
+      const details = await AdminDetails.findOne({
+        where: { username: identifier },
+        include: [{ model: AdminAuth, as: "auth" }],
+      });
+
+      if (details) {
+        user = details.auth;
+      }
+    }
 
     const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword)
@@ -136,7 +228,7 @@ export const login = async (req, res, next) => {
     });
 
     res.status(200).json({
-        message: "Login successful"
+      message: "Login successful",
     });
   } catch (err) {
     next(err);
@@ -211,7 +303,7 @@ export const refreshToken = async (req, res, next) => {
     });
 
     res.status(200).json({
-      message: "Access token refreshed"
+      message: "Access token refreshed",
     });
   } catch (err) {
     next(err);
@@ -231,10 +323,11 @@ export const getCurrentUser = async (req, res) => {
       }
 
       const user = await AdminAuth.findByPk(decoded.userId, {
-        attributes: ["id", "email"],
+        attributes: ["id", "email", "is_active"],
         include: [
           {
             model: AdminProfile,
+            as: "profile",
             attributes: ["setup_completed"],
           },
         ],
@@ -247,7 +340,8 @@ export const getCurrentUser = async (req, res) => {
       const response = {
         id: user.id,
         email: user.email,
-        setup_completed: user.AdminProfile?.setup_completed || false,
+        is_active: user.is_active,
+        setup_completed: user.profile?.setup_completed || false,
       };
 
       res.json(response);

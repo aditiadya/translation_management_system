@@ -4,7 +4,7 @@ const { AdminProfile } = db;
 export const markSetupCompleted = async (req, res) => {
   try {
     const userId = req.user.id;
-    const user = await AdminProfile.findOne({ where: { userId } });
+    const user = await AdminProfile.findOne({ where: { admin_id: userId } });
 
     if (!user) return res.status(404).json({ error: "User not found" });
 

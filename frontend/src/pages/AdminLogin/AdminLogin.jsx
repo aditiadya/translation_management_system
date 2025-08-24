@@ -9,16 +9,14 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { setUser } = useContext(AuthContext);
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
 
   const validate = () => {
     const currentErrors = {};
-    if (!form.email) currentErrors.email = "Email is required.";
-    else if (!/\S+@\S+\.\S+/.test(form.email))
-      currentErrors.email = "Email is invalid.";
+    if (!form.identifier) currentErrors.identifier = "Email or username is required.";
     if (!form.password) currentErrors.password = "Password is required.";
     setErrors(currentErrors);
     return Object.keys(currentErrors).length === 0;
@@ -27,11 +25,8 @@ const AdminLogin = () => {
   const handleBlur = (e) => {
     const { name, value } = e.target;
     let errorMsg = "";
-    if (name === "email") {
-      if (!value) errorMsg = "Email is required.";
-      else if (!/\S+@\S+\.\S+/.test(value)) errorMsg = "Email is invalid.";
-    } else if (name === "password") {
-      if (!value) errorMsg = "Password is required.";
+    if (!value) {
+      errorMsg = name === "identifier" ? "Email or username is required." : "Password is required.";
     }
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
   };
@@ -54,15 +49,12 @@ const AdminLogin = () => {
       console.log("Login response:", response.data);
 
       const meRes = await api.get("/auth/me", { withCredentials: true });
-      console.log("Fetched current user:", meRes.data);
 
       setUser(meRes.data);
 
       if (response.data.setup_completed) {
-        console.log("Navigating to dashboard...");
         navigate("/dashboard");
       } else {
-        console.log("Navigating to setup...");
         navigate("/setup");
       }
     } catch (err) {
@@ -102,23 +94,23 @@ const AdminLogin = () => {
 
           <div>
             <label
-              htmlFor="email"
+              htmlFor="identifier"
               className="block text-gray-700 font-bold mb-1"
             >
-              Email <span className="text-red-600">*</span>
+              Email or Username <span className="text-red-600">*</span>
             </label>
             <input
-              type="email"
-              name="email"
-              id="email"
-              placeholder="Email"
-              value={form.email}
+              type="text"
+              name="identifier"
+              id="identifier"
+              placeholder="Email/Username"
+              value={form.identifier}
               onChange={handleChange}
               onBlur={handleBlur}
-              className={inputClass("email")}
+              className={inputClass("identifier")}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            {errors.identifier && (
+              <p className="text-red-500 text-sm mt-1">{errors.identifier}</p>
             )}
           </div>
 

@@ -10,7 +10,6 @@ const CurrenciesStep = lazy(() => import("./CurrenciesStep"));
 const SetupWizard = ({ onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
-  // single wizard state for all steps
   const [wizardData, setWizardData] = useState({
     services: [],
     paymentMethods: [],

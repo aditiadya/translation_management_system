@@ -5,7 +5,8 @@ import {
   refreshToken,
   logout,
   getCurrentUser,
-  activateAccount
+  activateAccount,
+  verifyActivationToken,
 } from "../controllers/admin/authController.js";
 import { validateSignup } from "../middlewares/validateSignup.js";
 import { validateLogin } from "../middlewares/validateLogin.js";
@@ -22,5 +23,6 @@ router.post("/logout", logout);
 router.get("/me", getCurrentUser);
 router.patch("/setup-completed", authenticateToken, markSetupCompleted);
 router.post('/activate/:token', validateActivation, activateAccount);
+router.get("/activate/:token/verify", verifyActivationToken);
 
 export default router;

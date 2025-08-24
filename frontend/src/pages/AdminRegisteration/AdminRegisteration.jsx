@@ -4,28 +4,27 @@ import Button from "../../components/Button/Button";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
+import { ChevronDown } from "lucide-react";
 
 const AdminRegistration = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    email: "",
-    password: "",
     account_type: "",
     company_name: "",
     country: "",
-    time_zone: "",
     first_name: "",
     last_name: "",
-    username: "",
+    email: "",
     phone: "",
+    time_zone: "",
+    terms_accepted: false,
   });
 
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
   const [captchaValue, setCaptchaValue] = useState(null);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Full form validation, runs on submit
   const validate = () => {
@@ -35,27 +34,25 @@ const AdminRegistration = () => {
     else if (!/\S+@\S+\.\S+/.test(form.email))
       currentErrors.email = "Email is invalid.";
 
-    if (!form.password) currentErrors.password = "Password is required.";
-    else if (form.password.length <= 8)
-      currentErrors.password = "Password must be more than 8 characters";
-
     if (!form.account_type)
       currentErrors.account_type = "Account type is required.";
-    if (!form.company_name)
+    if (form.account_type === "enterprise" && !form.company_name) {
       currentErrors.company_name = "Company name is required.";
+    }
     if (!form.country) currentErrors.country = "Country is required.";
     if (!form.time_zone) currentErrors.time_zone = "Time zone is required.";
     if (!form.first_name) currentErrors.first_name = "First name is required.";
     if (!form.last_name) currentErrors.last_name = "Last name is required.";
-    if (!form.username) currentErrors.username = "Username is required.";
     if (!form.phone) currentErrors.phone = "Phone is required.";
     else if (!/^\+?[0-9\s\-]{7,15}$/.test(form.phone))
       currentErrors.phone = "Phone number is invalid.";
 
     if (!captchaValue)
       currentErrors.captcha = "Please verify you are not a robot.";
-    if (!acceptedTerms)
-      currentErrors.terms = "You must accept the Privacy Policy and Terms.";
+    if (!form.terms_accepted) {
+      currentErrors.terms_accepted =
+        "You must accept the Privacy Policy and Terms.";
+    }
 
     setErrors(currentErrors);
     return Object.keys(currentErrors).length === 0;
@@ -68,14 +65,12 @@ const AdminRegistration = () => {
     if (name === "email") {
       if (!value) errorMsg = "Email is required.";
       else if (!/\S+@\S+\.\S+/.test(value)) errorMsg = "Email is invalid.";
-    } else if (name === "password") {
-      if (!value) errorMsg = "Password is required.";
-      else if (value.length <= 8)
-        errorMsg = "Password must be more than 8 characters";
     } else if (name === "account_type") {
       if (!value) errorMsg = "Account type is required.";
     } else if (name === "company_name") {
-      if (!value) errorMsg = "Company name is required.";
+      if (form.account_type === "enterprise" && !value) {
+        errorMsg = "Company name is required.";
+      }
     } else if (name === "country") {
       if (!value) errorMsg = "Country is required.";
     } else if (name === "time_zone") {
@@ -84,8 +79,6 @@ const AdminRegistration = () => {
       if (!value) errorMsg = "First name is required.";
     } else if (name === "last_name") {
       if (!value) errorMsg = "Last name is required.";
-    } else if (name === "username") {
-      if (!value) errorMsg = "Username is required.";
     } else if (name === "phone") {
       if (!value) errorMsg = "Phone is required.";
       else if (!/^\+?[0-9\s\-]{7,15}$/.test(value))
@@ -129,7 +122,6 @@ const AdminRegistration = () => {
 
   const labelClass = "block text-gray-700 font-bold mb-1";
 
-
   return (
     <>
       <Navbar />
@@ -160,7 +152,7 @@ const AdminRegistration = () => {
               Account Details
             </h3>
             <div className="space-y-4 pl-2 pr-2">
-              <div>
+              <div className="relative">
                 <label htmlFor="account_type" className={labelClass}>
                   Account Type <span className="text-red-600">*</span>
                 </label>
@@ -170,7 +162,9 @@ const AdminRegistration = () => {
                   value={form.account_type}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={inputClass("account_type")}
+                  className={`${inputClass(
+                    "account_type"
+                  )} appearance-none pr-10`}
                 >
                   <option value="" disabled>
                     Select account type...
@@ -178,6 +172,13 @@ const AdminRegistration = () => {
                   <option value="freelance">Freelance</option>
                   <option value="enterprise">Enterprise</option>
                 </select>
+
+                {/* Stylish dropdown arrow */}
+                <ChevronDown
+                  size={18}
+                  className="absolute right-3 top-[42px] text-gray-500 pointer-events-none"
+                />
+
                 {errors.account_type && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.account_type}
@@ -185,26 +186,28 @@ const AdminRegistration = () => {
                 )}
               </div>
 
-              <div>
-                <label htmlFor="company_name" className={labelClass}>
-                  Company Name <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="company_name"
-                  id="company_name"
-                  placeholder="Company Name"
-                  value={form.company_name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={inputClass("company_name")}
-                />
-                {errors.company_name && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.company_name}
-                  </p>
-                )}
-              </div>
+              {form.account_type === "enterprise" && (
+                <div>
+                  <label htmlFor="company_name" className={labelClass}>
+                    Company Name <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="company_name"
+                    id="company_name"
+                    placeholder="Company Name"
+                    value={form.company_name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={inputClass("company_name")}
+                  />
+                  {errors.company_name && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.company_name}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div>
                 <label htmlFor="country" className={labelClass}>
@@ -351,12 +354,14 @@ const AdminRegistration = () => {
           <div className="flex items-center pl-2 pr-2">
             <input
               type="checkbox"
-              id="terms"
-              checked={acceptedTerms}
-              onChange={() => setAcceptedTerms(!acceptedTerms)}
+              id="terms_accepted"
+              checked={form.terms_accepted}
+              onChange={(e) =>
+                setForm({ ...form, terms_accepted: e.target.checked })
+              }
               className="mr-2"
             />
-            <label htmlFor="terms" className="text-sm text-gray-700">
+            <label htmlFor="terms_accepted" className="text-sm text-gray-700">
               I have read and accept the{" "}
               <Link
                 to="/privacy-policy"
@@ -374,8 +379,8 @@ const AdminRegistration = () => {
               .
             </label>
           </div>
-          {errors.terms && (
-            <p className="text-red-500 text-sm mt-1">{errors.terms}</p>
+          {errors.terms_accepted && (
+            <p className="text-red-500 text-sm mt-1">{errors.terms_accepted}</p>
           )}
 
           <div className="flex justify-center">

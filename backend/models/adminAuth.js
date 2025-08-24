@@ -66,6 +66,13 @@ AdminAuth.associate = (models) => {
       as: "terms",
     });
   }
+
+  if (models.AdminDetails) {
+    AdminAuth.hasOne(models.AdminDetails, {
+      foreignKey: "id",
+      as: "details",
+    });
+  }
 };
 
 export default AdminAuth;

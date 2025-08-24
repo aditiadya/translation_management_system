@@ -38,7 +38,8 @@ const AdminDetails = sequelize.define('AdminDetails', {
   },
   username: {
     type: DataTypes.STRING(64),
-    allowNull: true
+    allowNull: true,
+    unique: true,
   },
   phone: {
     type: DataTypes.STRING(32),
@@ -48,5 +49,14 @@ const AdminDetails = sequelize.define('AdminDetails', {
   tableName: 'admin_details',
   timestamps: false
 });
+
+AdminDetails.associate = (models) => {
+  if (models.AdminAuth) {
+    AdminDetails.belongsTo(models.AdminAuth, {
+      foreignKey: "id",
+      as: "auth",
+    });
+  }
+};
 
 export default AdminDetails;
