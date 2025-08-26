@@ -9,7 +9,6 @@ const ServicesStep = ({ onNext, onBack }) => {
   const [editValue, setEditValue] = useState("");
   const [editActive, setEditActive] = useState(true);
 
-  // Fetch services on mount
   useEffect(() => {
     fetchServices();
   }, []);
@@ -95,92 +94,108 @@ const ServicesStep = ({ onNext, onBack }) => {
   const canNext = services.length > 0;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
-      <h2 className="text-2xl font-bold mb-4 text-center">Add Services</h2>
+    <div
+      className="flex flex-col bg-white shadow-md rounded-lg"
+      style={{ width: "800px", height: "400px" }} 
+    >
+      {/* Top: Heading + Form */}
+      <div className="p-4 border-b">
+        <h2 className="text-2xl font-bold mb-4 text-center">Add Services</h2>
 
-      <div className="flex mb-4">
-        <input
-          type="text"
-          placeholder="Enter service name"
-          className={`flex-1 p-3 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
-          value={newService}
-          onChange={(e) => setNewService(e.target.value)}
-        />
-        <button
-          onClick={handleAdd}
-          className="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-r-md"
-        >
-          Add
-        </button>
-      </div>
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-
-      <ul className="space-y-2">
-        {services.map((service) => (
-          <li
-            key={service.id}
-            className="flex justify-between items-center border p-2 rounded-md"
+        <div className="flex mb-2">
+          <input
+            type="text"
+            placeholder="Enter service name"
+            className={`flex-1 p-3 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+              error ? "border-red-500" : "border-gray-300"
+            }`}
+            value={newService}
+            onChange={(e) => setNewService(e.target.value)}
+          />
+          <button
+            onClick={handleAdd}
+            className="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-r-md"
           >
-            {editId === service.id ? (
-              <div className="flex flex-1 gap-2">
-                <input
-                  type="text"
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  className="flex-1 p-2 border rounded-md"
-                />
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={editActive}
-                    onChange={(e) => setEditActive(e.target.checked)}
-                  />
-                  Active
-                </label>
-              </div>
-            ) : (
-              <div className="flex flex-col">
-                <span>{service.name}</span>
-                <span
-                  className={`text-sm ${
-                    service.active_flag ? "text-green-600" : "text-gray-500"
-                  }`}
-                >
-                  {service.active_flag ? "Active" : "Inactive"}
-                </span>
-              </div>
-            )}
+            Add
+          </button>
+        </div>
+        {error && <p className="text-red-500">{error}</p>}
+      </div>
 
-            <div className="space-x-2">
-              {editId === service.id ? (
-                <button
-                  onClick={() => handleUpdate(service.id)}
-                  className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded"
-                >
-                  Save
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleEdit(service)}
-                  className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                onClick={() => handleDelete(service.id)}
-                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+      {/* Middle: Scrollable list */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {services.length === 0 ? (
+          <p className="text-gray-500">No services added yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {services.map((service) => (
+              <li
+                key={service.id}
+                className="flex justify-between items-center border p-2 rounded-md"
               >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+                {editId === service.id ? (
+                  <div className="flex flex-1 gap-2">
+                    <input
+                      type="text"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="flex w-3/4 p-2 border rounded-md"
+                    />
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={editActive}
+                        onChange={(e) => setEditActive(e.target.checked)}
+                      />
+                      Active
+                    </label>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    <span>{service.name}</span>
+                    <span
+                      className={`text-sm ${
+                        service.active_flag
+                          ? "text-green-600"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {service.active_flag ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                )}
 
-      <div className="mt-6 flex justify-between">
+                <div className="space-x-2">
+                  {editId === service.id ? (
+                    <button
+                      onClick={() => handleUpdate(service.id)}
+                      className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded"
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleEdit(service)}
+                      className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(service.id)}
+                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Bottom: Navigation buttons */}
+      <div className="p-4 border-t flex justify-between">
         <button
           onClick={onBack}
           className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"

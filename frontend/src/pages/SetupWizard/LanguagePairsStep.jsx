@@ -10,7 +10,7 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
   const [editId, setEditId] = useState(null);
   const [editSource, setEditSource] = useState("");
   const [editTarget, setEditTarget] = useState("");
-  const [editActive, setEditActive] = useState(true); // NEW
+  const [editActive, setEditActive] = useState(true);
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -51,7 +51,7 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
       await api.post("/admin-language-pairs", {
         source_language_id: source,
         target_language_id: target,
-        active_flag: true, // NEW
+        active_flag: true,
       });
       setSource("");
       setTarget("");
@@ -75,7 +75,7 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
     setEditId(pair.id);
     setEditSource(pair.sourceLanguage?.id);
     setEditTarget(pair.targetLanguage?.id);
-    setEditActive(pair.active_flag); // NEW
+    setEditActive(pair.active_flag);
     setError("");
   };
 
@@ -93,7 +93,7 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
       await api.put(`/admin-language-pairs/${id}`, {
         source_language_id: editSource,
         target_language_id: editTarget,
-        active_flag: editActive, // NEW
+        active_flag: editActive,
       });
       setEditId(null);
       setEditSource("");
@@ -109,148 +109,160 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
   const canNext = pairs.length > 0;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
-      <h2 className="text-2xl font-bold mb-6 text-center">Language Pairs</h2>
+    <div
+      className="flex flex-col bg-white shadow-md rounded-lg"
+      style={{ width: "800px", height: "400px" }}
+    >
+      {/* Top: Heading + Add Form */}
+      <div className="p-4 border-b">
+        <h2 className="text-2xl font-bold mb-4 text-center">Add Language Pairs</h2>
 
-      {/* Add new pair */}
-      <div className="flex items-center gap-2 mb-4">
-        <select
-          value={source}
-          onChange={(e) => setSource(e.target.value)}
-          className="border p-2 rounded w-1/2"
-        >
-          <option value="" disabled>
-            Select source
-          </option>
-          {languages.map((lang) => (
-            <option key={lang.id} value={lang.id}>
-              {lang.name}
+        <div className="flex items-center gap-2 mb-2">
+          <select
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
+            className="border p-2 rounded w-[313px]"
+          >
+            <option value="" disabled>
+              Select source
             </option>
-          ))}
-        </select>
+            {languages.map((lang) => (
+              <option key={lang.id} value={lang.id}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
 
-        <span className="text-xl">→</span>
+          <span className="text-xl">→</span>
 
-        <select
-          value={target}
-          onChange={(e) => setTarget(e.target.value)}
-          className="border p-2 rounded w-1/2"
-        >
-          <option value="" disabled>
-            Select target
-          </option>
-          {languages.map((lang) => (
-            <option key={lang.id} value={lang.id}>
-              {lang.name}
+          <select
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+            className="border p-2 rounded w-[313px]"
+          >
+            <option value="" disabled>
+              Select target
             </option>
-          ))}
-        </select>
+            {languages.map((lang) => (
+              <option key={lang.id} value={lang.id}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+          <button
+          onClick={handleAdd}
+          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded disabled:bg-blue-200"
+        >
+          Add Pair
+        </button>
+        </div>
+
+        {error && <p className="text-red-500 mb-2">{error}</p>}
+
+        
       </div>
 
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-
-      <button
-        onClick={handleAdd}
-        className="mb-6 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded disabled:bg-blue-200"
-      >
-        Add Pair
-      </button>
-
-      {/* List of pairs */}
-      <ul className="space-y-2">
-        {pairs.map((pair) => (
-          <li
-            key={pair.id}
-            className="flex justify-between items-center border p-2 rounded-md"
-          >
-            {editId === pair.id ? (
-              <div className="flex gap-2 w-full items-center">
-                <select
-                  value={editSource}
-                  onChange={(e) => setEditSource(e.target.value)}
-                  className="border p-2 rounded w-1/3"
-                >
-                  <option value="" disabled>
-                    Select source
-                  </option>
-                  {languages.map((lang) => (
-                    <option key={lang.id} value={lang.id}>
-                      {lang.name}
-                    </option>
-                  ))}
-                </select>
-
-                <span className="text-xl">→</span>
-
-                <select
-                  value={editTarget}
-                  onChange={(e) => setEditTarget(e.target.value)}
-                  className="border p-2 rounded w-1/3"
-                >
-                  <option value="" disabled>
-                    Select target
-                  </option>
-                  {languages.map((lang) => (
-                    <option key={lang.id} value={lang.id}>
-                      {lang.name}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Active toggle while editing */}
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={editActive}
-                    onChange={(e) => setEditActive(e.target.checked)}
-                  />
-                  Active
-                </label>
-              </div>
-            ) : (
-              <div className="flex flex-col">
-                <span>
-                  {pair.sourceLanguage?.name} → {pair.targetLanguage?.name}
-                </span>
-                <span
-                  className={`text-sm ${
-                    pair.active_flag ? "text-green-600" : "text-gray-500"
-                  }`}
-                >
-                  {pair.active_flag ? "Active" : "Inactive"}
-                </span>
-              </div>
-            )}
-
-            <div className="space-x-2">
-              {editId === pair.id ? (
-                <button
-                  onClick={() => handleUpdate(pair.id)}
-                  className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded"
-                >
-                  Save
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleEdit(pair)}
-                  className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                onClick={() => handleDelete(pair.id)}
-                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+      {/* Middle: Scrollable List */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {pairs.length === 0 ? (
+          <p className="text-gray-500">No language pairs added yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {pairs.map((pair) => (
+              <li
+                key={pair.id}
+                className="flex justify-between items-center border p-2 rounded-md"
               >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+                {editId === pair.id ? (
+                  <div className="flex gap-2 w-full items-center">
+                    <select
+                      value={editSource}
+                      onChange={(e) => setEditSource(e.target.value)}
+                      className="border p-2 rounded w-1/3"
+                    >
+                      <option value="" disabled>
+                        Select source
+                      </option>
+                      {languages.map((lang) => (
+                        <option key={lang.id} value={lang.id}>
+                          {lang.name}
+                        </option>
+                      ))}
+                    </select>
 
-      {/* Navigation */}
-      <div className="mt-6 flex justify-between">
+                    <span className="text-xl">→</span>
+
+                    <select
+                      value={editTarget}
+                      onChange={(e) => setEditTarget(e.target.value)}
+                      className="border p-2 rounded w-1/3"
+                    >
+                      <option value="" disabled>
+                        Select target
+                      </option>
+                      {languages.map((lang) => (
+                        <option key={lang.id} value={lang.id}>
+                          {lang.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={editActive}
+                        onChange={(e) => setEditActive(e.target.checked)}
+                      />
+                      Active
+                    </label>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    <span>
+                      {pair.sourceLanguage?.name} → {pair.targetLanguage?.name}
+                    </span>
+                    <span
+                      className={`text-sm ${
+                        pair.active_flag ? "text-green-600" : "text-gray-500"
+                      }`}
+                    >
+                      {pair.active_flag ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2">
+  {editId === pair.id ? (
+    <button
+      onClick={() => handleUpdate(pair.id)}
+      className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded"
+    >
+      Save
+    </button>
+  ) : (
+    <button
+      onClick={() => handleEdit(pair)}
+      className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
+    >
+      Edit
+    </button>
+  )}
+  <button
+    onClick={() => handleDelete(pair.id)}
+    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+  >
+    Delete
+  </button>
+</div>
+
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Bottom: Navigation */}
+      <div className="p-4 border-t flex justify-between">
         <button
           onClick={onBack}
           className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
