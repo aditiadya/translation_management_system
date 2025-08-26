@@ -20,7 +20,7 @@ router.post("/signup", validateSignup, signup);
 router.post("/login", validateLogin, login);
 router.post("/refresh", refreshToken);
 router.post("/logout", logout);
-router.get("/me", getCurrentUser);
+router.get("/me", authenticateToken, getCurrentUser);
 router.patch("/setup-completed", authenticateToken, markSetupCompleted);
 router.post('/activate/:token', validateActivation, activateAccount);
 router.get("/activate/:token/verify", verifyActivationToken);
