@@ -13,13 +13,16 @@ const AdminAuth = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: true,
+      },
     },
     password_hash: {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
     activation_token: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: true,
       unique: true,
     },
@@ -29,15 +32,16 @@ const AdminAuth = sequelize.define(
       defaultValue: false,
     },
     reset_token: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: true,
+      unique: true,
     },
     token_expiry: {
       type: DataTypes.DATE,
       allowNull: true,
     },
     refresh_token: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
     refresh_token_expiry: {
@@ -48,6 +52,11 @@ const AdminAuth = sequelize.define(
   {
     tableName: "admin_auth",
     timestamps: true,
+    indexes: [
+      { fields: ["activation_token"] },
+      { fields: ["reset_token"] },
+      { fields: ["refresh_token"] },
+    ],
   }
 );
 
@@ -57,6 +66,7 @@ AdminAuth.associate = (models) => {
     AdminAuth.hasOne(models.AdminProfile, {
       foreignKey: "admin_id",
       as: "profile",
+      onDelete: "CASCADE",
     });
   }
 
@@ -64,15 +74,25 @@ AdminAuth.associate = (models) => {
     AdminAuth.hasOne(models.AdminTerms, {
       foreignKey: "admin_id",
       as: "terms",
+      onDelete: "CASCADE",
     });
   }
 
   if (models.AdminDetails) {
     AdminAuth.hasOne(models.AdminDetails, {
-      foreignKey: "id",
+      foreignKey: "admin_id", // FIXED from "id"
       as: "details",
+      onDelete: "CASCADE",
     });
   }
+
+  if(models.AdminCurrency){
+    AdminAuth.hasMany(models.AdminCurrency, { 
+      foreignKey: "admin_id", 
+      as: "currencies" 
+    });
+  }
+  
 };
 
 export default AdminAuth;

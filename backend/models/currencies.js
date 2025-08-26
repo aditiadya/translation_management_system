@@ -32,7 +32,7 @@ const Currency = sequelize.define(
 Currency.associate = (models) => {
   if (models.AdminCurrency) {
     Currency.hasMany(models.AdminCurrency, {
-      foreignKey: "currencyId",
+      foreignKey: "currency_id",
       as: "adminCurrencies",
     });
   }
