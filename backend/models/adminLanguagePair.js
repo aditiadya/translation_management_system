@@ -9,17 +9,30 @@ const AdminLanguagePair = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    email: {
-      type: DataTypes.STRING(255),
+    admin_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "admin_auth",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     source_language_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "languages",
+        key: "id",
+      },
     },
     target_language_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "languages",
+        key: "id",
+      },
     },
     active_flag: {
       type: DataTypes.BOOLEAN,
@@ -29,15 +42,29 @@ const AdminLanguagePair = sequelize.define(
   },
   {
     tableName: "admin_language_pairs",
-    timestamps: false,
+    timestamps: true,
+    indexes: [
+      {
+        fields: ["admin_id"],
+      },
+      {
+        fields: ["source_language_id"],
+      },
+      {
+        fields: ["target_language_id"],
+      },
+      {
+        unique: true,
+        fields: ["admin_id", "source_language_id", "target_language_id"],
+      },
+    ],
   }
 );
 
 AdminLanguagePair.associate = (models) => {
   if (models.AdminAuth) {
     AdminLanguagePair.belongsTo(models.AdminAuth, {
-      foreignKey: "email",
-      targetKey: "email",
+      foreignKey: "admin_id",
       as: "admin",
     });
   }

@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
-import AdminAuth from "./adminAuth.js";
 
 const AdminProfile = sequelize.define(
   "AdminProfile",
@@ -14,7 +13,7 @@ const AdminProfile = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: AdminAuth,
+        model: "admin_auth",
         key: "id",
       },
       onDelete: "CASCADE",
@@ -28,6 +27,12 @@ const AdminProfile = sequelize.define(
   {
     tableName: "admin_profile",
     timestamps: true,
+    indexes: [
+      {
+        fields: ["admin_id"],
+        unique: true,
+      },
+    ],
   }
 );
 

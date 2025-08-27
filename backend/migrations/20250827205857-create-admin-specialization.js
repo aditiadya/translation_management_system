@@ -1,5 +1,5 @@
 export async function up(queryInterface, Sequelize) {
-  await queryInterface.createTable("admin_currencies", {
+  await queryInterface.createTable("admin_specializations", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -15,14 +15,9 @@ export async function up(queryInterface, Sequelize) {
       },
       onDelete: "CASCADE",
     },
-    currency_id: {
-      type: Sequelize.INTEGER,
+    name: {
+      type: Sequelize.STRING(100),
       allowNull: false,
-      references: {
-        model: "currencies",
-        key: "id",
-      },
-      onDelete: "CASCADE",
     },
     active_flag: {
       type: Sequelize.BOOLEAN,
@@ -41,15 +36,12 @@ export async function up(queryInterface, Sequelize) {
     },
   });
 
-  await queryInterface.addIndex("admin_currencies", ["admin_id"]);
-  await queryInterface.addIndex("admin_currencies", ["currency_id"]);
-  await queryInterface.addConstraint("admin_currencies", {
-    fields: ["admin_id", "currency_id"],
-    type: "unique",
-    name: "unique_admin_currency",
+  await queryInterface.addIndex("admin_specializations", ["admin_id"]);
+  await queryInterface.addIndex("admin_specializations", ["admin_id", "name"], {
+    unique: true,
   });
 }
 
 export async function down(queryInterface) {
-  await queryInterface.dropTable("admin_currencies");
+  await queryInterface.dropTable("admin_specializations");
 }

@@ -9,9 +9,14 @@ const AdminPaymentMethod = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    email: {
-      type: DataTypes.STRING(100),
+    admin_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "admin_auth",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     name: {
       type: DataTypes.STRING(100),
@@ -29,22 +34,31 @@ const AdminPaymentMethod = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    active: {
+    active_flag: {
       type: DataTypes.BOOLEAN,
+      allowNull: false,
       defaultValue: true,
     },
   },
   {
     tableName: "admin_payment_methods",
-    timestamps: false,
+    timestamps: true,
+    indexes: [
+      {
+        fields: ["admin_id"],
+      },
+      {
+        unique: true,
+        fields: ["admin_id", "name"],
+      },
+    ],
   }
 );
 
 AdminPaymentMethod.associate = (models) => {
   if (models.AdminAuth) {
     AdminPaymentMethod.belongsTo(models.AdminAuth, {
-      foreignKey: "email",
-      targetKey: "email",
+      foreignKey: "admin_id",
       as: "admin",
     });
   }

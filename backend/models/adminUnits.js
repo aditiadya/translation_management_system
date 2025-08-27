@@ -9,9 +9,14 @@ const AdminUnits = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    email: {
-      type: DataTypes.STRING(100),
+    admin_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "admin_auth",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     name: {
       type: DataTypes.STRING(100),
@@ -35,17 +40,23 @@ const AdminUnits = sequelize.define(
   },
   {
     tableName: "admin_units",
-    timestamps: false,
+    timestamps: true,
+    indexes: [
+      {
+        fields: ["admin_id"],
+      },
+      {
+        unique: true,
+        fields: ["admin_id", "name"],
+      },
+    ],
   }
 );
 
 AdminUnits.associate = (models) => {
   if (models.AdminAuth) {
     AdminUnits.belongsTo(models.AdminAuth, {
-      foreignKey: "email",
-      targetKey: "email",
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
+      foreignKey: "admin_id",
       as: "admin",
     });
   }

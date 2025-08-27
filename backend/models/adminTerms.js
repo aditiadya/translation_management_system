@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
-import AdminAuth from "./adminAuth.js";
 
 const AdminTerms = sequelize.define(
   "AdminTerms",
@@ -14,7 +13,7 @@ const AdminTerms = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: AdminAuth,
+        model: "admin_auth",
         key: "id",
       },
       onDelete: "CASCADE",
@@ -24,14 +23,16 @@ const AdminTerms = sequelize.define(
       allowNull: false,
       defaultValue: false,
     },
-    terms_accepted_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
   },
   {
     tableName: "admin_terms",
-    timestamps: false,
+    timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["admin_id"],
+      },
+    ],
   }
 );
 

@@ -1,11 +1,10 @@
-"use strict";
-
 export async function up(queryInterface, Sequelize) {
   await queryInterface.createTable("admin_details", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+      allowNull: false,
     },
     admin_id: {
       type: Sequelize.INTEGER,

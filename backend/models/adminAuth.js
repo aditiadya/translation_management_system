@@ -80,7 +80,7 @@ AdminAuth.associate = (models) => {
 
   if (models.AdminDetails) {
     AdminAuth.hasOne(models.AdminDetails, {
-      foreignKey: "admin_id", // FIXED from "id"
+      foreignKey: "admin_id",
       as: "details",
       onDelete: "CASCADE",
     });
@@ -89,10 +89,50 @@ AdminAuth.associate = (models) => {
   if(models.AdminCurrency){
     AdminAuth.hasMany(models.AdminCurrency, { 
       foreignKey: "admin_id", 
-      as: "currencies" 
+      as: "currencies",
+      onDelete: "CASCADE",
     });
   }
   
+  if (models.AdminService) {
+    AdminAuth.hasMany(models.AdminService, {
+      foreignKey: "admin_id",
+      as: "services",
+      onDelete: "CASCADE",
+    });
+  }
+
+  if (models.AdminSpecialization) {
+    AdminAuth.hasMany(models.AdminSpecialization, {
+      foreignKey: "admin_id",
+      as: "specializations",
+      onDelete: "CASCADE",
+    });
+  }
+
+  if (models.AdminUnits) {
+    AdminAuth.hasMany(models.AdminUnits, {
+      foreignKey: "admin_id",
+      as: "units",
+      onDelete: "CASCADE",
+    });
+  }
+
+  if (models.AdminPaymentMethod) {
+    AdminAuth.hasMany(models.AdminPaymentMethod, {
+      foreignKey: "admin_id",
+      as: "payments",
+      onDelete: "CASCADE",
+    });
+  }
+
+  if (models.AdminLanguagePair) {
+    AdminAuth.hasMany(models.AdminLanguagePair, {
+      foreignKey: "admin_id",
+      as: "languagePairs",
+      onDelete: "CASCADE",
+    });
+  }
 };
 
 export default AdminAuth;
