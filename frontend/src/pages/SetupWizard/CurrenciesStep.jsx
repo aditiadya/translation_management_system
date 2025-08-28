@@ -25,7 +25,7 @@ const CurrenciesStep = ({ onNext, onBack }) => {
   const fetchUserCurrencies = async () => {
     try {
       const res = await api.get("/admin-currencies");
-      setUserCurrencies(res.data);
+      setUserCurrencies(res.data.data);
     } catch (err) {
       console.error(err);
     }

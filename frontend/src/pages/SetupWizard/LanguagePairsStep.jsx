@@ -27,7 +27,7 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
   const fetchPairs = async () => {
     try {
       const res = await api.get("/admin-language-pairs");
-      setPairs(res.data);
+      setPairs(res.data.data);
     } catch (err) {
       console.error(err);
     }

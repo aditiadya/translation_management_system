@@ -16,7 +16,7 @@ const UnitsStep = ({ onNext, onBack }) => {
   const fetchUnits = async () => {
     try {
       const res = await api.get("/admin-units");
-      setUnits(res.data);
+      setUnits(res.data.data);
     } catch (err) {
       console.error(err);
     }
@@ -46,7 +46,7 @@ const UnitsStep = ({ onNext, onBack }) => {
         active_flag: true,
         is_word: true,
       });
-      setUnits([...units, res.data]);
+      setUnits([...units, res.data.data]);
       setNewUnit("");
       setError("");
     } catch (err) {
@@ -73,7 +73,7 @@ const UnitsStep = ({ onNext, onBack }) => {
         name: editValue,
         active_flag: editActive,
       });
-      setUnits(units.map((u) => (u.id === id ? res.data : u)));
+      setUnits(units.map((u) => (u.id === id ? res.data.data : u)));
       setEditId(null);
       setEditValue("");
       setEditActive(true);

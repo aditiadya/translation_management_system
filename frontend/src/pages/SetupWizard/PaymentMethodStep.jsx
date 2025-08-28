@@ -21,7 +21,7 @@ const PaymentMethodStep = ({ onNext, onBack }) => {
   const fetchMethods = async () => {
     try {
       const res = await api.get("/admin/payment-methods");
-      setMethods(res.data);
+      setMethods(res.data.data);
     } catch (err) {
       console.error(err);
     }
@@ -46,7 +46,7 @@ const PaymentMethodStep = ({ onNext, onBack }) => {
 
     try {
       const res = await api.post("/admin/payment-methods", newMethod);
-      setMethods([...methods, res.data]);
+      setMethods([...methods, res.data.data]);
       setNewMethod({
         name: "",
         payment_type: "",
@@ -75,7 +75,7 @@ const PaymentMethodStep = ({ onNext, onBack }) => {
 
     try {
       const res = await api.put(`/admin/payment-methods/${id}`, editValue);
-      setMethods(methods.map((m) => (m.id === id ? res.data : m)));
+      setMethods(methods.map((m) => (m.id === id ? res.data.data : m)));
       setEditId(null);
       setEditValue(null);
       setError("");

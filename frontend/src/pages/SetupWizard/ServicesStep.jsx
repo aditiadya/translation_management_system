@@ -16,7 +16,7 @@ const ServicesStep = ({ onNext, onBack }) => {
   const fetchServices = async () => {
     try {
       const res = await api.get("/admin-services");
-      setServices(res.data);
+      setServices(res.data.data);
     } catch (err) {
       console.error(err);
     }
@@ -45,7 +45,7 @@ const ServicesStep = ({ onNext, onBack }) => {
         name: newService,
         active_flag: true,
       });
-      setServices([...services, res.data]);
+      setServices([...services, res.data.data]);
       setNewService("");
       setError("");
     } catch (err) {
@@ -72,7 +72,7 @@ const ServicesStep = ({ onNext, onBack }) => {
         name: editValue,
         active_flag: editActive,
       });
-      setServices(services.map((s) => (s.id === id ? res.data : s)));
+      setServices(services.map((s) => (s.id === id ? res.data.data : s)));
       setEditId(null);
       setEditValue("");
       setEditActive(true);

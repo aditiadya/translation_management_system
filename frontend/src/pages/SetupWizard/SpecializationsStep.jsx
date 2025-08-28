@@ -16,7 +16,7 @@ const SpecializationsStep = ({ onNext, onBack }) => {
   const fetchSpecializations = async () => {
     try {
       const res = await api.get("/admin-specializations");
-      setSpecializations(res.data);
+      setSpecializations(res.data.data);
     } catch (err) {
       console.error(err);
     }
@@ -45,7 +45,7 @@ const SpecializationsStep = ({ onNext, onBack }) => {
         name: newSpec,
         active_flag: true,
       });
-      setSpecializations([...specializations, res.data]);
+      setSpecializations([...specializations, res.data.data]);
       setNewSpec("");
       setError("");
     } catch (err) {
@@ -73,7 +73,7 @@ const SpecializationsStep = ({ onNext, onBack }) => {
         active_flag: editActive,
       });
       setSpecializations(
-        specializations.map((s) => (s.id === id ? res.data : s))
+        specializations.map((s) => (s.id === id ? res.data.data : s))
       );
       setEditId(null);
       setEditValue("");
