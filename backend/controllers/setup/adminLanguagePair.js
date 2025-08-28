@@ -1,66 +1,70 @@
-import db from '../../models/index.js';
-const { AdminLanguagePair } = db;
+import db from "../../models/index.js";
+import { pickAllowed } from "../../utils/pickAllowed.js";
 
+const { AdminLanguagePair, Language } = db;
+
+const ALLOWED_FIELDS = ["source_language_id", "target_language_id", "active_flag"];
+
+// Get
 export const getAllLanguagePairs = async (req, res) => {
   try {
     const pairs = await AdminLanguagePair.findAll({
-      where: { email: req.user.email },
+      where: { admin_id: req.user.id },
       include: [
-        { model: db.Language, as: "sourceLanguage", attributes: ["id", "name"] },
-        { model: db.Language, as: "targetLanguage", attributes: ["id", "name"] },
+        { model: Language, as: "sourceLanguage", attributes: ["id", "name"] },
+        { model: Language, as: "targetLanguage", attributes: ["id", "name"] },
       ],
     });
-    res.status(200).json(pairs);
+
+    res.status(200).json({ success: true, data: pairs });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
 
+// Add
 export const addLanguagePair = async (req, res) => {
   try {
-    const { source_language_id, target_language_id, active_flag } = req.body;
+    const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
     const newPair = await AdminLanguagePair.create({
-      email: req.user.email,
-      source_language_id,
-      target_language_id,
-      active_flag: active_flag ?? true
+      ...data,
+      admin_id: req.user.id, // always from JWT/session
     });
 
-    res.status(201).json(newPair);
+    res.status(201).json({ success: true, data: newPair });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
 
+// Update
 export const updateLanguagePair = async (req, res) => {
   try {
     const { id } = req.params;
-    const { source_language_id, target_language_id, active_flag } = req.body;
+    const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
-    const pair = await AdminLanguagePair.findOne({ where: { id, email: req.user.email } });
-    if (!pair) return res.status(404).json({ message: 'Language pair not found' });
+    const pair = await AdminLanguagePair.findOne({ where: { id, admin_id: req.user.id } });
+    if (!pair) return res.status(404).json({ success: false, message: "Language pair not found" });
 
-    pair.source_language_id = source_language_id ?? pair.source_language_id;
-    pair.target_language_id = target_language_id ?? pair.target_language_id;
-    pair.active_flag = active_flag ?? pair.active_flag;
-
-    await pair.save();
-    res.status(200).json(pair);
+    await pair.update(data);
+    res.status(200).json({ success: true, data: pair });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
 
+// Delete
 export const deleteLanguagePair = async (req, res) => {
   try {
     const { id } = req.params;
-    const pair = await AdminLanguagePair.findOne({ where: { id, email: req.user.email } });
-    if (!pair) return res.status(404).json({ message: 'Language pair not found' });
+    const pair = await AdminLanguagePair.findOne({ where: { id, admin_id: req.user.id } });
+
+    if (!pair) return res.status(404).json({ success: false, message: "Language pair not found" });
 
     await pair.destroy();
-    res.status(200).json({ message: 'Language pair deleted successfully' });
+    res.status(200).json({ success: true, message: "Language pair deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };

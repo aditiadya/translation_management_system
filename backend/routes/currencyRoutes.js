@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const currencies = await Currency.findAll({
-      attributes: ["id", "code", "name", "symbol"], // adjust fields as per your model
+      attributes: ["id", "code", "name", "symbol"],
       order: [["name", "ASC"]],
     });
     res.status(200).json(currencies);

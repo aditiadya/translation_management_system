@@ -1,75 +1,78 @@
 import db from "../../models/index.js";
+import { pickAllowed } from "../../utils/pickAllowed.js";
+
 const { AdminPaymentMethod } = db;
 
+const ALLOWED_FIELDS = ["name", "payment_type", "bank_info", "description", "active_flag"];
+
+// Get
 export const getAllPaymentMethods = async (req, res) => {
   try {
     const methods = await AdminPaymentMethod.findAll({
-      where: { email: req.user.email },
+      where: { admin_id: req.user.id },
     });
-    res.status(200).json(methods);
+
+    res.status(200).json({ success: true, data: methods });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
 
+// Add
 export const addPaymentMethod = async (req, res) => {
   try {
-    const { name, payment_type, bank_info, description, active } = req.body;
+    const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
     const newMethod = await AdminPaymentMethod.create({
-      email: req.user.email,
-      name,
-      payment_type,
-      bank_info,
-      description,
-      active: active ?? true,
+      ...data,
+      admin_id: req.user.id,
     });
 
-    res.status(201).json(newMethod);
+    res.status(201).json({ success: true, data: newMethod });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    if (error?.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({ success: false, message: "Payment method with this name already exists" });
+    }
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
 
+// Update
 export const updatePaymentMethod = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, payment_type, bank_info, description, active } = req.body;
+    const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
     const method = await AdminPaymentMethod.findOne({
-      where: { id, email: req.user.email },
+      where: { id, admin_id: req.user.id },
     });
 
-    if (!method)
-      return res.status(404).json({ message: "Payment method not found" });
+    if (!method) return res.status(404).json({ success: false, message: "Payment method not found" });
 
-    method.name = name ?? method.name;
-    method.payment_type = payment_type ?? method.payment_type;
-    method.bank_info = bank_info ?? method.bank_info;
-    method.description = description ?? method.description;
-    method.active = active ?? method.active;
-
-    await method.save();
-    res.status(200).json(method);
+    await method.update(data);
+    res.status(200).json({ success: true, data: method });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    if (error?.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({ success: false, message: "Payment method with this name already exists" });
+    }
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
 
+// Delete
 export const deletePaymentMethod = async (req, res) => {
   try {
     const { id } = req.params;
 
     const method = await AdminPaymentMethod.findOne({
-      where: { id, email: req.user.email },
+      where: { id, admin_id: req.user.id },
     });
 
-    if (!method)
-      return res.status(404).json({ message: "Payment method not found" });
+    if (!method) return res.status(404).json({ success: false, message: "Payment method not found" });
 
     await method.destroy();
-    res.status(200).json({ message: "Payment method deleted successfully" });
+    res.status(200).json({ success: true, message: "Payment method deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };

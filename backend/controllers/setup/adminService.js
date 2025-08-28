@@ -1,102 +1,77 @@
-import db from '../../models/index.js';
-const { AdminService, AdminAuth } = db;
-import jwt from 'jsonwebtoken';
+import db from "../../models/index.js";
+import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const getLoggedInUser = async (req) => {
-  const token = req.cookies.accessToken;
-  if (!token) return null;
+const { AdminService } = db;
 
-  try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await AdminAuth.findByPk(decoded.userId, {
-      attributes: ['id', 'email']
-    });
-    return user;
-  } catch (err) {
-    return null;
-  }
-};
+const ALLOWED_FIELDS = ["name", "active_flag"];
 
+// Get
 export const getAllServices = async (req, res) => {
   try {
-    const user = await getLoggedInUser(req);
-    if (!user) return res.status(401).json({ error: 'Not authenticated' });
-
-    const services = await AdminService.findAll({ where: { email: user.email } });
-    res.status(200).json(services);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Get a single service by ID
-export const getServiceById = async (req, res) => {
-  try {
-    const user = await getLoggedInUser(req);
-    if (!user) return res.status(401).json({ error: 'Not authenticated' });
-
-    const { id } = req.params;
-    const service = await AdminService.findOne({ where: { id, email: user.email } });
-    if (!service) return res.status(404).json({ message: 'Service not found' });
-
-    res.status(200).json(service);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const addService = async (req, res) => {
-  try {
-    const user = await getLoggedInUser(req);
-    if (!user) return res.status(401).json({ error: 'Not authenticated' });
-
-    const { name, active_flag } = req.body;
-
-    const newService = await AdminService.create({
-      email: user.email,
-      name,
-      active_flag: active_flag ?? true
+    const services = await AdminService.findAll({
+      where: { admin_id: req.user.id },
     });
 
-    res.status(201).json(newService);
+    res.status(200).json({ success: true, data: services });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
 
+// Add
+export const addService = async (req, res) => {
+  try {
+    const data = pickAllowed(req.body, ALLOWED_FIELDS);
+
+    const newService = await AdminService.create({
+      ...data,
+      admin_id: req.user.id,
+    });
+
+    res.status(201).json({ success: true, data: newService });
+  } catch (error) {
+    if (error?.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({ success: false, message: "Service with this name already exists" });
+    }
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
+  }
+};
+
+// Update
 export const updateService = async (req, res) => {
   try {
-    const user = await getLoggedInUser(req);
-    if (!user) return res.status(401).json({ error: 'Not authenticated' });
-
     const { id } = req.params;
-    const { name, active_flag } = req.body;
+    const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
-    const service = await AdminService.findOne({ where: { id, email: user.email } });
-    if (!service) return res.status(404).json({ message: 'Service not found' });
+    const service = await AdminService.findOne({
+      where: { id, admin_id: req.user.id },
+    });
 
-    service.name = name ?? service.name;
-    service.active_flag = active_flag ?? service.active_flag;
+    if (!service) return res.status(404).json({ success: false, message: "Service not found" });
 
-    await service.save();
-    res.status(200).json(service);
+    await service.update(data);
+    res.status(200).json({ success: true, data: service });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    if (error?.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({ success: false, message: "Service with this name already exists" });
+    }
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
 
+// Delete
 export const deleteService = async (req, res) => {
   try {
-    const user = await getLoggedInUser(req);
-    if (!user) return res.status(401).json({ error: 'Not authenticated' });
-
     const { id } = req.params;
-    const service = await AdminService.findOne({ where: { id, email: user.email } });
-    if (!service) return res.status(404).json({ message: 'Service not found' });
+    const service = await AdminService.findOne({
+      where: { id, admin_id: req.user.id },
+    });
+
+    if (!service) return res.status(404).json({ success: false, message: "Service not found" });
 
     await service.destroy();
-    res.status(200).json({ message: 'Service deleted successfully' });
+    res.status(200).json({ success: true, message: "Service deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };
