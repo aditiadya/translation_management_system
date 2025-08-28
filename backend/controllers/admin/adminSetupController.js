@@ -1,7 +1,7 @@
 import db from "../../models/index.js";
 const { AdminProfile } = db;
 
-export const markSetupCompleted = async (req, res) => {
+export const markSetupCompleted = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const user = await AdminProfile.findOne({ where: { admin_id: userId } });
@@ -17,6 +17,6 @@ export const markSetupCompleted = async (req, res) => {
 
     res.status(200).json({ message: "Setup completed successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };

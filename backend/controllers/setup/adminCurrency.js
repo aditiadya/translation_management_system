@@ -1,76 +1,90 @@
 import db from "../../models/index.js";
+import { pickAllowed } from "../../utils/pickAllowed.js";
+
 const { AdminCurrency, Currency } = db;
 
-// ✅ Get all currencies for logged-in admin
+const ALLOWED_FIELDS = ["currencyId", "active_flag"];
+
+const handleSequelizeError = (error) => {
+  if (error?.name === "SequelizeUniqueConstraintError") {
+    return { message: "This currency is already added for the admin." };
+  }
+  return { message: error.message || "Server error" };
+};
+
+// Get
 export const getAllAdminCurrencies = async (req, res) => {
   try {
     const currencies = await AdminCurrency.findAll({
-      where: { email: req.user.email },
+      where: { admin_id: req.user.id },
       include: [{ model: Currency, as: "currency" }],
     });
-    res.status(200).json(currencies);
+
+    res.status(200).json({ success: true, data: currencies });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, ...handleSequelizeError(error) });
   }
 };
 
-// ✅ Add a new currency
+// Add
 export const addAdminCurrency = async (req, res) => {
   try {
-    const { currencyId, active_flag } = req.body;
+    const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
     const newCurrency = await AdminCurrency.create({
-      email: req.user.email,
-      currencyId,
-      active_flag: active_flag ?? true,
+      admin_id: req.user.id,
+      currency_id: data.currencyId,
+      active_flag: data.active_flag ?? true,
     });
 
-    res.status(201).json(newCurrency);
+    res.status(201).json({ success: true, data: newCurrency });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, ...handleSequelizeError(error) });
   }
 };
 
-// ✅ Update a currency
+// Update
 export const updateAdminCurrency = async (req, res) => {
   try {
     const { id } = req.params;
-    const { currencyId, active_flag } = req.body;
+    const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
     const currency = await AdminCurrency.findOne({
-      where: { id, email: req.user.email },
+      where: { id, admin_id: req.user.id },
     });
 
     if (!currency) {
-      return res.status(404).json({ message: "Currency not found" });
+      return res.status(404).json({ success: false, message: "Currency not found" });
     }
 
-    currency.currencyId = currencyId ?? currency.currencyId;
-    currency.active_flag = active_flag ?? currency.active_flag;
+    if (data.currencyId !== undefined) currency.currency_id = data.currencyId;
+    if (data.active_flag !== undefined) currency.active_flag = data.active_flag;
 
     await currency.save();
-    res.status(200).json(currency);
+
+    res.status(200).json({ success: true, data: currency });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, ...handleSequelizeError(error) });
   }
 };
 
-// ✅ Delete a currency
+// Delete
 export const deleteAdminCurrency = async (req, res) => {
   try {
     const { id } = req.params;
 
     const currency = await AdminCurrency.findOne({
-      where: { id, email: req.user.email },
+      where: { id, admin_id: req.user.id },
     });
 
     if (!currency) {
-      return res.status(404).json({ message: "Currency not found" });
+      return res.status(404).json({ success: false, message: "Currency not found" });
     }
 
     await currency.destroy();
-    res.status(200).json({ message: "Currency deleted successfully" });
+
+    res.status(200).json({ success: true, message: "Currency deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, ...handleSequelizeError(error) });
   }
 };

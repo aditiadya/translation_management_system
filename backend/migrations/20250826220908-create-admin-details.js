@@ -41,7 +41,7 @@ export async function up(queryInterface, Sequelize) {
     },
     username: {
       type: Sequelize.STRING(64),
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     phone: {

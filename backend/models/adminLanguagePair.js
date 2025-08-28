@@ -56,6 +56,7 @@ const AdminLanguagePair = sequelize.define(
       {
         unique: true,
         fields: ["admin_id", "source_language_id", "target_language_id"],
+        name: "uniq_admin_lang_pair",
       },
     ],
   }

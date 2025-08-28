@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { Op } from "sequelize";
 import db from "../../models/index.js";
 const { AdminAuth, AdminDetails, AdminProfile, AdminTerms } = db;
 import {
@@ -50,11 +49,10 @@ export const signup = async (req, res, next) => {
     await AdminTerms.create({
       admin_id: adminAuth.id,
       terms_accepted: true,
-      accepted_at: new Date(),
     });
 
     await AdminDetails.create({
-      id: adminAuth.id,
+      admin_id: adminAuth.id,
       account_type,
       company_name: account_type === "enterprise" ? company_name : null,
       country,
@@ -69,6 +67,7 @@ export const signup = async (req, res, next) => {
       activationToken,
     });
   } catch (err) {
+    console.error("Signup Error:", err);
     next(err);
   }
 };
@@ -103,55 +102,57 @@ export const activateAccount = async (req, res, next) => {
     const password_hash = await bcrypt.hash(password, 12);
 
     const adminDetails = await AdminDetails.findOne({
-      where: { id: adminAuth.id },
+      where: { admin_id: adminAuth.id },
     });
 
-    if (adminDetails) {
-      adminDetails.username = username;
-      await adminDetails.save();
-    } else {
-      await AdminDetails.create({
-        id: adminAuth.id,
-        username,
-        account_type: "enterprise",
-        country: "Unknown",
-        time_zone: "UTC",
-        first_name: "N/A",
-        last_name: "N/A",
-        phone: "N/A",
-      });
+    if (!adminDetails) {
+      return res.status(500).json({ error: "No account detected." });
     }
+
+    adminDetails.username = username;
+    await adminDetails.save();
 
     adminAuth.password_hash = password_hash;
     adminAuth.is_active = true;
     adminAuth.activation_token = null;
     await adminAuth.save();
 
-    const fakeReq = {
-      body: {
-        identifier: username,
-        password,
-      },
-      cookies: req.cookies,
-    };
+    // Auto login after activation
+    const accessToken = generateAccessToken(adminAuth);
+    const refreshToken = generateRefreshToken(adminAuth);
 
-    const fakeRes = {
-      cookie: res.cookie.bind(res), 
-      status: (code) => {
-        fakeRes.statusCode = code;
-        return fakeRes;
-      },
-      json: (data) => res.status(fakeRes.statusCode || 200).json(data),
-    };
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7);
 
-    await login(fakeReq, fakeRes, next);
+    adminAuth.refresh_token = refreshToken;
+    adminAuth.refresh_token_expiry = expiryDate;
 
-    res.status(200).json({ message: "Account activated successfully" });
+    await adminAuth.save();
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000,
+      path: "/",
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+
+    res.status(200).json({
+      message: "Account activated & logged in successfully",
+      accessToken,
+    });
   } catch (err) {
     next(err);
   }
 };
-
 
 export const verifyActivationToken = async (req, res, next) => {
   try {
@@ -197,9 +198,17 @@ export const login = async (req, res, next) => {
       }
     }
 
+    if (!user) {
+      return res
+        .status(401)
+        .json({ error: "Invalid email/username or password" });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password_hash);
     if (!validPassword)
-      return res.status(401).json({ error: "Invalid password" });
+      return res
+        .status(401)
+        .json({ error: "Invalid email/username or password" });
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -310,41 +319,33 @@ export const refreshToken = async (req, res, next) => {
   }
 };
 
+// Current User Verification
 export const getCurrentUser = async (req, res) => {
   try {
-    const token = req.cookies.accessToken;
-    if (!token) {
-      return res.status(401).json({ error: "Not authenticated" });
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
-      if (err) {
-        return res.status(403).json({ error: "Invalid token" });
-      }
+    const user = await AdminAuth.findByPk(req.user.id, {
+      attributes: ["id", "email", "is_active"],
+      include: [
+        {
+          model: AdminProfile,
+          as: "profile",
+          attributes: ["setup_completed"],
+        },
+      ],
+    });
 
-      const user = await AdminAuth.findByPk(decoded.userId, {
-        attributes: ["id", "email", "is_active"],
-        include: [
-          {
-            model: AdminProfile,
-            as: "profile",
-            attributes: ["setup_completed"],
-          },
-        ],
-      });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      const response = {
-        id: user.id,
-        email: user.email,
-        is_active: user.is_active,
-        setup_completed: user.profile?.setup_completed || false,
-      };
-
-      res.json(response);
+    res.json({
+      id: user.id,
+      email: user.email,
+      is_active: user.is_active,
+      setup_completed: user.profile?.setup_completed || false,
     });
   } catch (error) {
     console.error(error);
@@ -356,13 +357,27 @@ export const getCurrentUser = async (req, res) => {
 export const logout = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
-    if (!token)
-      return res.status(401).json({ error: "Refresh token required" });
+    if (!token) {
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+      });
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+      });
+      return res.status(400).json({ error: "Refresh token required" });
+    }
 
     const user = await AdminAuth.findOne({ where: { refresh_token: token } });
-    if (!user) return res.status(401).json({ error: "Invalid token" });
 
-    await user.update({ refresh_token: null, refresh_token_expiry: null });
+    if (user) {
+      await user.update({ refresh_token: null, refresh_token_expiry: null });
+    }
 
     res.clearCookie("accessToken", {
       httpOnly: true,

@@ -42,7 +42,7 @@ const AdminDetails = sequelize.define('AdminDetails', {
   },
   username: {
     type: DataTypes.STRING(64),
-    allowNull: false,
+    allowNull: true,
     unique: true,
   },
   phone: {
@@ -54,7 +54,7 @@ const AdminDetails = sequelize.define('AdminDetails', {
   }
 }, {
   tableName: 'admin_details',
-  timestamps: true, 
+  timestamps: true,
   indexes: [
       {
         fields: ["admin_id"], 

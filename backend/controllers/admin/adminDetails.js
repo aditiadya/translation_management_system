@@ -1,5 +1,3 @@
-import Joi from "joi";
-const { ValidationError } = Joi;
 import db from "../../models/index.js";
 const { AdminDetails } = db;
 import { pickAllowed } from "../../utils/pickAllowed.js";
@@ -17,23 +15,40 @@ const ALLOWED_FIELDS = [
 
 const toClientError = (error) => {
   if (error?.name === "SequelizeUniqueConstraintError") {
-    return { code: 400, body: { success: false, message: "Username already taken" } };
+    return {
+      code: 400,
+      body: { success: false, message: "Username already taken" },
+    };
   }
   if (error?.name === "SequelizeValidationError") {
     return {
       code: 400,
-      body: { success: false, message: "Invalid data", details: error.errors?.map(e => e.message) },
+      body: {
+        success: false,
+        message: "Invalid data",
+        details: error.errors?.map((e) => e.message),
+      },
     };
   }
-  return { code: 500, body: { success: false, message: "Something went wrong" } };
+  return {
+    code: 500,
+    body: { success: false, message: "Something went wrong" },
+  };
 };
 
 export const updateAdminDetails = async (req, res) => {
   try {
     const updateData = pickAllowed(req.body, ALLOWED_FIELDS);
-    const [updated] = await AdminDetails.update(updateData, { where: { id: req.user.id } });
-    if (!updated) return res.status(404).json({ success: false, message: "No details found." });
-    const updatedData = await AdminDetails.findByPk(req.user.id);
+    const [updated] = await AdminDetails.update(updateData, {
+      where: { admin_id: req.user.id },
+    });
+    if (!updated)
+      return res
+        .status(404)
+        .json({ success: false, message: "No details found." });
+    const updatedData = await AdminDetails.findOne({
+      where: { admin_id: req.user.id },
+    });
     return res.status(200).json({ success: true, data: updatedData });
   } catch (error) {
     console.error(error);
@@ -44,8 +59,13 @@ export const updateAdminDetails = async (req, res) => {
 
 export const getAdminDetailsById = async (req, res) => {
   try {
-    const data = await AdminDetails.findOne({ where: { id: req.user.id } });
-    if (!data) return res.status(404).json({ success: false, message: "No details found." });
+    const data = await AdminDetails.findOne({
+      where: { admin_id: req.user.id },
+    });
+    if (!data)
+      return res
+        .status(404)
+        .json({ success: false, message: "No details found." });
     return res.status(200).json({ success: true, data });
   } catch (error) {
     console.error(error);
@@ -56,9 +76,16 @@ export const getAdminDetailsById = async (req, res) => {
 
 export const deleteAdminDetails = async (req, res) => {
   try {
-    const deleted = await AdminDetails.destroy({ where: { id: req.user.id } });
-    if (!deleted) return res.status(404).json({ success: false, message: "No details found." });
-    return res.status(200).json({ success: true, message: "Admin details deleted" });
+    const deleted = await AdminDetails.destroy({
+      where: { admin_id: req.user.id },
+    });
+    if (!deleted)
+      return res
+        .status(404)
+        .json({ success: false, message: "No details found." });
+    return res
+      .status(200)
+      .json({ success: true, message: "Admin details deleted" });
   } catch (error) {
     console.error(error);
     const err = toClientError(error);
