@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import SetupWizardPage from "./pages/SetupWizard/SetupWizardPage";
 import AccountActivation from "./pages/AccountActivation/AccountActivation";
+import AdminProfile from "./pages/Profile/adminProfile";
 
 const App = () => (
   <AuthProvider>
@@ -29,6 +30,14 @@ const App = () => (
           element={
             <ProtectedRoute>
               <SetupWizardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <AdminProfile />
             </ProtectedRoute>
           }
         />
