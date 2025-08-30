@@ -62,10 +62,10 @@ const AdminAuth = sequelize.define(
 
 
 AdminAuth.associate = (models) => {
-  if (models.AdminProfile) {
-    AdminAuth.hasOne(models.AdminProfile, {
+  if (models.AdminSetup) {
+    AdminAuth.hasOne(models.AdminSetup, {
       foreignKey: "admin_id",
-      as: "profile",
+      as: "setup",
       onDelete: "CASCADE",
     });
   }

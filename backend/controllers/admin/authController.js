@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import db from "../../models/index.js";
-const { AdminAuth, AdminDetails, AdminProfile, AdminTerms } = db;
+const { AdminAuth, AdminDetails, AdminSetup, AdminTerms } = db;
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -42,7 +42,7 @@ export const signup = async (req, res, next) => {
       is_active: false,
     });
 
-    await AdminProfile.create({
+    await AdminSetup.create({
       admin_id: adminAuth.id,
     });
 
@@ -330,8 +330,8 @@ export const getCurrentUser = async (req, res) => {
       attributes: ["id", "email", "is_active"],
       include: [
         {
-          model: AdminProfile,
-          as: "profile",
+          model: AdminSetup,
+          as: "setup",
           attributes: ["setup_completed"],
         },
       ],
@@ -345,7 +345,7 @@ export const getCurrentUser = async (req, res) => {
       id: user.id,
       email: user.email,
       is_active: user.is_active,
-      setup_completed: user.profile?.setup_completed || false,
+      setup_completed: user.setup?.setup_completed || false,
     });
   } catch (error) {
     console.error(error);
