@@ -28,6 +28,25 @@ const Navbar = () => {
       });
   }, []);
 
+  // 🔹 Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
   const handleLogout = () => {
     setUser(null);
     setProfile(null);
@@ -61,7 +80,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="sticky top-0 bg-gray-900 text-white px-6 py-3 flex justify-between items-center shadow-lg z-50">
+      <nav className="sticky top-0 bg-gray-900 text-white px-6 py-3 flex justify-between items-center  z-50">
         {/* Left Section: Logo/Brand */}
         <Link to="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold">
