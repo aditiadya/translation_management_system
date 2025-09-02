@@ -41,8 +41,6 @@ export async function up(queryInterface, Sequelize) {
       defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
   });
-
-  await queryInterface.addIndex('admin_profile', ['admin_id']);
 }
 
 export async function down(queryInterface, Sequelize) {

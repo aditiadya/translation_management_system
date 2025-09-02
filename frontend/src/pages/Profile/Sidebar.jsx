@@ -4,7 +4,6 @@ import {
   FiHome,
   FiUser,
   FiSettings,
-  FiLogOut,
   FiChevronLeft,
   FiGrid,
 } from "react-icons/fi";

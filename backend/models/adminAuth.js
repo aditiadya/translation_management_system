@@ -36,7 +36,7 @@ const AdminAuth = sequelize.define(
       allowNull: true,
       unique: true,
     },
-    token_expiry: {
+    reset_token_expiry: {
       type: DataTypes.DATE,
       allowNull: true,
     },
