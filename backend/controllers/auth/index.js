@@ -4,4 +4,4 @@ export { login } from "./login.controller.js";
 export { refreshToken } from "./refreshToken.controller.js";
 export { logout } from "./logout.controller.js";
 export { getCurrentUser } from "./getCurrentUser.controller.js";
-export { resetPassword, requestPasswordReset } from "./reset.controller.js"
+export { resetPassword, requestPasswordReset, changePassword } from "./reset.controller.js"

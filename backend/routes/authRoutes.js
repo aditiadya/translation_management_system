@@ -9,6 +9,7 @@ import {
   verifyActivationToken,
   requestPasswordReset,
   resetPassword,
+  changePassword,
 } from "../controllers/auth/index.js";
 import { validateSignup } from "../middlewares/validateSignup.js";
 import { validateLogin } from "../middlewares/validateLogin.js";
@@ -16,7 +17,7 @@ import { validateActivation } from "../middlewares/validateActivation.js";
 import { markSetupCompleted } from "../controllers/admin/adminSetupController.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
 import { validate } from "../middlewares/validate.js";
-import { requestResetSchema, resetPasswordSchema } from "../validators/resetPassword.schema.js";
+import { requestResetSchema, resetPasswordSchema, changePasswordSchema } from "../validators/resetPassword.schema.js";
 
 const router = express.Router();
 
@@ -30,5 +31,6 @@ router.post('/activate/:token', validateActivation, activateAccount);
 router.get("/activate/:token/verify", verifyActivationToken);
 router.post("/request-reset", validate(requestResetSchema), requestPasswordReset);
 router.post("/reset-password", validate(resetPasswordSchema), resetPassword);
+router.post("/change-password", authenticateToken, validate(changePasswordSchema), changePassword);
 
 export default router;

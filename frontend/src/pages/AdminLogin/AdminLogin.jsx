@@ -16,7 +16,8 @@ const AdminLogin = () => {
 
   const validate = () => {
     const currentErrors = {};
-    if (!form.identifier) currentErrors.identifier = "Email or username is required.";
+    if (!form.identifier)
+      currentErrors.identifier = "Email or username is required.";
     if (!form.password) currentErrors.password = "Password is required.";
     setErrors(currentErrors);
     return Object.keys(currentErrors).length === 0;
@@ -26,7 +27,10 @@ const AdminLogin = () => {
     const { name, value } = e.target;
     let errorMsg = "";
     if (!value) {
-      errorMsg = name === "identifier" ? "Email or username is required." : "Password is required.";
+      errorMsg =
+        name === "identifier"
+          ? "Email or username is required."
+          : "Password is required.";
     }
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
   };
@@ -134,6 +138,16 @@ const AdminLogin = () => {
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
+          </div>
+
+          <div className="text-right mt-2">
+            <button
+              type="button"
+              onClick={() => navigate("/request-reset")}
+              className="text-sm text-blue-600 hover:text-blue-800 font-semibold focus:outline-none"
+            >
+              Forgot Password?
+            </button>
           </div>
 
           <div className="flex justify-center">

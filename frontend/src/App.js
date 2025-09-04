@@ -8,6 +8,9 @@ import { AuthProvider } from "./context/AuthContext";
 import SetupWizardPage from "./pages/SetupWizard/SetupWizardPage";
 import AccountActivation from "./pages/AccountActivation/AccountActivation";
 import AdminProfile from "./pages/Profile/adminProfile";
+import RequestReset from "./pages/AdminLogin/ForgotPassword/requestReset";
+import ResetPassword from "./pages/AdminLogin/ForgotPassword/resetPassword";
+import ChangePassword from "./pages/Profile/ChangePasswordPage";
 
 const App = () => (
   <AuthProvider>
@@ -17,6 +20,8 @@ const App = () => (
         <Route path="/create-account" element={<AdminRegisteration />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/account-activation/:token" element={<AccountActivation />} />
+        <Route path="/request-reset" element={<RequestReset />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/dashboard"
           element={
@@ -38,6 +43,14 @@ const App = () => (
           element={
             <ProtectedRoute>
               <AdminProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
             </ProtectedRoute>
           }
         />
