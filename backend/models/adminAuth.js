@@ -21,6 +21,15 @@ const AdminAuth = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    role_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'roles',
+      key: 'id',
+    },
+    onDelete: 'CASCADE',
+  },
     activation_token: {
       type: DataTypes.STRING(255),
       allowNull: true,
@@ -130,6 +139,14 @@ AdminAuth.associate = (models) => {
     AdminAuth.hasMany(models.AdminLanguagePair, {
       foreignKey: "admin_id",
       as: "languagePairs",
+      onDelete: "CASCADE",
+    });
+  }
+
+  if (models.Roles) {
+    AdminAuth.belongsTo(models.Roles, {
+      foreignKey: 'role_id',
+      as: 'role',
       onDelete: "CASCADE",
     });
   }
