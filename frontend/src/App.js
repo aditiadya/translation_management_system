@@ -11,6 +11,9 @@ import AdminProfile from "./pages/Profile/adminProfile";
 import RequestReset from "./pages/AdminLogin/ForgotPassword/requestReset";
 import ResetPassword from "./pages/AdminLogin/ForgotPassword/resetPassword";
 import ChangePassword from "./pages/Profile/ChangePasswordPage";
+import CreateManager from "./pages/Managers/CreateManager/CreateManagerPage";
+import ManagersPage from "./pages/Managers/ManagerList/ManagersPage";
+import ManagerDetailPage from "./pages/Managers/ManagerDetails/ManagerDetailPage";
 
 const App = () => (
   <AuthProvider>
@@ -51,6 +54,30 @@ const App = () => (
           element={
             <ProtectedRoute>
               <ChangePassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="managers/create-manager"
+          element={
+            <ProtectedRoute>
+              <CreateManager />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/managers"
+          element={
+            <ProtectedRoute>
+              <ManagersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="managers/:id"
+          element={
+            <ProtectedRoute>
+              <ManagerDetailPage />
             </ProtectedRoute>
           }
         />

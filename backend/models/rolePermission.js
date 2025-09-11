@@ -30,7 +30,6 @@ const RolePermission = sequelize.define(
   },
   {
     tableName: "role_permissions",
-    underscored: true,
     indexes: [
       {
         unique: true,

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../utils/axiosInstance";
 import Navbar from "../../components/Navbar/Navbar";
-import Sidebar from "./Sidebar";
+import Sidebar from "../../components/Sidebar/Sidebar";
 import ProfileInfoCard from "./ProfileInfoCard";
 import ChangePasswordSection from "./ChangePasswordSection";
 

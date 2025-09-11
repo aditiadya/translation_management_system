@@ -36,8 +36,7 @@ const FormField = React.memo(
               name={fieldKey}
               value={fieldKey === "gender" ? value?.toLowerCase() : value}
               onChange={handleChange}
-              className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                         focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
             >
               <option value="">Select {label}</option>
               {fieldKey === "gender" && (
@@ -68,8 +67,7 @@ const FormField = React.memo(
               name={fieldKey}
               value={value}
               onChange={handleChange}
-              className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                         focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
               placeholder={`Your ${label}`}
             />
           )

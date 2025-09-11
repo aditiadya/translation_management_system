@@ -26,7 +26,6 @@ const Roles = sequelize.define(
   },
   {
     tableName: "roles",
-    underscored: true,
   }
 );
 

@@ -25,7 +25,6 @@ const Permissions = sequelize.define(
   },
   {
     tableName: "permissions",
-    underscored: true,
   }
 );
 

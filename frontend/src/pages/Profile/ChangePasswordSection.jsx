@@ -1,4 +1,3 @@
-import React from "react";
 import { FiLock } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 

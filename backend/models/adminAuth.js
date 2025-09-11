@@ -21,15 +21,6 @@ const AdminAuth = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    role_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'roles',
-      key: 'id',
-    },
-    onDelete: 'CASCADE',
-  },
     activation_token: {
       type: DataTypes.STRING(255),
       allowNull: true,
@@ -143,10 +134,18 @@ AdminAuth.associate = (models) => {
     });
   }
 
-  if (models.Roles) {
-    AdminAuth.belongsTo(models.Roles, {
-      foreignKey: 'role_id',
-      as: 'role',
+  if (models.ManagerDetails) {
+    AdminAuth.hasMany(models.ManagerDetails, {
+      foreignKey: "admin_id",
+      as: "managers",
+      onDelete: "CASCADE",
+    });
+  }
+
+  if (models.UserRoles) {
+    AdminAuth.hasOne(models.UserRoles, {
+      foreignKey: "auth_id",
+      as: "role",
       onDelete: "CASCADE",
     });
   }

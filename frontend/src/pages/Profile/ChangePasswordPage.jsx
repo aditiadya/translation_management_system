@@ -1,4 +1,3 @@
-// src/pages/Profile/ChangePassword.jsx
 import React, { useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import Button from "../../components/Button/Button";

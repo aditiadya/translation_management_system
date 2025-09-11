@@ -13,7 +13,7 @@ import languageRoutes from "./routes/languageRoutes.js";
 import currencyRoutes from "./routes/currencyRoutes.js";
 import adminDetailsRoutes from "./routes/adminDetailsRoutes.js"
 import AdminProfileRoutes from "./routes/adminProfileRoutes.js"
-
+import managerDetailsRoutes from "./routes/managerDetailsRoutes.js"
 
 const app = express();
 
@@ -41,5 +41,6 @@ app.use("/api/currencies", currencyRoutes);
 app.use("/api/admin", authRoutes);
 app.use("/api/admin-details", adminDetailsRoutes);
 app.use("/api/admin-profile", AdminProfileRoutes);
+app.use("/api/managers", managerDetailsRoutes);
 
 export default app;

@@ -2,12 +2,21 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 
 const ManagerDetails = sequelize.define(
-  "manager_details",
+  "ManagerDetails",
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+    },
+    auth_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "admin_auth",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     admin_id: {
       type: DataTypes.INTEGER,
@@ -58,21 +67,32 @@ const ManagerDetails = sequelize.define(
   {
     tableName: "manager_details",
     timestamps: true,
-    underscored: true,
     indexes: [
-      { fields: ["admin_id"] }
+      { fields: ["admin_id"] },
+      { fields: ["auth_id"] }
     ],
   }
 );
 
 ManagerDetails.associate = (models) => {
-  if (models.AdminAuth) {
-    ManagerDetails.belongsTo(models.AdminAuth, {
-      foreignKey: "admin_id",
-      as: "admin",
-      onDelete: "CASCADE",
-    });
-  }
+  ManagerDetails.belongsTo(models.AdminAuth, {
+    foreignKey: "admin_id",
+    as: "admin",
+    onDelete: "CASCADE",
+  });
+
+  ManagerDetails.belongsTo(models.AdminAuth, {
+    foreignKey: "auth_id",
+    as: "auth",
+    onDelete: "CASCADE",
+  });
+
+  ManagerDetails.hasOne(models.UserRoles, {
+    foreignKey: "auth_id", 
+    sourceKey: "auth_id",
+    as: "role",
+    onDelete: "CASCADE",
+  });
 };
 
 export default ManagerDetails;
