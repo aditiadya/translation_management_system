@@ -11,7 +11,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const navLinks = [
     { to: "/dashboard", icon: FiHome, label: "Dashboard" },
     { to: "/profile", icon: FiUser, label: "My Profile" },
-    { to: "/option1", icon: FiGrid, label: "Option 1" },
+    { to: "/managers", icon: FiGrid, label: "Managers" },
     { to: "/option2", icon: FiSettings, label: "Option 2" },
   ];
 
