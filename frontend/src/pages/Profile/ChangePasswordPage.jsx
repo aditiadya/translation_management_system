@@ -84,7 +84,7 @@ const ChangePassword = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white flex justify-center items-center p-6">
+      <div className="min-h-screen bg-white flex justify-center items-center pt-6">
         <form
           className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full space-y-5"
           onSubmit={handleSubmit}

@@ -12,7 +12,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { to: "/dashboard", icon: FiHome, label: "Dashboard" },
     { to: "/profile", icon: FiUser, label: "My Profile" },
     { to: "/managers", icon: FiGrid, label: "Managers" },
-    { to: "/option2", icon: FiSettings, label: "Option 2" },
+    { to: "/clients", icon: FiSettings, label: "Clients" },
   ];
 
   const linkClasses = ({ isActive }) =>

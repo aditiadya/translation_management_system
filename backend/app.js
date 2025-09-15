@@ -14,6 +14,7 @@ import currencyRoutes from "./routes/currencyRoutes.js";
 import adminDetailsRoutes from "./routes/adminDetailsRoutes.js"
 import AdminProfileRoutes from "./routes/adminProfileRoutes.js"
 import managerDetailsRoutes from "./routes/managerDetailsRoutes.js"
+import clientDetailsRoutes from "./routes/clientDetailsRoutes.js"
 
 const app = express();
 
@@ -42,5 +43,6 @@ app.use("/api/admin", authRoutes);
 app.use("/api/admin-details", adminDetailsRoutes);
 app.use("/api/admin-profile", AdminProfileRoutes);
 app.use("/api/managers", managerDetailsRoutes);
+app.use("/api/clients", clientDetailsRoutes);
 
 export default app;
