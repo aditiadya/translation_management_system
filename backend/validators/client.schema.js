@@ -62,7 +62,6 @@ export const createClientSchema = Joi.object({
     "boolean.base": "Can login must be true or false",
   }),
 
-  // Primary user fields at root level
   first_name: Joi.string().trim().required().messages({
     "any.required": "Primary user's first name is required",
     "string.base": "First name must be a string",
@@ -98,13 +97,20 @@ export const createClientSchema = Joi.object({
   gender: Joi.string().valid("Male", "Female", "Other").optional().allow(null, "").messages({
     "any.only": "Gender must be Male, Female, or Other",
   }),
+
+  nationality: Joi.string().trim().optional().allow(null, "").messages({
+    "string.base": "Nationality must be a string",
+  }),
 });
 
 
 export const updateClientSchema = Joi.object({
-  type: Joi.string().valid("Company", "Individual").optional().messages({
-    "any.only": "Type must be either 'Company' or 'Individual'",
-  }),
+  type: Joi.string()
+    .valid("Company", "Individual")
+    .optional()
+    .messages({
+      "any.only": "Type must be either 'Company' or 'Individual'",
+    }),
 
   company_name: Joi.string().trim().optional().allow(null, "").messages({
     "string.base": "Company name must be a string",
@@ -158,57 +164,65 @@ export const updateClientSchema = Joi.object({
     "boolean.base": "Can login must be true or false",
   }),
 
-  primary_user: Joi.object({
-    first_name: Joi.string().trim().optional().messages({
-      "string.base": "Primary user's first name must be a string",
-    }),
+  first_name: Joi.string().trim().optional().messages({
+    "string.base": "Primary user's first name must be a string",
+  }),
 
-    last_name: Joi.string().trim().optional().messages({
-      "string.base": "Primary user's last name must be a string",
-    }),
+  last_name: Joi.string().trim().optional().messages({
+    "string.base": "Primary user's last name must be a string",
+  }),
 
-    email: Joi.string().email().optional().messages({
-      "string.email": "Email must be a valid email address",
-    }),
+  email: Joi.string().email().optional().messages({
+    "string.email": "Email must be a valid email address",
+  }),
 
-    timezone: Joi.string().trim().optional().messages({
-      "string.base": "Timezone must be a string",
-    }),
+  timezone: Joi.string().trim().optional().messages({
+    "string.base": "Timezone must be a string",
+  }),
 
-    phone: Joi.string().pattern(/^[0-9]{7,15}$/).optional().allow(null, "").messages({
+  phone: Joi.string()
+    .pattern(/^[0-9]{7,15}$/)
+    .optional()
+    .allow(null, "")
+    .messages({
       "string.pattern.base": "Phone must be between 7 and 15 digits",
     }),
 
-    zoom_id: Joi.string().trim().optional().allow(null, "").messages({
-      "string.base": "Zoom ID must be a string",
-    }),
+  zoom_id: Joi.string().trim().optional().allow(null, "").messages({
+    "string.base": "Zoom ID must be a string",
+  }),
 
-    teams_id: Joi.string().trim().optional().allow(null, "").messages({
-      "string.base": "Teams ID must be a string",
-    }),
+  teams_id: Joi.string().trim().optional().allow(null, "").messages({
+    "string.base": "Teams ID must be a string",
+  }),
 
-    gender: Joi.string().valid("Male", "Female", "Other").optional().allow(null, "").messages({
+  gender: Joi.string()
+    .valid("Male", "Female", "Other")
+    .optional()
+    .allow(null, "")
+    .messages({
       "any.only": "Gender must be Male, Female, or Other",
     }),
 
-    can_login: Joi.boolean().optional().messages({
-      "boolean.base": "Can login must be true or false",
-    }),
-  }).optional(),
+    nationality: Joi.string().trim().optional().allow(null, "").messages({
+    "string.base": "Nationality must be a string",
+  }),
 });
+
 
 export const getClientSchema = Joi.object({
   id: Joi.number().integer().positive().required().messages({
-    "any.required": "Client ID is required",
+    "any.required": "Client ID is required in URL params",
     "number.base": "Client ID must be a number",
     "number.integer": "Client ID must be an integer",
     "number.positive": "Client ID must be a positive number",
   }),
 });
 
+
 export const deleteClientSchema = Joi.object({
   id: Joi.number().integer().positive().required().messages({
-    "any.required": "Client ID is required",
+    "any.required": "Client ID is required in URL params",
     "number.base": "Client ID must be a number",
     "number.integer": "Client ID must be an integer",
     "number.positive": "Client ID must be a positive number",

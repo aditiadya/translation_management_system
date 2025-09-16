@@ -142,6 +142,14 @@ AdminAuth.associate = (models) => {
     });
   }
 
+  if (models.ClientDetails) {
+    AdminAuth.hasMany(models.ClientDetails, {
+      foreignKey: "admin_id",
+      as: "clients",
+      onDelete: "CASCADE",
+    });
+  }
+
   if (models.UserRoles) {
     AdminAuth.hasOne(models.UserRoles, {
       foreignKey: "auth_id",

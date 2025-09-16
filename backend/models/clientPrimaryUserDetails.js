@@ -46,6 +46,10 @@ const ClientPrimaryUserDetails = sequelize.define(
       type: DataTypes.ENUM("Male", "Female", "Other"),
       allowNull: true,
     },
+    nationality : {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
   {
     tableName: "client_primary_user_details",

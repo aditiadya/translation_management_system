@@ -25,6 +25,7 @@ const CLIENT_ALLOWED_FIELDS = [
   "zoom_id",
   "teams_id",
   "gender",
+  "nationality",
   "can_login",
 ];
 
@@ -94,6 +95,7 @@ export const createClient = async (req, res) => {
       zoom_id: data.zoom_id,
       teams_id: data.teams_id,
       gender: data.gender,
+      nationality: data.nationality,
       can_login: data.can_login,
     });
 
@@ -117,58 +119,119 @@ export const createClient = async (req, res) => {
 };
 
 // Update
-// export const updateClient = async (req, res) => {
-//   const clientId = req.params.id;
-//   const adminId = req.user.id;
-//   const data = pickAllowed(req.body, CLIENT_ALLOWED_FIELDS);
+export const updateClient = async (req, res) => {
+  const clientId = req.params.id;
+  const adminId = req.user.id;
 
-//   try {
-//     if (data.email) {
-//       const client = await ClientDetails.findOne({
-//         where: { id: clientId, admin_id: adminId },
-//       });
+  console.log("Request body:", req.body);
 
-//       if (!client) {
-//         return res
-//           .status(404)
-//           .json({ success: false, message: "Client not found." });
-//       }
+  try {
+    const client = await ClientDetails.findOne({
+      where: { id: clientId, admin_id: adminId },
+    });
 
-//       await AdminAuth.update(
-//         { email: data.email },
-//         { where: { id: client.auth_id } }
-//       );
-//     }
+    console.log("Fetched client:", client?.dataValues);
 
-//     const [updated] = await ClientDetails.update(data, {
-//       where: { id: clientId, admin_id: adminId },
-//     });
+    if (!client) {
+      console.log("Client not found!");
+      return res
+        .status(404)
+        .json({ success: false, message: "Client not found." });
+    }
 
-//     if (!updated) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Client not found." });
-//     }
+    if (req.body.email) {
+      const auth = await AdminAuth.findByPk(client.auth_id);
+      console.log("Fetched auth record before update:", auth?.dataValues);
 
-//     await ClientPrimaryUserDetails.update(data, {
-//       where: { client_id: clientId },
-//     });
+      if (auth) {
+        auth.email = req.body.email;
+        await auth.save();
+        console.log("Updated auth record:", auth.dataValues);
+      }
+    }
 
-//     const updatedClient = await ClientDetails.findOne({
-//       where: { id: clientId, admin_id: adminId },
-//       include: [
-//         { model: AdminAuth, as: "auth", attributes: ["email"] },
-//         { model: ClientPrimaryUserDetails, as: "primary_users" }, // match your alias
-//       ],
-//     });
+    const clientFields = [
+      "type",
+      "company_name",
+      "legal_entity",
+      "status",
+      "country",
+      "state_region",
+      "city",
+      "postal_code",
+      "address",
+      "pan_tax_number",
+      "gstin_vat_number",
+      "website",
+      "note",
+      "can_login",
+    ];
 
-//     return res.status(200).json({ success: true, data: updatedClient });
-//   } catch (error) {
-//     console.error(error);
-//     const err = toClientError(error);
-//     return res.status(err.code).json(err.body);
-//   }
-// };
+    clientFields.forEach((field) => {
+      if (req.body.hasOwnProperty(field)) {
+        client[field] = req.body[field];
+      }
+    });
+
+    await client.save();
+    console.log("Updated client record:", client.dataValues);
+
+    let primaryUser = await ClientPrimaryUserDetails.findOne({
+      where: { client_id: clientId },
+    });
+
+    console.log("Fetched primary user before update:", primaryUser?.dataValues);
+
+    const primaryUserFields = [
+      "first_name",
+      "last_name",
+      "timezone",
+      "phone",
+      "zoom_id",
+      "teams_id",
+      "gender",
+      "nationality"
+    ];
+
+    if (primaryUser) {
+      primaryUserFields.forEach((field) => {
+        if (req.body.hasOwnProperty(field)) {
+          primaryUser[field] = req.body[field];
+        }
+      });
+
+      await primaryUser.save();
+      console.log("Updated primary user record:", primaryUser.dataValues);
+    } else {
+      const newPrimaryUserData = { client_id: clientId };
+      primaryUserFields.forEach((field) => {
+        if (req.body.hasOwnProperty(field)) {
+          newPrimaryUserData[field] = req.body[field];
+        }
+      });
+
+      primaryUser = await ClientPrimaryUserDetails.create(newPrimaryUserData);
+      console.log("Created new primary user:", primaryUser.dataValues);
+    }
+
+    const updatedClient = await ClientDetails.findOne({
+      where: { id: clientId, admin_id: adminId },
+      include: [
+        { model: AdminAuth, as: "auth", attributes: ["email"] },
+        { model: ClientPrimaryUserDetails, as: "primary_users" },
+      ],
+    });
+
+    console.log("Final updatedClient fetched:", updatedClient?.dataValues);
+
+    return res.status(200).json({ success: true, data: updatedClient });
+  } catch (error) {
+    console.error("UPDATE CLIENT ERROR:", error);
+    const err = toClientError(error);
+    return res.status(err.code).json(err.body);
+  }
+};
+
 
 
 // Get client by ID

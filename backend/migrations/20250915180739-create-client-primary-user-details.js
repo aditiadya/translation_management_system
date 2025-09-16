@@ -45,6 +45,10 @@ export async function up(queryInterface) {
       type: DataTypes.ENUM("Male", "Female", "Other"),
       allowNull: true,
     },
+    nationality : {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
