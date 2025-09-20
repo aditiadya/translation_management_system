@@ -2,9 +2,9 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../utils/axiosInstance";
 import { AuthContext } from "../../../context/AuthContext";
-import FormInput from "../FormInput";
-import FormSelect from "../FormSelect";
-import CheckboxField from "../CheckboxField";
+import FormInput from "../../../components/Form/FormInput";
+import FormSelect from "../../../components/Form/FormSelect";
+import CheckboxField from "../../../components/Form/CheckboxField";
 import Button from "../../../components/Button/Button";
 
 const roles = [

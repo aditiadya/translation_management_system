@@ -1,9 +1,9 @@
 import { useState } from "react";
 import api from "../../../utils/axiosInstance";
 import ConfirmModal from "../../../components/Modals/ConfirmModal";
-import FormInput from "../FormInput";
-import FormSelect from "../FormSelect";
-import CheckboxField from "../CheckboxField";
+import FormInput from "../../../components/Form/FormInput";
+import FormSelect from "../../../components/Form/FormSelect";
+import CheckboxField from "../../../components/Form/CheckboxField";
 
 const ManagerEditForm = ({ manager, id, navigate, setIsEditing }) => {
   const [formData, setFormData] = useState({

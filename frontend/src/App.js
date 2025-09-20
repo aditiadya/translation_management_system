@@ -14,6 +14,9 @@ import ChangePassword from "./pages/Profile/ChangePasswordPage";
 import CreateManager from "./pages/Managers/CreateManager/CreateManagerPage";
 import ManagersPage from "./pages/Managers/ManagerList/ManagersPage";
 import ManagerDetailPage from "./pages/Managers/ManagerDetails/ManagerDetailPage";
+import CreateClientPage from "./pages/Clients/CreateClient/CreateClientPage";
+import ClientsPage from "./pages/Clients/ClientList/ClientsPage";
+import ClientDetailPage from "./pages/Clients/ClientDetails/ClientDetailPage";
 
 const App = () => (
   <AuthProvider>
@@ -78,6 +81,30 @@ const App = () => (
           element={
             <ProtectedRoute>
               <ManagerDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="clients/create-client"
+          element={
+            <ProtectedRoute>
+              <CreateClientPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/clients"
+          element={
+            <ProtectedRoute>
+              <ClientsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="clients/:id"
+          element={
+            <ProtectedRoute>
+              <ClientDetailPage />
             </ProtectedRoute>
           }
         />

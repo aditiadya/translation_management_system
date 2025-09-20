@@ -12,7 +12,7 @@ import { createManagerSchema, updateManagerSchema, deleteManagerSchema, getManag
 
 const router = express.Router();
 
-router.use(authenticateToken); 
+router.use(authenticateToken);
 
 router.post('/', validate(createManagerSchema), createManager);
 router.put("/:id", validate(updateManagerSchema), updateManager);
