@@ -5,6 +5,9 @@ import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
 import ClientView from "./ClientView";
 import ClientEditForm from "./ClientEditForm";
+import GeneralInfoEditForm from "./GeneralInfoEditForm";
+import PrimaryUserEditForm from "./PrimaryUserEditForm";
+import SettingsEditForm from "./SettingsEditForm";
 
 const tabs = [
   "General Info",
@@ -25,6 +28,7 @@ const ClientDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [editingSection, setEditingSection] = useState(null);
   const [activeTab, setActiveTab] = useState("General Info");
 
   useEffect(() => {
@@ -43,6 +47,20 @@ const ClientDetailPage = () => {
     };
     fetchClient();
   }, [id]);
+
+  const handleSave = async (updatedData) => {
+  try {
+    const response = await api.put(`/clients/${id}`, updatedData, {
+      withCredentials: true,
+    });
+    setClient(response.data.data);
+    setEditingSection(null);
+  } catch (err) {
+    console.error("Update failed", err);
+    alert("Failed to update client");
+  }
+};
+
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this client?")) return;
@@ -94,29 +112,47 @@ const ClientDetailPage = () => {
 
         {/* Tab Content */}
         {activeTab === "General Info" && (
-          <>
-            {!isEditing ? (
-              <ClientView
-                client={client}
-                onEdit={() => setIsEditing(true)}
-                onDelete={handleDelete}
-              />
-            ) : (
-              <ClientEditForm
-                client={client}
-                id={id}
-                navigate={navigate}
-                setIsEditing={setIsEditing}
-              />
-            )}
-          </>
-        )}
+  <>
+    {!editingSection ? (
+      <ClientView
+        client={client}
+        onEditGeneral={() => setEditingSection("general")}
+        onEditPrimary={() => setEditingSection("primary")}
+        onEditSettings={() => setEditingSection("settings")}
+        onDelete={handleDelete}
+      />
+    ) : editingSection === "general" ? (
+      <GeneralInfoEditForm
+        client={client}
+        onSave={handleSave}
+        onCancel={() => setEditingSection(null)}
+      />
+    ) : editingSection === "primary" ? (
+      <PrimaryUserEditForm
+        client={client}
+        onSave={handleSave}
+        onCancel={() => setEditingSection(null)}
+      />
+    ) : editingSection === "settings" ? (
+      <SettingsEditForm
+        client={client}
+        onSave={(updated) => {
+          console.log("Save settings info", updated);
+          setEditingSection(null);
+        }}
+        onCancel={() => setEditingSection(null)}
+      />
+    ) : null}
+  </>
+)}
 
         {activeTab === "Contact Persons" && (
           <div className="p-4 bg-white rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">Contact Persons</h2>
             {/* Placeholder – you’ll define this later */}
-            <p className="text-gray-500">Contact person details will go here.</p>
+            <p className="text-gray-500">
+              Contact person details will go here.
+            </p>
           </div>
         )}
 
@@ -130,7 +166,9 @@ const ClientDetailPage = () => {
         {activeTab === "CRM" && (
           <div className="p-4 bg-white rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">CRM</h2>
-            <p className="text-gray-500">CRM integration details will go here.</p>
+            <p className="text-gray-500">
+              CRM integration details will go here.
+            </p>
           </div>
         )}
 
