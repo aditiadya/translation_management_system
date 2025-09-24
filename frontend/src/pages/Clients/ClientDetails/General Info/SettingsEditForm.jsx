@@ -1,7 +1,7 @@
 import { useState } from "react";
-import CheckboxField from "../../../components/Form/CheckboxField";
-import Button from "../../../components/Button/Button";
-import BackButton from "../../../components/Button/BackButton";
+import CheckboxField from "../../../../components/Form/CheckboxField";
+import Button from "../../../../components/Button/Button";
+import BackButton from "../../../../components/Button/BackButton";
 
 const SettingsEditForm = ({ client, onCancel, onSave }) => {
   const [form, setForm] = useState({

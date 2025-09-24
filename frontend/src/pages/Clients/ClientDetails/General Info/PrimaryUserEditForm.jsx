@@ -1,9 +1,9 @@
 import { useState } from "react";
-import FormInput from "../../../components/Form/FormInput";
-import FormSelect from "../../../components/Form/FormSelect";
-import CheckboxField from "../../../components/Form/CheckboxField";
-import Button from "../../../components/Button/Button";
-import BackButton from "../../../components/Button/BackButton";
+import FormInput from "../../../../components/Form/FormInput";
+import FormSelect from "../../../../components/Form/FormSelect";
+import CheckboxField from "../../../../components/Form/CheckboxField";
+import Button from "../../../../components/Button/Button";
+import BackButton from "../../../../components/Button/BackButton";
 
 const PrimaryUserEditForm = ({ client, onCancel, onSave }) => {
   const primaryUser = client?.primary_users || {};

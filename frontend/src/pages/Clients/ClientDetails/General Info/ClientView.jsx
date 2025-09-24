@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ConfirmModal from "../../../components/Modals/ConfirmModal";
+import ConfirmModal from "../../../../components/Modals/ConfirmModal";
 
 const ClientView = ({
   client,

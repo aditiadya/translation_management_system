@@ -1,8 +1,8 @@
 import { useState } from "react";
-import FormInput from "../../../components/Form/FormInput";
-import FormSelect from "../../../components/Form/FormSelect";
-import Button from "../../../components/Button/Button";
-import BackButton from "../../../components/Button/BackButton";
+import FormInput from "../../../../components/Form/FormInput";
+import FormSelect from "../../../../components/Form/FormSelect";
+import Button from "../../../../components/Button/Button";
+import BackButton from "../../../../components/Button/BackButton";
 
 const GeneralInfoEditForm = ({ client, onCancel, onSave }) => {
   const [form, setForm] = useState({
