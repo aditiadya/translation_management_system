@@ -3,10 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
-import ClientView from "./General Info/ClientView";
-import GeneralInfoEditForm from "./General Info/GeneralInfoEditForm";
-import PrimaryUserEditForm from "./General Info/PrimaryUserEditForm";
-import SettingsEditForm from "./General Info/SettingsEditForm";
+import ClientView from "./GeneralInfo/ClientView";
+import GeneralInfoEditForm from "./GeneralInfo/GeneralInfoEditForm";
+import PrimaryUserEditForm from "./GeneralInfo/PrimaryUserEditForm";
+import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
 
 const tabs = [
   "General Info",

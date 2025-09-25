@@ -10,6 +10,16 @@ export async function up(queryInterface, Sequelize) {
       type: Sequelize.STRING,
       allowNull: false,
     },
+    admin_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: {
+        model: "admin_auth", 
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
     created_at: {
       type: Sequelize.DATE,
       allowNull: false,
@@ -18,10 +28,11 @@ export async function up(queryInterface, Sequelize) {
     updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+      defaultValue: Sequelize.literal(
+        "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+      ),
     },
   });
-
 }
 
 export async function down(queryInterface, Sequelize) {

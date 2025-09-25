@@ -9,9 +9,21 @@ const ClientPool = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
+
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+
+    admin_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "admin_auth",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
   },
   {
@@ -22,6 +34,11 @@ const ClientPool = sequelize.define(
 );
 
 ClientPool.associate = (models) => {
+  ClientPool.belongsTo(models.AdminAuth, {
+    foreignKey: "admin_id",
+    as: "admin",
+  });
+
   ClientPool.belongsToMany(models.ClientDetails, {
     through: models.ClientPoolClients,
     foreignKey: "client_pool_id",

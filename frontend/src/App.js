@@ -17,6 +17,9 @@ import ManagerDetailPage from "./pages/Managers/ManagerDetails/ManagerDetailPage
 import CreateClientPage from "./pages/Clients/CreateClient/CreateClientPage";
 import ClientsPage from "./pages/Clients/ClientList/ClientsPage";
 import ClientDetailPage from "./pages/Clients/ClientDetails/ClientDetailPage";
+import ClientPoolsPage from "./pages/ClientPools/ClientPoolsPage";
+import AddClientPoolPage from "./pages/ClientPools/ClientPoolForm";
+import ClientPoolDetailsPage from "./pages/ClientPools/ClientPoolDetail";
 
 const App = () => (
   <AuthProvider>
@@ -105,6 +108,30 @@ const App = () => (
           element={
             <ProtectedRoute>
               <ClientDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/client-pools"
+          element={
+            <ProtectedRoute>
+              <ClientPoolsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-client-pool"
+          element={
+            <ProtectedRoute>
+              <AddClientPoolPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="client-pools/:id"
+          element={
+            <ProtectedRoute>
+              <ClientPoolDetailsPage />
             </ProtectedRoute>
           }
         />
