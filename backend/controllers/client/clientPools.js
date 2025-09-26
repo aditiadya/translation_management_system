@@ -8,6 +8,7 @@ const {
   ClientPoolManagers,
   ClientDetails,
   ManagerDetails,
+  ClientPrimaryUserDetails,
 } = db;
 const ALLOWED_FIELDS = ["name", "client_ids", "manager_ids"];
 
@@ -112,12 +113,19 @@ export const getAllClientPools = async (req, res) => {
     const pools = await ClientPool.findAll({
       where: { admin_id: req.user.id },
       include: [
-        { model: ClientDetails, as: "clients" },
+        {
+          model: ClientDetails,
+          as: "clients",
+          include: [
+            { model: ClientPrimaryUserDetails, as: "primary_users" }, // nested include
+          ],
+        },
         { model: ManagerDetails, as: "managers" },
       ],
     });
     res.status(200).json({ success: true, data: pools });
   } catch (error) {
+    console.error("Error in getAllClientPools:", error);
     const err = toClientError(error);
     res.status(err.code).json(err.body);
   }
@@ -129,14 +137,22 @@ export const getClientPoolById = async (req, res) => {
     const pool = await ClientPool.findOne({
       where: { id: req.params.id, admin_id: req.user.id },
       include: [
-        { model: ClientDetails, as: "clients" },
+        {
+          model: ClientDetails,
+          as: "clients",
+          include: [
+            { model: ClientPrimaryUserDetails, as: "primary_users" }, // nested include
+          ],
+        },
         { model: ManagerDetails, as: "managers" },
       ],
     });
+
     if (!pool)
       return res
         .status(404)
         .json({ success: false, message: "Client pool not found" });
+
     res.status(200).json({ success: true, data: pool });
   } catch (error) {
     const err = toClientError(error);
