@@ -1,7 +1,7 @@
 import { useState } from "react";
-import api from "../../utils/axiosInstance"; // adjust path if needed
+import api from "../../utils/axiosInstance";
 
-const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, setFormState }) => {
+const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, setFormState, setPool }) => {
   const [loading, setLoading] = useState(false);
 
   const handleMultiSelect = (field, id) => {
@@ -19,17 +19,20 @@ const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, s
   const handleSave = async () => {
   setLoading(true);
   try {
-    // send even if empty
     const payload = {
-      manager_ids: formState.manager_ids, // can be empty
+      manager_ids: formState.manager_ids,
     };
 
     const res = await api.put(`/client-pools/${pool.id}`, payload);
     if (res.data.success) {
-      // update pool.managers locally so UI updates
+      const updatedManagers = res.data.data.managers;
       setFormState((prev) => ({
         ...prev,
-        manager_ids: res.data.data.managers.map((m) => m.id),
+        manager_ids: updatedManagers.map((m) => m.id),
+      }));
+      setPool((prev) => ({
+        ...prev,
+        managers: updatedManagers,
       }));
       setIsEditing(false);
     }

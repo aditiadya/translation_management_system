@@ -88,10 +88,11 @@ const ClientPoolDetailsPage = () => {
       };
     });
   };
-  
 
-  if (loading) return <div className="text-center mt-10 text-lg">Loading...</div>;
-  if (error) return <div className="text-center mt-10 text-red-600">{error}</div>;
+  if (loading)
+    return <div className="text-center mt-10 text-lg">Loading...</div>;
+  if (error)
+    return <div className="text-center mt-10 text-red-600">{error}</div>;
   if (!pool) return <div className="text-center mt-10">No pool found</div>;
 
   return (
@@ -134,6 +135,7 @@ const ClientPoolDetailsPage = () => {
           formState={form}
           setFormState={setForm}
           handleMultiSelect={handleMultiSelect}
+          setPool={setPool}
         />
       </main>
     </>

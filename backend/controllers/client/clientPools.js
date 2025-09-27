@@ -58,7 +58,7 @@ export const createClientPool = async (req, res) => {
       if (validClientIds.length !== client_ids.length) {
         return res.status(400).json({
           success: false,
-          message: "Some clients do not belong to your admin account",
+          message: "Invalid clients provided",
         });
       }
 
@@ -79,7 +79,7 @@ export const createClientPool = async (req, res) => {
       if (validManagerIds.length !== manager_ids.length) {
         return res.status(400).json({
           success: false,
-          message: "Some managers do not belong to your admin account",
+          message: "Invalid managers provided",
         });
       }
 
@@ -165,8 +165,8 @@ export const updateClientPool = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     const body = pickAllowed(req.body, ALLOWED_FIELDS);
-    const client_ids = sanitizeIds(body.client_ids);
-    const manager_ids = sanitizeIds(body.manager_ids);
+    let client_ids = sanitizeIds(body.client_ids);
+    let manager_ids = sanitizeIds(body.manager_ids);
 
     const pool = await ClientPool.findOne({
       where: { id: req.params.id, admin_id: req.user.id },
@@ -181,6 +181,17 @@ export const updateClientPool = async (req, res) => {
     await pool.save({ transaction });
 
     if (client_ids.length) {
+      const validClients = await ClientDetails.findAll({
+        where: {
+          id: client_ids,
+          admin_id: req.user.id,
+        },
+        attributes: ["id"],
+        transaction,
+      });
+      client_ids = validClients.map((c) => c.id);
+
+      // remove others not in new list
       await ClientPoolClients.destroy({
         where: {
           client_pool_id: pool.id,
@@ -194,6 +205,7 @@ export const updateClientPool = async (req, res) => {
         transaction,
       });
       const existingClientIds = existingClients.map((c) => c.client_id);
+
       const newClients = client_ids.filter(
         (id) => !existingClientIds.includes(id)
       );
@@ -207,33 +219,57 @@ export const updateClientPool = async (req, res) => {
       }
     }
 
-    if (manager_ids.length) {
-      await ClientPoolManagers.destroy({
-        where: {
-          client_pool_id: pool.id,
-          manager_id: { [Op.notIn]: manager_ids },
-        },
-        transaction,
-      });
+if (Array.isArray(manager_ids)) {
+  if (manager_ids.length === 0) {
+    await ClientPoolManagers.destroy({
+      where: { client_pool_id: pool.id },
+      transaction,
+    });
+  } else {
+    const validManagers = await ManagerDetails.findAll({
+      where: {
+        id: manager_ids,
+        admin_id: req.user.id,
+      },
+      attributes: ["id"],
+      transaction,
+    });
+    const validManagerIds = validManagers.map((m) => m.id);
 
-      const existingManagers = await ClientPoolManagers.findAll({
-        where: { client_pool_id: pool.id },
-        transaction,
+    if (validManagerIds.length !== manager_ids.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid managers provided",
       });
-      const existingManagerIds = existingManagers.map((m) => m.manager_id);
-      const newManagers = manager_ids.filter(
-        (id) => !existingManagerIds.includes(id)
-      );
-
-      if (newManagers.length) {
-        const managerData = newManagers.map((id) => ({
-          client_pool_id: pool.id,
-          manager_id: id,
-        }));
-        await ClientPoolManagers.bulkCreate(managerData, { transaction });
-      }
     }
 
+    await ClientPoolManagers.destroy({
+      where: {
+        client_pool_id: pool.id,
+        manager_id: { [Op.notIn]: validManagerIds },
+      },
+      transaction,
+    });
+
+    const existingManagers = await ClientPoolManagers.findAll({
+      where: { client_pool_id: pool.id },
+      transaction,
+    });
+    const existingManagerIds = existingManagers.map((m) => m.manager_id);
+
+    const newManagers = validManagerIds.filter(
+      (id) => !existingManagerIds.includes(id)
+    );
+
+    if (newManagers.length) {
+      const managerData = newManagers.map((id) => ({
+        client_pool_id: pool.id,
+        manager_id: id,
+      }));
+      await ClientPoolManagers.bulkCreate(managerData, { transaction });
+    }
+  }
+}
     await transaction.commit();
 
     const updatedPool = await ClientPool.findByPk(pool.id, {
@@ -250,6 +286,7 @@ export const updateClientPool = async (req, res) => {
     res.status(err.code).json(err.body);
   }
 };
+
 
 // Delete
 export const deleteClientPool = async (req, res) => {

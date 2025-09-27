@@ -50,7 +50,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       <div className="p-4">
         <nav className="flex flex-col space-y-2">
           {navLinks.map((link) => (
-            <NavLink to={link.to} className={linkClasses} key={link.label}>
+            <NavLink to={link.to} className={linkClasses} key={link.to}>
               <link.icon size={22} className="flex-shrink-0" />
               {isOpen && <span>{link.label}</span>}
             </NavLink>

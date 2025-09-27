@@ -19,7 +19,7 @@ import ClientsPage from "./pages/Clients/ClientList/ClientsPage";
 import ClientDetailPage from "./pages/Clients/ClientDetails/ClientDetailPage";
 import ClientPoolsPage from "./pages/ClientPools/ClientPoolsPage";
 import AddClientPoolPage from "./pages/ClientPools/ClientPoolForm";
-import ClientPoolDetailsPage from "./pages/ClientPools/ClientPoolDetaiPagel";
+import ClientPoolDetailsPage from "./pages/ClientPools/ClientPoolDetailPage";
 
 const App = () => (
   <AuthProvider>

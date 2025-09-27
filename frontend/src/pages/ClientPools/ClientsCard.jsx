@@ -7,7 +7,7 @@ const ClientsCard = ({
   setIsEditing,
   formState,
   handleMultiSelect,
-  setPool, // <-- pass this from parent
+  setPool,
 }) => {
   const handleSave = async () => {
     try {
@@ -16,7 +16,7 @@ const ClientsCard = ({
       });
 
       if (res.data.success) {
-        setPool(res.data.data); // update parent state
+        setPool(res.data.data);
         setIsEditing(false);
       }
     } catch (err) {
