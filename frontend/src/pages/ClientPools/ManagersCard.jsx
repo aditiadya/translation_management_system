@@ -1,8 +1,18 @@
 import { useState } from "react";
 import api from "../../utils/axiosInstance";
+import ConfirmModal from "../../components/Modals/ConfirmModal";
 
-const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, setFormState, setPool }) => {
+const ManagersCard = ({
+  pool,
+  allManagers,
+  isEditing,
+  setIsEditing,
+  formState,
+  setFormState,
+  setPool,
+}) => {
   const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleMultiSelect = (field, id) => {
     setFormState((prev) => {
@@ -17,39 +27,42 @@ const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, s
   };
 
   const handleSave = async () => {
-  setLoading(true);
-  try {
-    const payload = {
-      manager_ids: formState.manager_ids,
-    };
+    setLoading(true);
+    try {
+      const payload = {
+        manager_ids: formState.manager_ids,
+      };
 
-    const res = await api.put(`/client-pools/${pool.id}`, payload);
-    if (res.data.success) {
-      const updatedManagers = res.data.data.managers;
-      setFormState((prev) => ({
-        ...prev,
-        manager_ids: updatedManagers.map((m) => m.id),
-      }));
-      setPool((prev) => ({
-        ...prev,
-        managers: updatedManagers,
-      }));
-      setIsEditing(false);
+      const res = await api.put(`/client-pools/${pool.id}`, payload);
+      if (res.data.success) {
+        const updatedManagers = res.data.data.managers;
+        setFormState((prev) => ({
+          ...prev,
+          manager_ids: updatedManagers.map((m) => m.id),
+        }));
+        setPool((prev) => ({
+          ...prev,
+          managers: updatedManagers,
+        }));
+        setIsEditing(false);
+        setShowConfirm(false);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update managers");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error(error);
-    alert("Failed to update managers");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-6 flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <h3 className="text-xl font-semibold text-gray-800">Managers</h3>
-          <span className="text-sm text-gray-500">({pool.managers?.length || 0})</span>
+          <span className="text-sm text-gray-500">
+            ({pool.managers?.length || 0})
+          </span>
         </div>
 
         {!isEditing ? (
@@ -83,7 +96,9 @@ const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, s
                     key={m.id}
                     onClick={() => handleMultiSelect("manager_ids", m.id)}
                     className={`cursor-pointer border-b last:border-0 ${
-                      isChecked ? "bg-indigo-50 hover:bg-indigo-100" : "hover:bg-gray-50"
+                      isChecked
+                        ? "bg-indigo-50 hover:bg-indigo-100"
+                        : "hover:bg-gray-50"
                     }`}
                   >
                     <td className="p-2">
@@ -96,7 +111,8 @@ const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, s
                       />
                     </td>
                     <td className="p-2 font-medium text-gray-800">
-                      {`${m.first_name || ""} ${m.last_name || ""}`.trim() || `Manager #${m.id}`}
+                      {`${m.first_name || ""} ${m.last_name || ""}`.trim() ||
+                        `Manager #${m.id}`}
                     </td>
                     <td className="p-2 text-gray-600">{contact}</td>
                   </tr>
@@ -108,7 +124,10 @@ const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, s
           <ul className="divide-y">
             {pool.managers && pool.managers.length > 0 ? (
               pool.managers.map((manager) => (
-                <li key={manager.id} className="p-3 flex items-center gap-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                <li
+                  key={manager.id}
+                  className="p-3 flex items-center gap-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                >
                   <div className="flex-1">
                     <div className="font-medium text-gray-700">
                       {manager.first_name} {manager.last_name}
@@ -129,11 +148,11 @@ const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, s
       {isEditing && (
         <div className="flex gap-3 mt-4">
           <button
-            onClick={handleSave}
+            onClick={() => setShowConfirm(true)}
             disabled={loading}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
           >
-            {loading ? "Saving..." : "Save"}
+            Save
           </button>
           <button
             onClick={() => setIsEditing(false)}
@@ -142,6 +161,18 @@ const ManagersCard = ({ pool, allManagers, isEditing, setIsEditing, formState, s
             Cancel
           </button>
         </div>
+      )}
+
+      {showConfirm && (
+        <ConfirmModal
+          title="Confirm Update"
+          message="Are you sure you want to update and save the selected managers?"
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={handleSave}
+          confirmText={loading ? "Saving..." : "Save"}
+          confirmColor="bg-green-600"
+          confirmHoverColor="hover:bg-green-700"
+        />
       )}
     </div>
   );

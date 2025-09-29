@@ -1,4 +1,6 @@
+import { useState } from "react";
 import api from "../../utils/axiosInstance";
+import ConfirmModal from "../../components/Modals/ConfirmModal";
 
 const ClientsCard = ({
   pool,
@@ -9,6 +11,8 @@ const ClientsCard = ({
   handleMultiSelect,
   setPool,
 }) => {
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const handleSave = async () => {
     try {
       const res = await api.put(`/client-pools/${pool.id}`, {
@@ -18,6 +22,7 @@ const ClientsCard = ({
       if (res.data.success) {
         setPool(res.data.data);
         setIsEditing(false);
+        setShowConfirm(false);
       }
     } catch (err) {
       console.error("Failed to update clients:", err);
@@ -30,7 +35,9 @@ const ClientsCard = ({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <h3 className="text-xl font-semibold text-gray-800">Clients</h3>
-          <span className="text-sm text-gray-500">({pool.clients?.length || 0})</span>
+          <span className="text-sm text-gray-500">
+            ({pool.clients?.length || 0})
+          </span>
         </div>
 
         {!isEditing ? (
@@ -65,7 +72,9 @@ const ClientsCard = ({
                     key={c.id}
                     onClick={() => handleMultiSelect("client_ids", c.id)}
                     className={`cursor-pointer border-b last:border-0 ${
-                      isChecked ? "bg-indigo-50 hover:bg-indigo-100" : "hover:bg-gray-50"
+                      isChecked
+                        ? "bg-indigo-50 hover:bg-indigo-100"
+                        : "hover:bg-gray-50"
                     }`}
                   >
                     <td className="p-2">
@@ -80,7 +89,9 @@ const ClientsCard = ({
                     <td className="p-2 font-medium text-gray-800">
                       {c.company_name
                         ? c.company_name
-                        : `${c.primary_users?.first_name || ""} ${c.primary_users?.last_name || ""}`.trim()}
+                        : `${c.primary_users?.first_name || ""} ${
+                            c.primary_users?.last_name || ""
+                          }`.trim()}
                     </td>
                     <td className="p-2 text-gray-600">{c.type || "—"}</td>
                     <td className="p-2 text-gray-600">{c.status || "—"}</td>
@@ -92,17 +103,23 @@ const ClientsCard = ({
           </table>
         ) : (
           <ul className="divide-y">
-            {(pool.clients && pool.clients.length > 0) ? (
+            {pool.clients && pool.clients.length > 0 ? (
               pool.clients.map((client) => (
-                <li key={client.id} className="p-3 flex items-center gap-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                <li
+                  key={client.id}
+                  className="p-3 flex items-center gap-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                >
                   <div className="flex-1">
                     <div className="font-medium text-gray-700">
                       {client.company_name
                         ? client.company_name
-                        : `${client.primary_users?.first_name || ""} ${client.primary_users?.last_name || ""}`.trim()}
+                        : `${client.primary_users?.first_name || ""} ${
+                            client.primary_users?.last_name || ""
+                          }`.trim()}
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
-                      {client.type || "—"} • {client.status || "—"} • {client.country || "—"}
+                      {client.type || "—"} • {client.status || "—"} •{" "}
+                      {client.country || "—"}
                     </div>
                   </div>
                 </li>
@@ -118,7 +135,7 @@ const ClientsCard = ({
         <div className="flex gap-3 mt-4">
           <button
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
-            onClick={handleSave}
+            onClick={() => setShowConfirm(true)}
           >
             Save
           </button>
@@ -129,6 +146,18 @@ const ClientsCard = ({
             Cancel
           </button>
         </div>
+      )}
+
+      {showConfirm && (
+        <ConfirmModal
+          title="Confirm Update"
+          message="Are you sure you want to update and save the selected clients?"
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={handleSave}
+          confirmText="Save"
+          confirmColor="bg-green-600"
+          confirmHoverColor="hover:bg-green-700"
+        />
       )}
     </div>
   );

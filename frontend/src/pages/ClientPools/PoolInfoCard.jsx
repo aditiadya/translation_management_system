@@ -1,8 +1,10 @@
 import { useState } from "react";
-import api from "../../utils/axiosInstance"; // adjust path if needed
+import api from "../../utils/axiosInstance";
+import ConfirmModal from "../../components/Modals/ConfirmModal";
 
 const PoolInfoCard = ({ pool, isEditing, setIsEditing, infoForm, setInfoForm, setPool }) => {
   const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSaveInfo = async () => {
     setLoading(true);
@@ -15,9 +17,9 @@ const PoolInfoCard = ({ pool, isEditing, setIsEditing, infoForm, setInfoForm, se
       const res = await api.put(`/client-pools/${pool.id}`, payload);
 
       if (res.data.success) {
-        // Update parent pool state
         setPool(res.data.data);
         setIsEditing(false);
+        setShowConfirm(false);
       }
     } catch (error) {
       console.error(error);
@@ -86,7 +88,7 @@ const PoolInfoCard = ({ pool, isEditing, setIsEditing, infoForm, setInfoForm, se
           ) : (
             <div className="flex gap-3">
               <button
-                onClick={handleSaveInfo}
+                onClick={() => setShowConfirm(true)}
                 disabled={loading}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
               >
@@ -102,6 +104,19 @@ const PoolInfoCard = ({ pool, isEditing, setIsEditing, infoForm, setInfoForm, se
           )}
         </div>
       </div>
+
+      {/* ✅ Confirmation Modal */}
+      {showConfirm && (
+        <ConfirmModal
+          title="Confirm Update"
+          message="Are you sure you want to save the updated pool information?"
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={handleSaveInfo}
+          confirmText="Save"
+          confirmColor="bg-green-600"
+          confirmHoverColor="hover:bg-green-700"
+        />
+      )}
     </div>
   );
 };

@@ -165,111 +165,119 @@ export const updateClientPool = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     const body = pickAllowed(req.body, ALLOWED_FIELDS);
-    let client_ids = sanitizeIds(body.client_ids);
-    let manager_ids = sanitizeIds(body.manager_ids);
+    let client_ids = body.hasOwnProperty("client_ids")
+      ? sanitizeIds(body.client_ids)
+      : undefined;
+    let manager_ids = body.hasOwnProperty("manager_ids")
+      ? sanitizeIds(body.manager_ids)
+      : undefined;
 
     const pool = await ClientPool.findOne({
       where: { id: req.params.id, admin_id: req.user.id },
       transaction,
     });
-    if (!pool)
+    if (!pool) {
+      await transaction.rollback();
       return res
         .status(404)
         .json({ success: false, message: "Client pool not found" });
+    }
 
     if (body.name) pool.name = body.name;
     await pool.save({ transaction });
 
-    if (client_ids.length) {
-      const validClients = await ClientDetails.findAll({
-        where: {
-          id: client_ids,
-          admin_id: req.user.id,
-        },
-        attributes: ["id"],
-        transaction,
-      });
-      client_ids = validClients.map((c) => c.id);
+    // ---- Clients update ----
+    if (client_ids !== undefined) {
+      if (client_ids.length === 0) {
+        await ClientPoolClients.destroy({
+          where: { client_pool_id: pool.id },
+          transaction,
+        });
+      } else {
+        const validClients = await ClientDetails.findAll({
+          where: { id: client_ids, admin_id: req.user.id },
+          attributes: ["id"],
+          transaction,
+        });
+        client_ids = validClients.map((c) => c.id);
 
-      // remove others not in new list
-      await ClientPoolClients.destroy({
-        where: {
-          client_pool_id: pool.id,
-          client_id: { [Op.notIn]: client_ids },
-        },
-        transaction,
-      });
+        await ClientPoolClients.destroy({
+          where: {
+            client_pool_id: pool.id,
+            client_id: { [Op.notIn]: client_ids },
+          },
+          transaction,
+        });
 
-      const existingClients = await ClientPoolClients.findAll({
-        where: { client_pool_id: pool.id },
-        transaction,
-      });
-      const existingClientIds = existingClients.map((c) => c.client_id);
+        const existingClients = await ClientPoolClients.findAll({
+          where: { client_pool_id: pool.id },
+          transaction,
+        });
+        const existingClientIds = existingClients.map((c) => c.client_id);
 
-      const newClients = client_ids.filter(
-        (id) => !existingClientIds.includes(id)
-      );
-
-      if (newClients.length) {
-        const clientData = newClients.map((id) => ({
-          client_pool_id: pool.id,
-          client_id: id,
-        }));
-        await ClientPoolClients.bulkCreate(clientData, { transaction });
+        const newClients = client_ids.filter(
+          (id) => !existingClientIds.includes(id)
+        );
+        if (newClients.length) {
+          const clientData = newClients.map((id) => ({
+            client_pool_id: pool.id,
+            client_id: id,
+          }));
+          await ClientPoolClients.bulkCreate(clientData, { transaction });
+        }
       }
     }
 
-if (Array.isArray(manager_ids)) {
-  if (manager_ids.length === 0) {
-    await ClientPoolManagers.destroy({
-      where: { client_pool_id: pool.id },
-      transaction,
-    });
-  } else {
-    const validManagers = await ManagerDetails.findAll({
-      where: {
-        id: manager_ids,
-        admin_id: req.user.id,
-      },
-      attributes: ["id"],
-      transaction,
-    });
-    const validManagerIds = validManagers.map((m) => m.id);
+    // ---- Managers update ----
+    if (manager_ids !== undefined) {
+      if (manager_ids.length === 0) {
+        await ClientPoolManagers.destroy({
+          where: { client_pool_id: pool.id },
+          transaction,
+        });
+      } else {
+        const validManagers = await ManagerDetails.findAll({
+          where: { id: manager_ids, admin_id: req.user.id },
+          attributes: ["id"],
+          transaction,
+        });
+        const validManagerIds = validManagers.map((m) => m.id);
 
-    if (validManagerIds.length !== manager_ids.length) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid managers provided",
-      });
+        if (validManagerIds.length !== manager_ids.length) {
+          await transaction.rollback();
+          return res.status(400).json({
+            success: false,
+            message: "Invalid managers provided",
+          });
+        }
+
+        await ClientPoolManagers.destroy({
+          where: {
+            client_pool_id: pool.id,
+            manager_id: { [Op.notIn]: validManagerIds },
+          },
+          transaction,
+        });
+
+        const existingManagers = await ClientPoolManagers.findAll({
+          where: { client_pool_id: pool.id },
+          transaction,
+        });
+        const existingManagerIds = existingManagers.map((m) => m.manager_id);
+
+        const newManagers = validManagerIds.filter(
+          (id) => !existingManagerIds.includes(id)
+        );
+        if (newManagers.length) {
+          const managerData = newManagers.map((id) => ({
+            client_pool_id: pool.id,
+            manager_id: id,
+          }));
+          await ClientPoolManagers.bulkCreate(managerData, { transaction });
+        }
+      }
     }
 
-    await ClientPoolManagers.destroy({
-      where: {
-        client_pool_id: pool.id,
-        manager_id: { [Op.notIn]: validManagerIds },
-      },
-      transaction,
-    });
-
-    const existingManagers = await ClientPoolManagers.findAll({
-      where: { client_pool_id: pool.id },
-      transaction,
-    });
-    const existingManagerIds = existingManagers.map((m) => m.manager_id);
-
-    const newManagers = validManagerIds.filter(
-      (id) => !existingManagerIds.includes(id)
-    );
-
-    if (newManagers.length) {
-      const managerData = newManagers.map((id) => ({
-        client_pool_id: pool.id,
-        manager_id: id,
-      }));
-      await ClientPoolManagers.bulkCreate(managerData, { transaction });
-    }
-  }
-}
     await transaction.commit();
 
     const updatedPool = await ClientPool.findByPk(pool.id, {
@@ -286,7 +294,6 @@ if (Array.isArray(manager_ids)) {
     res.status(err.code).json(err.body);
   }
 };
-
 
 // Delete
 export const deleteClientPool = async (req, res) => {

@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../utils/axiosInstance";
 import { AuthContext } from "../../../context/AuthContext";
@@ -20,15 +20,13 @@ const staticTimezones = [
   "UTC−09:00",
 ];
 
-const clientPools = ["Pool A", "Pool B", "Pool C"];
-
 const CreateManagerForm = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     role_id: "",
-    client_pool: "",
+    client_pool_id: "",
     first_name: "",
     last_name: "",
     gender: "",
@@ -43,6 +41,23 @@ const CreateManagerForm = () => {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
+  const [clientPools, setClientPools] = useState([]); // dynamic pools
+
+  // Fetch client pools from backend
+  useEffect(() => {
+    const fetchClientPools = async () => {
+      try {
+        const res = await api.get("/client-pools", { withCredentials: true });
+        // Filter pools belonging to the current admin
+        const pools = res.data.data.filter((pool) => pool.admin_id === user.id);
+        setClientPools(pools);
+      } catch (err) {
+        console.error("Failed to fetch client pools:", err.response || err);
+      }
+    };
+
+    fetchClientPools();
+  }, [user.id]);
 
   const validate = () => {
     const currentErrors = {};
@@ -50,6 +65,8 @@ const CreateManagerForm = () => {
     if (!form.first_name) currentErrors.first_name = "First name is required.";
     if (!form.last_name) currentErrors.last_name = "Last name is required.";
     if (!form.email) currentErrors.email = "Email is required.";
+    if (!form.client_pool_id)
+      currentErrors.client_pool_id = "Client Pool is required.";
     setErrors(currentErrors);
     return Object.keys(currentErrors).length === 0;
   };
@@ -58,7 +75,9 @@ const CreateManagerForm = () => {
     const { name, value } = e.target;
     let errorMsg = "";
     if (
-      ["role_id", "first_name", "last_name", "email"].includes(name) &&
+      ["role_id", "first_name", "last_name", "email", "client_pool_id"].includes(
+        name
+      ) &&
       !value
     ) {
       errorMsg =
@@ -66,6 +85,8 @@ const CreateManagerForm = () => {
           ? "Role is required."
           : name === "email"
           ? "Email is required."
+          : name === "client_pool_id"
+          ? "Client Pool is required."
           : `${name.replace("_", " ")} is required.`;
     }
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
@@ -120,11 +141,16 @@ const CreateManagerForm = () => {
 
         <FormSelect
           label="Client Pool"
-          name="client_pool"
-          value={form.client_pool}
+          name="client_pool_id"
+          value={form.client_pool_id}
           onChange={handleChange}
-          options={clientPools}
-          error={errors.client_pool}
+          onBlur={handleBlur}
+          options={clientPools.map((pool) => ({
+            value: pool.id,
+            label: pool.name,
+          }))}
+          error={errors.client_pool_id}
+          required
         />
 
         <FormInput

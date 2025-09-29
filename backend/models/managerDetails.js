@@ -27,9 +27,14 @@ const ManagerDetails = sequelize.define(
       },
       onDelete: "CASCADE",
     },
-    client_pool: {
-      type: DataTypes.STRING,
+    client_pool_id: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "client_pools",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     first_name: {
       type: DataTypes.STRING,
@@ -69,7 +74,8 @@ const ManagerDetails = sequelize.define(
     timestamps: true,
     indexes: [
       { fields: ["admin_id"] },
-      { fields: ["auth_id"] }
+      { fields: ["auth_id"] },
+      { fields: ["client_pool_id"] },
     ],
   }
 );
@@ -88,10 +94,16 @@ ManagerDetails.associate = (models) => {
   });
 
   ManagerDetails.hasOne(models.UserRoles, {
-    foreignKey: "auth_id", 
+    foreignKey: "auth_id",
     sourceKey: "auth_id",
     as: "role",
     onDelete: "CASCADE",
+  });
+
+  ManagerDetails.belongsTo(models.ClientPool, {
+    foreignKey: "client_pool_id",
+    as: "client_pool",
+    onDelete: "SET NULL",
   });
 };
 
