@@ -41,14 +41,12 @@ const CreateManagerForm = () => {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
-  const [clientPools, setClientPools] = useState([]); // dynamic pools
+  const [clientPools, setClientPools] = useState([]);
 
-  // Fetch client pools from backend
   useEffect(() => {
     const fetchClientPools = async () => {
       try {
         const res = await api.get("/client-pools", { withCredentials: true });
-        // Filter pools belonging to the current admin
         const pools = res.data.data.filter((pool) => pool.admin_id === user.id);
         setClientPools(pools);
       } catch (err) {

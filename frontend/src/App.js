@@ -20,6 +20,13 @@ import ClientDetailPage from "./pages/Clients/ClientDetails/ClientDetailPage";
 import ClientPoolsPage from "./pages/ClientPools/ClientPoolsPage";
 import AddClientPoolPage from "./pages/ClientPools/ClientPoolForm";
 import ClientPoolDetailsPage from "./pages/ClientPools/ClientPoolDetailPage";
+import ServicesPage from "./pages/SystemValues/Services/ServicePage";
+import LanguagePairsPage from "./pages/SystemValues/LanguagePairs/LanguagePairsPage";
+import SpecializationPage from "./pages/SystemValues/Specialization/SpecializationPage";
+import UnitPage from "./pages/SystemValues/Units/UnitPage";
+import CurrencyPage from "./pages/SystemValues/Currency/CurrencyPage";
+import PaymentMethodPage from "./pages/SystemValues/PaymentMethods/PaymentMethodPage";
+import SystemValuesPage from "./pages/SystemValues/SystemValuesPage";
 
 const App = () => (
   <AuthProvider>
@@ -135,6 +142,62 @@ const App = () => (
             </ProtectedRoute>
           }
         />
+          <Route
+            path="system-values/services"
+            element={
+              <ProtectedRoute>
+                <ServicesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="system-values/language-pairs"
+            element={
+              <ProtectedRoute>
+                <LanguagePairsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="system-values/specializations"
+            element={
+              <ProtectedRoute>
+                <SpecializationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="system-values/units"
+            element={
+              <ProtectedRoute>
+                <UnitPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="system-values/currencies"
+            element={
+              <ProtectedRoute>
+                <CurrencyPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="system-values/payment-methods"
+            element={
+              <ProtectedRoute>
+                <PaymentMethodPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="system-values"
+            element={
+              <ProtectedRoute>
+                <SystemValuesPage />
+              </ProtectedRoute>
+            }
+          />
       </Routes>
     </Router>
   </AuthProvider>

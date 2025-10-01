@@ -1,11 +1,11 @@
 import crypto from "crypto";
 import db from "../../models/index.js";
-const { AdminAuth, ManagerDetails, UserRoles } = db;
+const { AdminAuth, ManagerDetails, UserRoles, ClientPool, ClientPoolManagers } =
+  db;
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
 const ALLOWED_FIELDS = [
   "role_id",
-  "client_pool",
   "first_name",
   "last_name",
   "gender",
@@ -15,6 +15,7 @@ const ALLOWED_FIELDS = [
   "zoom_id",
   "timezone",
   "can_login",
+  "client_pool_id",
 ];
 
 const toClientError = (error) => {
@@ -45,49 +46,82 @@ export const createManager = async (req, res) => {
   const adminId = req.user.id;
   const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
+  const transaction = await AdminAuth.sequelize.transaction();
+
   try {
     const activationToken = data.can_login
       ? crypto.randomBytes(32).toString("hex")
       : null;
 
-    const managerAuth = await AdminAuth.create({
-      email: data.email,
-      activation_token: activationToken,
-    });
+    const managerAuth = await AdminAuth.create(
+      {
+        email: data.email,
+        activation_token: activationToken,
+      },
+      { transaction }
+    );
 
     const optionalFields = [
-      "client_pool",
+      "client_pool_id",
       "gender",
       "phone",
       "teams_id",
       "zoom_id",
       "timezone",
     ];
-
     optionalFields.forEach((field) => {
       if (data[field] === "") {
         data[field] = null;
       }
     });
 
-    await ManagerDetails.create({
-      auth_id: managerAuth.id,
-      admin_id: adminId,
-      client_pool: data.client_pool,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      gender: data.gender,
-      phone: data.phone,
-      teams_id: data.teams_id,
-      zoom_id: data.zoom_id,
-      timezone: data.timezone,
-      can_login: data.can_login,
-    });
+    let clientPoolId = data.client_pool_id || null;
+    if (clientPoolId) {
+      const pool = await ClientPool.findOne({
+        where: { id: clientPoolId, admin_id: adminId },
+      });
 
-    await UserRoles.create({
-      auth_id: managerAuth.id,
-      role_id: data.role_id,
-    });
+      if (!pool) {
+        throw new Error("Client pool does not belong to this admin");
+      }
+    }
+
+    const manager = await ManagerDetails.create(
+      {
+        auth_id: managerAuth.id,
+        admin_id: adminId,
+        client_pool_id: clientPoolId,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        gender: data.gender,
+        phone: data.phone,
+        teams_id: data.teams_id,
+        zoom_id: data.zoom_id,
+        timezone: data.timezone,
+        can_login: data.can_login,
+      },
+      { transaction }
+    );
+
+    await UserRoles.create(
+      {
+        auth_id: managerAuth.id,
+        role_id: data.role_id,
+      },
+      { transaction }
+    );
+
+    if (clientPoolId) {
+      await ClientPoolManagers.create(
+        {
+          client_pool_id: clientPoolId,
+          manager_id: manager.id,
+        },
+        { transaction }
+      );
+    }
+
+    await transaction.commit();
 
     let activationLink = null;
     if (data.can_login) {
@@ -102,6 +136,7 @@ export const createManager = async (req, res) => {
       activationLink,
     });
   } catch (err) {
+    await transaction.rollback();
     console.error(err);
     const errorResponse = toClientError(err);
     return res.status(errorResponse.code).json(errorResponse.body);
@@ -115,58 +150,81 @@ export const updateManager = async (req, res) => {
   const data = pickAllowed(req.body, ALLOWED_FIELDS);
 
   try {
-    if (data.email) {
-      await AdminAuth.update(
-        { email: data.email },
-        {
-          where: {
-            id: (
-              await ManagerDetails.findOne({
-                where: { id: managerId, admin_id: adminId },
-              })
-            ).auth_id,
-          },
-        }
-      );
-    }
-
-    const [updated] = await ManagerDetails.update(data, {
-      where: { id: managerId, admin_id: adminId },
-    });
-
-    if (!updated)
-      return res
-        .status(404)
-        .json({ success: false, message: "No manager found." });
-
-    if (data.role_id) {
-      const managerAuth = await ManagerDetails.findOne({
+    const updatedManager = await AdminAuth.sequelize.transaction(async (transaction) => {
+      const manager = await ManagerDetails.findOne({
         where: { id: managerId, admin_id: adminId },
+        transaction,
       });
 
-      await UserRoles.update(
-        { role_id: data.role_id },
-        { where: { auth_id: managerAuth.auth_id } }
-      );
-    }
+      if (!manager) {
+        throw new Error("No manager found.");
+      }
 
-    const updatedManager = await ManagerDetails.findOne({
-      where: { id: managerId, admin_id: adminId },
-      include: [
-        { model: AdminAuth, as: "auth", attributes: ["email"] },
-        { model: UserRoles, as: "role", attributes: ["role_id"] },
-      ],
+      if (data.email) {
+        await AdminAuth.update(
+          { email: data.email },
+          { where: { id: manager.auth_id }, transaction }
+        );
+      }
+
+      if (data.role_id) {
+        await UserRoles.update(
+          { role_id: data.role_id },
+          { where: { auth_id: manager.auth_id }, transaction }
+        );
+      }
+
+      if (data.client_pool_id !== undefined) {
+        const newPoolId = data.client_pool_id || null;
+
+        if (newPoolId) {
+          const pool = await ClientPool.findOne({
+            where: { id: newPoolId, admin_id: adminId },
+            transaction,
+          });
+          if (!pool) throw new Error("Client pool does not belong to this admin");
+        }
+
+        await ManagerDetails.update(
+          { ...data, client_pool_id: newPoolId },
+          { where: { id: managerId, admin_id: adminId }, transaction }
+        );
+
+        await ClientPoolManagers.destroy({ where: { manager_id: managerId }, transaction });
+        if (newPoolId) {
+          await ClientPoolManagers.create(
+            { client_pool_id: newPoolId, manager_id: managerId },
+            { transaction }
+          );
+        }
+      } else {
+        await ManagerDetails.update(
+          data,
+          { where: { id: managerId, admin_id: adminId }, transaction }
+        );
+      }
+
+      return await ManagerDetails.findOne({
+        where: { id: managerId, admin_id: adminId },
+        include: [
+          { model: AdminAuth, as: "auth", attributes: ["email"] },
+          { model: UserRoles, as: "role", attributes: ["role_id"] },
+          { model: ClientPool, as: "client_pool", attributes: ["id", "name"] },
+        ],
+        transaction,
+      });
     });
 
     return res.status(200).json({ success: true, data: updatedManager });
   } catch (error) {
     console.error(error);
     const err = toClientError(error);
-    return res.status(err.code).json(err.body);
+    return res.status(err.code || 500).json(err.body || { success: false, message: error.message });
   }
 };
 
-// Get
+
+// Get manager by ID
 export const getManagerById = async (req, res) => {
   const managerId = req.params.id;
   const adminId = req.user.id;
@@ -178,6 +236,7 @@ export const getManagerById = async (req, res) => {
         { model: AdminAuth, as: "auth", attributes: ["email"] },
         { model: UserRoles, as: "role", attributes: ["role_id"] },
         { model: AdminAuth, as: "admin", attributes: ["id", "email"] },
+        { model: ClientPool, as: "client_pool", attributes: ["id", "name"] },
       ],
     });
 
@@ -204,6 +263,7 @@ export const getAllManagers = async (req, res) => {
       include: [
         { model: AdminAuth, as: "auth", attributes: ["email"] },
         { model: UserRoles, as: "role", attributes: ["role_id"] },
+        { model: ClientPool, as: "client_pool", attributes: ["id", "name"] },
       ],
       order: [["id", "ASC"]],
     });

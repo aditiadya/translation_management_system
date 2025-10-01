@@ -15,7 +15,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { to: "/profile", icon: FiUser, label: "My Profile" },
     { to: "/managers", icon: FiGrid, label: "Managers" },
     { to: "/clients", icon: FiSettings, label: "Clients" },
-    { to: "/client-pools", icon: FiUsers, label: "Clients" },
+    { to: "/client-pools", icon: FiUsers, label: "Client Pools" },
+    { to: "/system-values", icon: FiUsers, label: "System Values" },
   ];
 
   const linkClasses = ({ isActive }) =>

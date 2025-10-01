@@ -1,19 +1,17 @@
 import Joi from "joi";
 
 export const createManagerSchema = Joi.object({
-  role_id: Joi.number()
-    .integer()
-    .positive()
-    .required()
-    .messages({
-      "any.required": "Role ID is required",
-      "number.base": "Role ID must be a number",
-      "number.integer": "Role ID must be an integer",
-      "number.positive": "Role ID must be a positive number",
-    }),
+  role_id: Joi.number().integer().positive().required().messages({
+    "any.required": "Role ID is required",
+    "number.base": "Role ID must be a number",
+    "number.integer": "Role ID must be an integer",
+    "number.positive": "Role ID must be a positive number",
+  }),
 
-  client_pool: Joi.string().trim().optional().allow(null, "").messages({
-    "string.base": "Client pool must be a string",
+  client_pool_id: Joi.number().integer().positive().optional().allow(null).messages({
+    "number.base": "Client Pool ID must be a number",
+    "number.integer": "Client Pool ID must be an integer",
+    "number.positive": "Client Pool ID must be a positive number",
   }),
 
   first_name: Joi.string().trim().required().messages({
@@ -64,8 +62,10 @@ export const updateManagerSchema = Joi.object({
     "number.positive": "Role ID must be a positive number",
   }),
 
-  client_pool: Joi.string().trim().optional().allow(null, "").messages({
-    "string.base": "Client pool must be a string",
+  client_pool_id: Joi.number().integer().positive().optional().allow(null).messages({
+    "number.base": "Client Pool ID must be a number",
+    "number.integer": "Client Pool ID must be an integer",
+    "number.positive": "Client Pool ID must be a positive number",
   }),
 
   first_name: Joi.string().trim().optional().messages({
