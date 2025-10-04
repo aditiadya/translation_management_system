@@ -18,19 +18,11 @@ const AdminPaymentMethod = sequelize.define(
       },
       onDelete: "CASCADE",
     },
-    name: {
-      type: DataTypes.STRING(100),
+    payment_method: {
+      type: DataTypes.ENUM("bank_transfer", "paypal", "payoneer", "skrill", "other"),
       allowNull: false,
     },
-    payment_type: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    bank_info: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    description: {
+    note: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
@@ -44,24 +36,32 @@ const AdminPaymentMethod = sequelize.define(
     tableName: "admin_payment_methods",
     timestamps: true,
     indexes: [
-      {
-        fields: ["admin_id"],
-      },
-      {
-        unique: true,
-        fields: ["admin_id", "name"],
-      },
+      { fields: ["admin_id"] },
+      { unique: true, fields: ["admin_id", "payment_method"] },
     ],
   }
 );
 
 AdminPaymentMethod.associate = (models) => {
-  if (models.AdminAuth) {
-    AdminPaymentMethod.belongsTo(models.AdminAuth, {
-      foreignKey: "admin_id",
-      as: "admin",
-    });
-  }
+  AdminPaymentMethod.belongsTo(models.AdminAuth, {
+    foreignKey: "admin_id",
+    as: "admin",
+  });
+
+  AdminPaymentMethod.hasOne(models.BankTransferDetail, {
+    foreignKey: "payment_method_id",
+    as: "bank_transfer_detail",
+  });
+
+  AdminPaymentMethod.hasOne(models.EmailPaymentDetail, {
+    foreignKey: "payment_method_id",
+    as: "email_payment_detail",
+  });
+
+  AdminPaymentMethod.hasOne(models.OtherPaymentDetail, {
+    foreignKey: "payment_method_id",
+    as: "other_payment_detail",
+  });
 };
 
 export default AdminPaymentMethod;
