@@ -4,9 +4,9 @@ const FormTextarea = ({
   value,
   onChange,
   onBlur,
+  rows,
   error,
   required = false,
-  rows = 4,
 }) => (
   <div>
     <label className="block text-gray-700 font-bold mb-1">
@@ -17,7 +17,7 @@ const FormTextarea = ({
       value={value}
       onChange={onChange}
       onBlur={onBlur}
-      rows={1}
+      rows={rows}
       className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none ${
         error ? "border-red-500" : "border-gray-300"
       } focus:shadow-outline resize`}

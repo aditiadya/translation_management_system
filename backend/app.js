@@ -37,7 +37,7 @@ app.use('/api/admin-language-pairs', adminLanguageRoutes);
 app.use("/api/admin-specializations", adminSpecializationRoutes);
 app.use("/api/admin-units", adminUnitsRoutes);
 app.use("/api/admin-currencies", adminCurrencyRoutes);
-app.use("/api/admin/payment-methods", adminPaymentMethodRoutes);
+app.use("/api/admin-payment-methods", adminPaymentMethodRoutes);
 app.use("/api/languages", languageRoutes);
 app.use("/api/currencies", currencyRoutes);
 app.use("/api/admin", authRoutes);

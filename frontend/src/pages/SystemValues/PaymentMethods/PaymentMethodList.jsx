@@ -1,21 +1,80 @@
-import React from "react";
+import dayjs from "dayjs";
 
 const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
+  const renderBankInfo = (method) => {
+    if (method.payment_method !== "bank_transfer") return "N/A";
+
+    const bankDetails = method.bank_transfer_detail || method.details || {};
+
+    const fields = [
+      { label: "Bank Name", value: bankDetails.bank_name },
+      { label: "Bank Address", value: bankDetails.bank_address },
+      { label: "SWIFT", value: bankDetails.swift },
+      { label: "Beneficiary Name", value: bankDetails.beneficiary_name },
+      { label: "Beneficiary Address", value: bankDetails.beneficiary_address },
+      { label: "Account Number", value: bankDetails.account_number },
+      { label: "IFSC Code", value: bankDetails.ifsc_code },
+      { label: "IBAN", value: bankDetails.iban },
+      { label: "Sort Code", value: bankDetails.sort_code },
+      { label: "Country", value: bankDetails.country },
+      { label: "State / Region", value: bankDetails.state_region },
+      { label: "City", value: bankDetails.city },
+      { label: "Postal Code", value: bankDetails.postal_code },
+    ];
+
+    const filtered = fields.filter((f) => f.value && f.value.trim() !== "");
+
+    return filtered.length > 0 ? (
+      <div className="text-sm text-gray-700 space-y-1 max-h-48 overflow-y-auto pr-1">
+        {filtered.map((f, i) => (
+          <div key={i}>
+            <span className="font-medium">{f.label}:</span> {f.value}
+          </div>
+        ))}
+      </div>
+    ) : (
+      "N/A"
+    );
+  };
+
+  const renderPaymentMethodName = (method) => {
+    const type = method.payment_method;
+    if (type === "bank_transfer")
+      return method.bank_transfer_detail?.payment_method_name || "N/A";
+    if (["paypal", "payoneer", "skrill"].includes(type))
+      return (
+        method[`${type}_detail`]?.email ||
+        method.email_payment_detail?.email ||
+        "N/A"
+      );
+    if (type === "other")
+      return method.other_payment_detail?.payment_method_name || "N/A";
+    return "N/A";
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    return dayjs(dateString).format("YYYY-MM-DD HH:mm");
+  };
+
   return (
     <div className="overflow-x-auto shadow rounded-lg bg-white mt-6">
-      <table className="min-w-full leading-normal">
+      <table className="min-w-full leading-normal border-collapse">
         <thead>
           <tr className="bg-gray-100 text-black uppercase text-sm">
-            <th className="py-3 px-6 text-left">Name</th>
-            <th className="py-3 px-6 text-left">Payment Type</th>
-            <th className="py-3 px-6 text-left">Status</th>
-            <th className="py-3 px-6 text-left">Actions</th>
+            <th className="py-3 px-4 text-left w-1/6">Payment Method Type</th>
+            <th className="py-3 px-4 text-left w-1/6">Payment Method Name</th>
+            <th className="py-3 px-4 text-left w-1/3">Bank Info</th>
+            <th className="py-3 px-4 text-left w-1/4">Note</th>
+            <th className="py-3 px-4 text-left w-1/12">Is Enabled</th>
+            <th className="py-3 px-4 text-left w-1/6">Created At</th>
+            <th className="py-3 px-4 text-left w-1/12">Actions</th>
           </tr>
         </thead>
         <tbody>
           {methods.length === 0 ? (
             <tr>
-              <td colSpan={4} className="text-center py-4 text-gray-500">
+              <td colSpan={7} className="text-center py-4 text-gray-500">
                 No payment methods added yet.
               </td>
             </tr>
@@ -23,26 +82,52 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
             methods.map((method, index) => (
               <tr
                 key={method.id}
-                className={
-                  index % 2 === 0
-                    ? "bg-gray-50 hover:bg-gray-100"
-                    : "hover:bg-gray-100"
-                }
+                className={`${
+                  index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                } hover:bg-gray-100`}
               >
-                <td className="py-4 px-6">{method.name}</td>
-                <td className="py-4 px-6">{method.payment_type}</td>
-                <td className="py-4 px-6">
+                {/* Payment Method Type */}
+                <td className="py-4 px-4 capitalize">
+                  {method.payment_method.replace("_", " ")}
+                </td>
+
+                {/* Payment Method Name */}
+                <td className="py-4 px-4 font-medium text-gray-800">
+                  {renderPaymentMethodName(method)}
+                </td>
+
+                {/* Bank Info */}
+                <td className="py-4 px-4 align-top">
+                  {renderBankInfo(method)}
+                </td>
+
+                {/* Note */}
+                <td className="py-4 px-4">
+                  <div className="text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto pr-1">
+                    {method.note || "-"}
+                  </div>
+                </td>
+
+                {/* Is Enabled */}
+                <td className="py-4 px-4">
                   <span
                     className={`px-3 py-1 inline-block text-sm rounded-full ${
-                      method.active
+                      method.active_flag
                         ? "bg-green-100 text-green-800"
                         : "bg-gray-200 text-gray-700"
                     }`}
                   >
-                    {method.active ? "Active" : "Inactive"}
+                    {method.active_flag ? "Yes" : "No"}
                   </span>
                 </td>
-                <td className="py-4 px-6 space-x-2">
+
+                {/* Created At */}
+                <td className="py-4 px-4 text-gray-600">
+                  {formatDate(method.createdAt)}
+                </td>
+
+                {/* Actions */}
+                <td className="py-4 px-4 space-x-2 text-nowrap">
                   <button
                     onClick={() => onEdit(method)}
                     className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
