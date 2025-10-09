@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
-import ClientView from "./GeneralInfo/ClientView";
+import VendorView from "./GeneralInfo/VendorView";
 import GeneralInfoEditForm from "./GeneralInfo/GeneralInfoEditForm";
 import PrimaryUserEditForm from "./GeneralInfo/PrimaryUserEditForm";
 import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
@@ -11,19 +11,21 @@ import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
 const tabs = [
   "General Info",
   "Contact Persons",
-  "Client Pools",
-  "CRM",
+  "Payment Methods",
+  "Services",
+  "Language Pairs",
+  "Specializations",
   "Price List",
   "Taxes",
   "Documents",
-  "Project Charts",
+  "Availability Charts",
 ];
 
-const ClientDetailPage = () => {
+const VendorDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [client, setClient] = useState(null);
+  const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -31,46 +33,46 @@ const ClientDetailPage = () => {
   const [activeTab, setActiveTab] = useState("General Info");
 
   useEffect(() => {
-    const fetchClient = async () => {
+    const fetchVendor = async () => {
       try {
-        const response = await api.get(`/clients/${id}`, {
+        const response = await api.get(`/vendors/${id}`, {
           withCredentials: true,
         });
-        setClient(response.data.data);
+        setVendor(response.data.data);
       } catch (err) {
         console.error(err);
-        setError("Failed to fetch client details");
+        setError("Failed to fetch vendor details");
       } finally {
         setLoading(false);
       }
     };
-    fetchClient();
+    fetchVendor();
   }, [id]);
 
   const handleSave = async (updatedData) => {
   try {
-    const response = await api.put(`/clients/${id}`, updatedData, {
+    const response = await api.put(`/vendors/${id}`, updatedData, {
       withCredentials: true,
     });
-    setClient(response.data.data);
+    setVendor(response.data.data);
     setEditingSection(null);
   } catch (err) {
     console.error("Update failed", err);
-    alert("Failed to update client");
+    alert("Failed to update vendor");
   }
 };
 
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this client?")) return;
+    if (!window.confirm("Are you sure you want to delete this vendor?")) return;
 
     try {
-      await api.delete(`/clients/${id}`, { withCredentials: true });
-      alert("Client deleted successfully");
-      navigate("/clients");
+      await api.delete(`/vendors/${id}`, { withCredentials: true });
+      alert("Vendor deleted successfully");
+      navigate("/vendors");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete client");
+      alert("Failed to delete vendor");
     }
   };
 
@@ -113,8 +115,8 @@ const ClientDetailPage = () => {
         {activeTab === "General Info" && (
   <>
     {!editingSection ? (
-      <ClientView
-        client={client}
+      <VendorView
+        vendor={vendor}
         onEditGeneral={() => setEditingSection("general")}
         onEditPrimary={() => setEditingSection("primary")}
         onEditSettings={() => setEditingSection("settings")}
@@ -122,19 +124,19 @@ const ClientDetailPage = () => {
       />
     ) : editingSection === "general" ? (
       <GeneralInfoEditForm
-        client={client}
+        vendor={vendor}
         onSave={handleSave}
         onCancel={() => setEditingSection(null)}
       />
     ) : editingSection === "primary" ? (
       <PrimaryUserEditForm
-        client={client}
+        vendor={vendor}
         onSave={handleSave}
         onCancel={() => setEditingSection(null)}
       />
     ) : editingSection === "settings" ? (
       <SettingsEditForm
-        client={client}
+        vendor={vendor}
         onSave={(updated) => {
           console.log("Save settings info", updated);
           setEditingSection(null);
@@ -148,25 +150,42 @@ const ClientDetailPage = () => {
         {activeTab === "Contact Persons" && (
           <div className="p-4 bg-white rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">Contact Persons</h2>
-            {/* Placeholder – you’ll define this later */}
             <p className="text-gray-500">
               Contact person details will go here.
             </p>
           </div>
         )}
 
-        {activeTab === "Client Pools" && (
+        {activeTab === "Payment Methods" && (
           <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Client Pools</h2>
-            <p className="text-gray-500">Client pool details will go here.</p>
+            <h2 className="text-lg font-semibold mb-4">Payment Methods</h2>
+            <p className="text-gray-500">Payment methods details will go here.</p>
           </div>
         )}
 
-        {activeTab === "CRM" && (
+        {activeTab === "Services" && (
           <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">CRM</h2>
+            <h2 className="text-lg font-semibold mb-4">Services</h2>
             <p className="text-gray-500">
-              CRM integration details will go here.
+              Service details will go here.
+            </p>
+          </div>
+        )}
+
+        {activeTab === "Language Pairs" && (
+          <div className="p-4 bg-white rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4">Language Pairs</h2>
+            <p className="text-gray-500">
+              Language Pair details will go here.
+            </p>
+          </div>
+        )}
+
+        {activeTab === "Specializations" && (
+          <div className="p-4 bg-white rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4">Specializations</h2>
+            <p className="text-gray-500">
+              Specialization details will go here.
             </p>
           </div>
         )}
@@ -192,10 +211,10 @@ const ClientDetailPage = () => {
           </div>
         )}
 
-        {activeTab === "Project Charts" && (
+        {activeTab === "Availability Charts" && (
           <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Project Charts</h2>
-            <p className="text-gray-500">Charts and reports will go here.</p>
+            <h2 className="text-lg font-semibold mb-4">Availability Charts</h2>
+            <p className="text-gray-500">Availability Charts will go here.</p>
           </div>
         )}
       </main>
@@ -203,4 +222,4 @@ const ClientDetailPage = () => {
   );
 };
 
-export default ClientDetailPage;
+export default VendorDetailPage;

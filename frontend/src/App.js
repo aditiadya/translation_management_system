@@ -27,6 +27,10 @@ import UnitPage from "./pages/SystemValues/Units/UnitPage";
 import CurrencyPage from "./pages/SystemValues/Currency/CurrencyPage";
 import PaymentMethodPage from "./pages/SystemValues/PaymentMethods/PaymentMethodPage";
 import SystemValuesPage from "./pages/SystemValues/SystemValuesPage";
+import CreateVendorPage from "./pages/Vendors/CreateVendor/CreateVendorPage";
+import VendorsPage from "./pages/Vendors/VendorList/VendorsPage";
+import VendorDetailPage from "./pages/Vendors/VendorDetails/VendorDetailPage";
+
 
 const App = () => (
   <AuthProvider>
@@ -195,6 +199,30 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <SystemValuesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="vendors/create-vendor"
+            element={
+              <ProtectedRoute>
+                <CreateVendorPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendors"
+            element={
+              <ProtectedRoute>
+                <VendorsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendors/:id"
+            element={
+              <ProtectedRoute>
+                <VendorDetailPage />
               </ProtectedRoute>
             }
           />

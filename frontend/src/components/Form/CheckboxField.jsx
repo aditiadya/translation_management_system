@@ -1,4 +1,4 @@
-const CheckboxField = ({ label, name, checked, onChange }) => (
+const CheckboxField = ({ label, name, checked, onChange, hint = "If checked, the system will send an invitation email." }) => (
   <div>
     <label className="flex items-center">
       <input
@@ -10,9 +10,7 @@ const CheckboxField = ({ label, name, checked, onChange }) => (
       />
       {label}
     </label>
-    <p className="text-gray-500 text-sm mt-1">
-      If checked, the system will send an invitation email.
-    </p>
+    {hint && <p className="text-gray-500 text-sm mt-1">{hint}</p>}
   </div>
 );
 

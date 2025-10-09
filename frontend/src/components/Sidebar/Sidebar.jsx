@@ -17,6 +17,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { to: "/clients", icon: FiSettings, label: "Clients" },
     { to: "/client-pools", icon: FiUsers, label: "Client Pools" },
     { to: "/system-values", icon: FiUsers, label: "System Values" },
+    { to: "/vendors", icon: FiUsers, label: "Vendors" },
   ];
 
   const linkClasses = ({ isActive }) =>

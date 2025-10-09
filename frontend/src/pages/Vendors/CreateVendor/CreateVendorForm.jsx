@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import api from "../../../utils/axiosInstance";
 import FormInput from "../../../components/Form/FormInput";
 import FormSelect from "../../../components/Form/FormSelect";
-import CheckboxField from "../../../components/Form/CheckboxField";
 import FormTextarea from "../../../components/Form/TextArea";
+import CheckboxField from "../../../components/Form/CheckboxField";
 import Button from "../../../components/Button/Button";
 
 const staticTimezones = ["UTC−12:00", "UTC−11:00", "UTC−10:00", "UTC−09:00"];
-const clientTypes = ["Company", "Individual"];
-const statuses = ["Active", "Inactive", "Pending"];
+const vendorTypes = ["Company", "Freelance", "In-House"];
 const genders = ["Male", "Female", "Other"];
 const legalEntities = [
   "Private Limited",
@@ -25,15 +24,13 @@ const countries = [
   "Australia",
 ];
 
-const CreateClientForm = () => {
+const CreateVendorForm = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    // ClientDetails
     type: "",
     company_name: "",
     legal_entity: "",
-    status: "",
     country: "",
     state_region: "",
     city: "",
@@ -44,11 +41,12 @@ const CreateClientForm = () => {
     website: "",
     note: "",
     can_login: false,
-    email: "",
-
-    // ClientPrimaryUserDetails
+    assignable_to_jobs: false,
+    finances_visible: false,
+    
     first_name: "",
     last_name: "",
+    email: "",
     timezone: "",
     phone: "",
     zoom_id: "",
@@ -100,17 +98,17 @@ const CreateClientForm = () => {
     if (!validate()) return;
 
     try {
-      const response = await api.post("/clients", form, {
+      const response = await api.post("/vendors", form, {
         withCredentials: true,
       });
       setSuccess(response.data.message);
-      navigate("/clients");
+      navigate("/vendors");
       setServerError("");
     } catch (err) {
       console.error(err.response?.data || err);
       setServerError(
         err.response?.data?.message ||
-          "Something went wrong while creating client."
+          "Something went wrong while creating vendor."
       );
       setSuccess("");
     }
@@ -120,16 +118,16 @@ const CreateClientForm = () => {
     <form onSubmit={handleSubmit} noValidate className="space-y-8">
       {/* Company Info */}
       <h3 className="text-lg font-semibold text-gray-700">
-        Client Details
+        Vendor Details
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
         <FormSelect
-          label="Client Type"
+          label="Vendor Type"
           name="type"
           value={form.type}
           onChange={handleChange}
           onBlur={handleBlur}
-          options={clientTypes}
+          options={vendorTypes}
           error={errors.type}
           required
         />
@@ -155,16 +153,6 @@ const CreateClientForm = () => {
           onChange={handleChange}
           options={legalEntities}
           error={errors.legal_entity}
-          required
-        />
-
-        <FormSelect
-          label="Status"
-          name="status"
-          value={form.status}
-          onChange={handleChange}
-          options={statuses}
-          error={errors.status}
           required
         />
 
@@ -230,6 +218,22 @@ const CreateClientForm = () => {
           rows={3}
           error={errors.note}
           required={false}
+        />
+
+        <CheckboxField
+          label="Assignable to jobs"
+          name="assignable_to_jobs"
+          checked={form.assignable_to_jobs}
+          onChange={handleChange}
+          hint="If checked, the vendor can be assigned to a job regardless of whether Can log in is set or not."
+        />
+        <div></div>
+        <CheckboxField
+          label="Finances visisble"
+          name="finances_visible"
+          checked={form.finances_visible}
+          onChange={handleChange}
+          hint="If checked, the vendor has access to their own payables, invoices and payments."
         />
       </div>
 
@@ -337,10 +341,10 @@ const CreateClientForm = () => {
       )}
 
       <div className="flex justify-center">
-        <Button type="submit">Create Client</Button>
+        <Button type="submit">Create Vendor</Button>
       </div>
     </form>
   );
 };
 
-export default CreateClientForm;
+export default CreateVendorForm;

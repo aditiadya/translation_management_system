@@ -4,27 +4,27 @@ import Navbar from "../../../components/Navbar/Navbar";
 import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
 
-const ClientsPage = () => {
+const VendorsPage = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [clients, setClients] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchClients = async () => {
+    const fetchVendors = async () => {
       try {
-        const response = await api.get("/clients", { withCredentials: true });
-        setClients(response.data.data);
+        const response = await api.get("/vendors", { withCredentials: true });
+        setVendors(response.data.data);
       } catch (err) {
         console.error(err);
-        setError("Failed to fetch clients");
+        setError("Failed to fetch vendors");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClients();
+    fetchVendors();
   }, []);
 
   return (
@@ -38,24 +38,24 @@ const ClientsPage = () => {
         }`}
       >
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Clients</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Vendors</h1>
           <div>
             <button
-            onClick={() => navigate("/clients/create-client")}
+            onClick={() => navigate("/vendors/create-vendor")}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
           >
-            New Client
+            New Vendor
           </button>
 
           <button
-            onClick={() => navigate("/clients")}
+            onClick={() => navigate("/vendors")}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
           >
             Import from Excel
           </button>
 
           <button
-            onClick={() => navigate("/clients")}
+            onClick={() => navigate("/vendors")}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
           >
             Export to Excel
@@ -72,60 +72,67 @@ const ClientsPage = () => {
             <table className="min-w-full leading-normal">
               <thead>
                 <tr className="bg-white text-black uppercase text-sm">
+                  <th className="py-3 px-6 text-left">Name</th>
                   <th className="py-3 px-6 text-left">Type</th>
-                  <th className="py-3 px-6 text-left">Company Name</th>
+                  <th className="py-3 px-6 text-left">Services</th>
+                  <th className="py-3 px-6 text-left">Language Pairs</th>
+                  <th className="py-3 px-6 text-left">Specializations</th>
                   <th className="py-3 px-6 text-left">Primary User</th>
                   <th className="py-3 px-6 text-left">Country</th>
-                  <th className="py-3 px-6 text-left">Email</th>
                   <th className="py-3 px-6 text-left">Assignable</th>
+                  <th className="py-3 px-6 text-left">Tags</th>
                   <th className="py-3 px-6 text-left">Created At</th>
+                  <th className="py-3 px-6 text-left">Invited At</th>
+                  <th className="py-3 px-6 text-left">Registered At</th>
+                  <th className="py-3 px-6 text-left">Last Activity At</th>
                 </tr>
               </thead>
 
               <tbody>
-                {clients.map((client, index) => {
-                  const primaryUser = client.primary_users || {};
+                {vendors.map((vendor, index) => {
+                  const primaryUser = vendor.primary_users || {};
                   return (
                     <tr
-                      key={client.id}
+                      key={vendor.id}
                       className={
                         index % 2 === 0
                           ? "bg-gray-50 hover:bg-gray-100"
                           : "hover:bg-gray-100"
                       }
                     >
+                      
                       <td className="py-4 px-6 text-gray-700">
-                        {client.type || "—"}
+                        {vendor.company_name || "—"}
                       </td>
                       <td className="py-4 px-6 text-gray-700">
-                        {client.company_name || "—"}
+                        {vendor.type || "—"}
                       </td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
                       <td className="py-4 px-6 text-blue-600 underline hover:text-indigo-600 whitespace-nowrap">
-                        <Link to={`/clients/${client.id}`}>
+                        <Link to={`/vendors/${vendor.id}`}>
                           {primaryUser.first_name || ""}{" "}
                           {primaryUser.last_name || ""}
                         </Link>
                       </td>
 
                       <td className="py-4 px-6 text-gray-700">
-                        {client.country || "—"}
+                        {vendor.country || "—"}
                       </td>
-                      <td className="py-4 px-6 text-blue-600">
-                        <a
-                          href={`mailto:${client.auth?.email}`}
-                          className="underline hover:text-indigo-600"
-                        >
-                          {client.auth?.email || "—"}
-                        </a>
-                      </td>
+                      
                       <td className="py-4 px-6 text-gray-700">
-                        {client.assignable ? "Yes" : "No"}
+                        {vendor.assignable_to_jobs ? "Yes" : "No"}
                       </td>
+                      <td></td>
                       <td className="py-4 px-6 text-gray-500">
-                        {client.createdAt
-                          ? new Date(client.createdAt).toLocaleDateString()
+                        {vendor.createdAt
+                          ? new Date(vendor.createdAt).toLocaleDateString()
                           : "—"}
                       </td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
                     </tr>
                   );
                 })}
@@ -138,4 +145,4 @@ const ClientsPage = () => {
   );
 };
 
-export default ClientsPage;
+export default VendorsPage;
