@@ -93,7 +93,6 @@ const VendorDetails = sequelize.define(
   {
     tableName: "vendor_details",
     timestamps: true,
-    indexes: [{ fields: ["email"] }],
   }
 );
 
@@ -112,7 +111,7 @@ VendorDetails.associate = (models) => {
 
   VendorDetails.hasOne(models.VendorPrimaryUserDetails, {
     foreignKey: "vendor_id",
-    as: "primary_user",
+    as: "primary_users",
     onDelete: "CASCADE",
   });
 };

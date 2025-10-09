@@ -1,13 +1,13 @@
 import crypto from "crypto";
 import db from "../../models/index.js";
-const { AdminAuth, ClientDetails, ClientPrimaryUserDetails } = db;
+const { AdminAuth, VendorDetails, VendorPrimaryUserDetails } = db;
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const CLIENT_ALLOWED_FIELDS = [
+const VENDOR_ALLOWED_FIELDS = [
+  "email",
   "type",
   "company_name",
   "legal_entity",
-  "status",
   "country",
   "state_region",
   "city",
@@ -19,7 +19,6 @@ const CLIENT_ALLOWED_FIELDS = [
   "note",
   "first_name",
   "last_name",
-  "email",
   "timezone",
   "phone",
   "zoom_id",
@@ -27,6 +26,8 @@ const CLIENT_ALLOWED_FIELDS = [
   "gender",
   "nationality",
   "can_login",
+  "assignable_to_jobs",
+  "finances_visible",
 ];
 
 const toClientError = (error) => {
@@ -53,27 +54,30 @@ const toClientError = (error) => {
 };
 
 // Add
-export const createClient = async (req, res) => {
+export const createVendor = async (req, res) => {
   const adminId = req.user.id;
-  const data = pickAllowed(req.body, CLIENT_ALLOWED_FIELDS);
+  const data = pickAllowed(req.body, VENDOR_ALLOWED_FIELDS);
 
   try {
     const activationToken = data.can_login
       ? crypto.randomBytes(32).toString("hex")
       : null;
 
-    const clientAuth = await AdminAuth.create({
+    console.log("REQ.BODY:", req.body);
+    console.log("DATA AFTER pickAllowed:", data);
+    console.log("EMAIL PASSED TO ADMINAUTH:", data.email);
+
+    const vendorAuth = await AdminAuth.create({
       email: data.email,
       activation_token: activationToken,
     });
 
-    const clientDetails = await ClientDetails.create({
-      auth_id: clientAuth.id,
+    const vendorDetails = await VendorDetails.create({
+      auth_id: vendorAuth.id,
       admin_id: adminId,
       type: data.type,
       company_name: data.company_name,
       legal_entity: data.legal_entity,
-      status: data.status,
       country: data.country,
       state_region: data.state_region,
       city: data.city,
@@ -84,10 +88,12 @@ export const createClient = async (req, res) => {
       website: data.website,
       note: data.note,
       can_login: data.can_login,
+      assignable_to_jobs: data.assignable_to_jobs,
+      finances_visible: data.finances_visible,
     });
 
-    await ClientPrimaryUserDetails.create({
-      client_id: clientDetails.id,
+    await VendorPrimaryUserDetails.create({
+      vendor_id: vendorDetails.id,
       first_name: data.first_name,
       last_name: data.last_name,
       timezone: data.timezone,
@@ -96,7 +102,6 @@ export const createClient = async (req, res) => {
       teams_id: data.teams_id,
       gender: data.gender,
       nationality: data.nationality,
-      can_login: data.can_login,
     });
 
     let activationLink = null;
@@ -108,7 +113,7 @@ export const createClient = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Client created successfully",
+      message: "Vendor created successfully",
       activationLink,
     });
   } catch (err) {
@@ -119,42 +124,34 @@ export const createClient = async (req, res) => {
 };
 
 // Update
-export const updateClient = async (req, res) => {
-  const clientId = req.params.id;
+export const updateVendor = async (req, res) => {
+  const vendorId = req.params.id;
   const adminId = req.user.id;
 
-  console.log("Request body:", req.body);
-
   try {
-    const client = await ClientDetails.findOne({
-      where: { id: clientId, admin_id: adminId },
+    const vendor = await VendorDetails.findOne({
+      where: { id: vendorId, admin_id: adminId },
     });
 
-    console.log("Fetched client:", client?.dataValues);
-
-    if (!client) {
-      console.log("Client not found!");
+    if (!vendor) {
       return res
         .status(404)
-        .json({ success: false, message: "Client not found." });
+        .json({ success: false, message: "Vendor not found." });
     }
 
     if (req.body.email) {
-      const auth = await AdminAuth.findByPk(client.auth_id);
-      console.log("Fetched auth record before update:", auth?.dataValues);
+      const auth = await AdminAuth.findByPk(vendor.auth_id);
 
       if (auth) {
         auth.email = req.body.email;
         await auth.save();
-        console.log("Updated auth record:", auth.dataValues);
       }
     }
 
-    const clientFields = [
+    const vendorFields = [
       "type",
       "company_name",
       "legal_entity",
-      "status",
       "country",
       "state_region",
       "city",
@@ -165,22 +162,21 @@ export const updateClient = async (req, res) => {
       "website",
       "note",
       "can_login",
+      "assignable_to_jobs",
+      "finances_visible",
     ];
 
-    clientFields.forEach((field) => {
+    vendorFields.forEach((field) => {
       if (req.body.hasOwnProperty(field)) {
-        client[field] = req.body[field];
+        vendor[field] = req.body[field];
       }
     });
 
-    await client.save();
-    console.log("Updated client record:", client.dataValues);
+    await vendor.save();
 
-    let primaryUser = await ClientPrimaryUserDetails.findOne({
-      where: { client_id: clientId },
+    let primaryUser = await VendorPrimaryUserDetails.findOne({
+      where: { vendor_id: vendorId },
     });
-
-    console.log("Fetched primary user before update:", primaryUser?.dataValues);
 
     const primaryUserFields = [
       "first_name",
@@ -201,57 +197,53 @@ export const updateClient = async (req, res) => {
       });
 
       await primaryUser.save();
-      console.log("Updated primary user record:", primaryUser.dataValues);
     } else {
-      const newPrimaryUserData = { client_id: clientId };
+      const newPrimaryUserData = { vendor_id: vendorId };
       primaryUserFields.forEach((field) => {
         if (req.body.hasOwnProperty(field)) {
           newPrimaryUserData[field] = req.body[field];
         }
       });
 
-      primaryUser = await ClientPrimaryUserDetails.create(newPrimaryUserData);
-      console.log("Created new primary user:", primaryUser.dataValues);
+      primaryUser = await VendorPrimaryUserDetails.create(newPrimaryUserData);
     }
 
-    const updatedClient = await ClientDetails.findOne({
-      where: { id: clientId, admin_id: adminId },
+    const updatedVendor = await VendorDetails.findOne({
+      where: { id: vendorId, admin_id: adminId },
       include: [
         { model: AdminAuth, as: "auth", attributes: ["email"] },
-        { model: ClientPrimaryUserDetails, as: "primary_users" },
+        { model: VendorPrimaryUserDetails, as: "primary_users" },
       ],
     });
 
-    console.log("Final updatedClient fetched:", updatedClient?.dataValues);
-
-    return res.status(200).json({ success: true, data: updatedClient });
+    return res.status(200).json({ success: true, data: updatedVendor });
   } catch (error) {
-    console.error("UPDATE CLIENT ERROR:", error);
+    console.error("UPDATE VENDOR ERROR:", error);
     const err = toClientError(error);
     return res.status(err.code).json(err.body);
   }
 };
 
-// Get client by ID
-export const getClientById = async (req, res) => {
-  const clientId = req.params.id;
+// Get vendor by ID
+export const getVendorById = async (req, res) => {
+  const vendorId = req.params.id;
   const adminId = req.user.id;
 
   try {
-    const client = await ClientDetails.findOne({
-      where: { id: clientId, admin_id: adminId },
+    const vendor = await VendorDetails.findOne({
+      where: { id: vendorId, admin_id: adminId },
       include: [
         { model: AdminAuth, as: "auth", attributes: ["email"] },
-        { model: ClientPrimaryUserDetails, as: "primary_users" },
+        { model: VendorPrimaryUserDetails, as: "primary_users" },
       ],
     });
 
-    if (!client)
+    if (!vendor)
       return res
         .status(404)
-        .json({ success: false, message: "No client found." });
+        .json({ success: false, message: "No vendor found." });
 
-    return res.status(200).json({ success: true, data: client });
+    return res.status(200).json({ success: true, data: vendor });
   } catch (error) {
     console.error(error);
     const err = toClientError(error);
@@ -259,21 +251,21 @@ export const getClientById = async (req, res) => {
   }
 };
 
-// Get all clients
-export const getAllClients = async (req, res) => {
+// Get all vendors
+export const getAllVendors = async (req, res) => {
   const adminId = req.user.id;
 
   try {
-    const clients = await ClientDetails.findAll({
+    const vendors = await VendorDetails.findAll({
       where: { admin_id: adminId },
       include: [
         { model: AdminAuth, as: "auth", attributes: ["email"] },
-        { model: ClientPrimaryUserDetails, as: "primary_users" },
+        { model: VendorPrimaryUserDetails, as: "primary_users" },
       ],
       order: [["id", "ASC"]],
     });
 
-    return res.status(200).json({ success: true, data: clients });
+    return res.status(200).json({ success: true, data: vendors });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
@@ -281,29 +273,27 @@ export const getAllClients = async (req, res) => {
 };
 
 // Delete
-export const deleteClient = async (req, res) => {
-  const clientId = req.params.id;
+export const deleteVendor = async (req, res) => {
+  const vendorId = req.params.id;
   const adminId = req.user.id;
 
   try {
-    const client = await ClientDetails.findOne({
-      where: { id: clientId, admin_id: adminId },
+    const vendor = await VendorDetails.findOne({
+      where: { id: vendorId, admin_id: adminId },
     });
 
-    if (!client)
+    if (!vendor)
       return res
         .status(404)
-        .json({ success: false, message: "No client found." });
+        .json({ success: false, message: "No vendor found." });
 
-    await ClientPrimaryUserDetails.destroy({ where: { client_id: clientId } });
-
-    await AdminAuth.destroy({ where: { id: client.auth_id } });
-
-    await ClientDetails.destroy({ where: { id: clientId } });
+    await VendorPrimaryUserDetails.destroy({ where: { vendor_id: vendorId } });
+    await AdminAuth.destroy({ where: { id: vendor.auth_id } });
+    await VendorDetails.destroy({ where: { id: vendorId } });
 
     return res
       .status(200)
-      .json({ success: true, message: "Client deleted successfully" });
+      .json({ success: true, message: "Vendor deleted successfully" });
   } catch (error) {
     console.error(error);
     const err = toClientError(error);

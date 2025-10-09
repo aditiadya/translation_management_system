@@ -16,6 +16,7 @@ import AdminProfileRoutes from "./routes/adminProfileRoutes.js"
 import managerDetailsRoutes from "./routes/managerDetailsRoutes.js"
 import clientDetailsRoutes from "./routes/clientDetailsRoutes.js"
 import clientPoolRoutes from "./routes/clientPoolRoutes.js"
+import vendorDetailsRoutes from "./routes/vendorDetailsRoutes.js"
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use("/api/admin-profile", AdminProfileRoutes);
 app.use("/api/managers", managerDetailsRoutes);
 app.use("/api/clients", clientDetailsRoutes);
 app.use("/api/client-pools", clientPoolRoutes);
+app.use("/api/vendors", vendorDetailsRoutes);
 
 
 export default app;
