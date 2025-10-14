@@ -11,7 +11,7 @@ import {
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navLinks = [
-    { to: "/dashboard", icon: FiHome, label: "Dashboard" },
+    { to: "/", icon: FiHome, label: "Dashboard" },
     { to: "/profile", icon: FiUser, label: "My Profile" },
     { to: "/managers", icon: FiGrid, label: "Managers" },
     { to: "/clients", icon: FiSettings, label: "Clients" },

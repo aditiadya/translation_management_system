@@ -1,12 +1,14 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { HiArrowLeft } from "react-icons/hi";
 
-const BackButton = ({ to, className, style }) => {
+const BackButton = ({ to, onClick, className, style }) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    if (to) {
+    if (onClick) {
+      onClick();
+    } 
+    else if (to) {
       navigate(to);
     } else {
       navigate(-1);

@@ -4,6 +4,8 @@ import ConfirmModal from "../../../components/Modals/ConfirmModal";
 import FormInput from "../../../components/Form/FormInput";
 import FormSelect from "../../../components/Form/FormSelect";
 import CheckboxField from "../../../components/Form/CheckboxField";
+import BackButton from "../../../components/Button/BackButton";
+
 
 const ManagerEditForm = ({ manager, id, navigate, setIsEditing }) => {
   const [formData, setFormData] = useState({
@@ -44,9 +46,12 @@ const ManagerEditForm = ({ manager, id, navigate, setIsEditing }) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">
-        Update Manager Details
-      </h2>
+      <div className="flex items-center gap-4 mb-8">
+        <BackButton onClick={() => setIsEditing(false)} />
+        <h2 className="text-2xl font-bold text-gray-900">
+          Update Manager Details
+        </h2>
+      </div>
 
       <form
         onSubmit={(e) => {

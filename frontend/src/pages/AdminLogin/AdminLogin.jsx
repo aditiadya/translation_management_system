@@ -56,7 +56,7 @@ const AdminLogin = () => {
 
       setUser(meRes.data);
 
-      if (response.data.setup_completed) {
+      if (meRes.data.setup_completed) {
         navigate("/dashboard");
       } else {
         navigate("/setup");

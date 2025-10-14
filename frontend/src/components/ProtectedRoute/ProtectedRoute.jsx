@@ -5,9 +5,7 @@ import { AuthContext } from "../../context/AuthContext";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
   console.log("ProtectedRoute:", { user, loading });
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Checking authentication...</div>;
 
   if (!user) {
     return <Navigate to="/login" replace />;

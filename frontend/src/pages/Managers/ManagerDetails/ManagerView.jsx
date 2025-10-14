@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ConfirmModal from "../../../components/Modals/ConfirmModal";
+import BackButton from "../../../components/Button/BackButton";
 
 const ManagerView = ({ manager, onEdit, onResendInvitation, onDelete }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,7 +13,10 @@ const ManagerView = ({ manager, onEdit, onResendInvitation, onDelete }) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Manager Details</h1>
+        <div className="flex items-center gap-4">
+          <BackButton to="/managers" />
+          <h1 className="text-3xl font-bold text-gray-800">Manager Details</h1>
+        </div>
 
         <div className="space-x-4">
           <button

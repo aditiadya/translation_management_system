@@ -25,7 +25,7 @@ const SettingsEditForm = ({ client, onCancel, onSave }) => {
       className="space-y-6 bg-white p-6 rounded-lg shadow"
     >
       <div className="flex items-center gap-4">
-        <BackButton to="/clients" />
+        <BackButton onClick={onCancel} />
         <h2 className="text-lg font-semibold text-gray-700">Edit Settings</h2>
       </div>
       <CheckboxField

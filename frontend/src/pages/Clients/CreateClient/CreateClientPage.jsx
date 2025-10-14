@@ -2,6 +2,7 @@ import { useState } from "react";
 import Navbar from "../../../components/Navbar/Navbar";
 import Sidebar from "../../../components/Sidebar/Sidebar";
 import CreateClientForm from "./CreateClientForm";
+import BackButton from "../../../components/Button/BackButton";
 
 const CreateClientPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,9 +18,14 @@ const CreateClientPage = () => {
         }`}
       >
         <div className="bg-white rounded-xl shadow-md p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
-            Create New Client
-          </h2>
+          
+
+          <div className="flex items-center gap-4 mb-8">
+          <BackButton to="/clients" />
+          <h1 className="text-3xl font-bold text-gray-800">Create New Client</h1>
+        </div>
+
+
           <CreateClientForm />
         </div>
       </main>

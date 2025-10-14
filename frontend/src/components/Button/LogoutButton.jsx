@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import api from "../../utils/axiosInstance";
 
-const LogoutButton = ({ onLogout }) => {
+const LogoutButton = () => {
   const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext);
 
   const handleLogout = async () => {
     try {
       await api.post("auth/logout");
-      onLogout();
+      setUser(null);
       navigate("/");
     } catch (err) {
       console.error("Logout failed", err);
@@ -19,7 +22,7 @@ const LogoutButton = ({ onLogout }) => {
       onClick={handleLogout}
       className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white"
     >
-      Logout
+       Logout {" "}
     </button>
   );
 };

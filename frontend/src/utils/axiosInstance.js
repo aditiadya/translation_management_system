@@ -22,23 +22,31 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest.url !== "/auth/refresh" &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+
       if (isRefreshing) {
-        return new Promise((resolve) => {
-          subscribeTokenRefresh(() => resolve(api(originalRequest)));
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh(() => {
+            api(originalRequest).then(resolve).catch(reject);
+          });
         });
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        await api.post("/auth/refresh", {}, { withCredentials: true });
+        await api.post("/auth/refresh", {});
         isRefreshing = false;
         onRefreshed();
         return api(originalRequest);
       } catch (err) {
         isRefreshing = false;
+        refreshSubscribers = [];
         return Promise.reject(err);
       }
     }
