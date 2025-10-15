@@ -65,14 +65,14 @@ const VendorContactPersons = sequelize.define(
   {
     tableName: "vendor_contact_persons",
     timestamps: true,
-    indexes: [{ fields: ["client_id"] }],
+    indexes: [{ fields: ["vendor_id"] }],
   }
 );
 
 VendorContactPersons.associate = (models) => {
   VendorContactPersons.belongsTo(models.VendorDetails, {
-    foreignKey: "client_id",
-    as: "client",
+    foreignKey: "vendor_id",
+    as: "vendor",
     onDelete: "CASCADE",
   });
 };
