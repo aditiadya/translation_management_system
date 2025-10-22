@@ -134,7 +134,7 @@ export const updateContactPerson = async (req, res) => {
     console.log("Data to update:", data);
 
     console.log("Headers:", req.headers);
-console.log("Request body:", req.body);
+    console.log("Request body:", req.body);
 
     if (Object.keys(data).length === 0) {
       return res.status(400).json({

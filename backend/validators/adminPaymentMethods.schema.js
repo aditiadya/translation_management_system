@@ -1,6 +1,5 @@
 import Joi from "joi";
 
-// Common schema for payment method enum
 const paymentMethodEnum = Joi.string()
   .valid("bank_transfer", "paypal", "payoneer", "skrill", "other")
   .required()
@@ -9,8 +8,6 @@ const paymentMethodEnum = Joi.string()
     "any.only":
       "Payment method must be one of bank_transfer, paypal, payoneer, skrill, or other",
   });
-
-// ---------------------- DETAILS SCHEMAS ----------------------
 
 // Bank Transfer
 const bankTransferDetailsSchema = Joi.object({

@@ -22,9 +22,11 @@ import managerDetailsRoutes from "./routes/managerDetailsRoutes.js"
 import clientDetailsRoutes from "./routes/clientDetailsRoutes.js"
 import clientPoolRoutes from "./routes/clientPoolRoutes.js"
 import clientContactPersonRoutes from "./routes/clientContactPersonRoutes.js"
+import clientDocumentsRoutes from "./routes/clientDocumentsRoutes.js"
 
 import vendorDetailsRoutes from "./routes/vendorDetailsRoutes.js"
 import vendorContactPersonRoutes from "./routes/vendorContactPersonRoutes.js"
+import vendorDocumentsRoutes from "./routes/vendorDocumentsRoutes.js"
 
 const app = express();
 
@@ -39,6 +41,8 @@ app.options(/.*/, cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/uploads", express.static("uploads"));
 
 app.use('/api/auth', authRoutes);
 app.use("/api/admin", authRoutes);
@@ -60,9 +64,11 @@ app.use("/api/managers", managerDetailsRoutes);
 app.use("/api/clients", clientDetailsRoutes);
 app.use("/api/client-pools", clientPoolRoutes);
 app.use("/api/client/contact-persons", clientContactPersonRoutes);
-app.use("/api/vendor/contact-persons", vendorContactPersonRoutes);
+app.use("/api/client-documents", clientDocumentsRoutes);
 
 app.use("/api/vendors", vendorDetailsRoutes);
+app.use("/api/vendor/contact-persons", vendorContactPersonRoutes);
+app.use("/api/vendor-documents", vendorDocumentsRoutes);
 
 
 export default app;
