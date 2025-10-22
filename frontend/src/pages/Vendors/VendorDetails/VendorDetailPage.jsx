@@ -7,6 +7,8 @@ import VendorView from "./GeneralInfo/VendorView";
 import GeneralInfoEditForm from "./GeneralInfo/GeneralInfoEditForm";
 import PrimaryUserEditForm from "./GeneralInfo/PrimaryUserEditForm";
 import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
+import ContactPersonsPage from "./ContactPersons/ContactPersonPage";
+import DocumentsPage from "./Document/DocumentsPage";
 
 const tabs = [
   "General Info",
@@ -50,18 +52,17 @@ const VendorDetailPage = () => {
   }, [id]);
 
   const handleSave = async (updatedData) => {
-  try {
-    const response = await api.put(`/vendors/${id}`, updatedData, {
-      withCredentials: true,
-    });
-    setVendor(response.data.data);
-    setEditingSection(null);
-  } catch (err) {
-    console.error("Update failed", err);
-    alert("Failed to update vendor");
-  }
-};
-
+    try {
+      const response = await api.put(`/vendors/${id}`, updatedData, {
+        withCredentials: true,
+      });
+      setVendor(response.data.data);
+      setEditingSection(null);
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("Failed to update vendor");
+    }
+  };
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this vendor?")) return;
@@ -113,71 +114,64 @@ const VendorDetailPage = () => {
 
         {/* Tab Content */}
         {activeTab === "General Info" && (
-  <>
-    {!editingSection ? (
-      <VendorView
-        vendor={vendor}
-        onEditGeneral={() => setEditingSection("general")}
-        onEditPrimary={() => setEditingSection("primary")}
-        onEditSettings={() => setEditingSection("settings")}
-        onDelete={handleDelete}
-      />
-    ) : editingSection === "general" ? (
-      <GeneralInfoEditForm
-        vendor={vendor}
-        onSave={handleSave}
-        onCancel={() => setEditingSection(null)}
-      />
-    ) : editingSection === "primary" ? (
-      <PrimaryUserEditForm
-        vendor={vendor}
-        onSave={handleSave}
-        onCancel={() => setEditingSection(null)}
-      />
-    ) : editingSection === "settings" ? (
-      <SettingsEditForm
-        vendor={vendor}
-        onSave={(updated) => {
-          console.log("Save settings info", updated);
-          setEditingSection(null);
-        }}
-        onCancel={() => setEditingSection(null)}
-      />
-    ) : null}
-  </>
-)}
+          <>
+            {!editingSection ? (
+              <VendorView
+                vendor={vendor}
+                onEditGeneral={() => setEditingSection("general")}
+                onEditPrimary={() => setEditingSection("primary")}
+                onEditSettings={() => setEditingSection("settings")}
+                onDelete={handleDelete}
+              />
+            ) : editingSection === "general" ? (
+              <GeneralInfoEditForm
+                vendor={vendor}
+                onSave={handleSave}
+                onCancel={() => setEditingSection(null)}
+              />
+            ) : editingSection === "primary" ? (
+              <PrimaryUserEditForm
+                vendor={vendor}
+                onSave={handleSave}
+                onCancel={() => setEditingSection(null)}
+              />
+            ) : editingSection === "settings" ? (
+              <SettingsEditForm
+                vendor={vendor}
+                onSave={(updated) => {
+                  console.log("Save settings info", updated);
+                  setEditingSection(null);
+                }}
+                onCancel={() => setEditingSection(null)}
+              />
+            ) : null}
+          </>
+        )}
 
         {activeTab === "Contact Persons" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Contact Persons</h2>
-            <p className="text-gray-500">
-              Contact person details will go here.
-            </p>
-          </div>
+          <ContactPersonsPage vendorId={id} />
         )}
 
         {activeTab === "Payment Methods" && (
           <div className="p-4 bg-white rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">Payment Methods</h2>
-            <p className="text-gray-500">Payment methods details will go here.</p>
+            <p className="text-gray-500">
+              Payment methods details will go here.
+            </p>
           </div>
         )}
 
         {activeTab === "Services" && (
           <div className="p-4 bg-white rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">Services</h2>
-            <p className="text-gray-500">
-              Service details will go here.
-            </p>
+            <p className="text-gray-500">Service details will go here.</p>
           </div>
         )}
 
         {activeTab === "Language Pairs" && (
           <div className="p-4 bg-white rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">Language Pairs</h2>
-            <p className="text-gray-500">
-              Language Pair details will go here.
-            </p>
+            <p className="text-gray-500">Language Pair details will go here.</p>
           </div>
         )}
 
@@ -204,12 +198,7 @@ const VendorDetailPage = () => {
           </div>
         )}
 
-        {activeTab === "Documents" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Documents</h2>
-            <p className="text-gray-500">Client documents will go here.</p>
-          </div>
-        )}
+        {activeTab === "Documents" && <DocumentsPage vendorId={id} />}
 
         {activeTab === "Availability Charts" && (
           <div className="p-4 bg-white rounded-lg shadow">

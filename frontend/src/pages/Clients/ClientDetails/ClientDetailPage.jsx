@@ -7,6 +7,7 @@ import ClientView from "./GeneralInfo/ClientView";
 import GeneralInfoEditForm from "./GeneralInfo/GeneralInfoEditForm";
 import PrimaryUserEditForm from "./GeneralInfo/PrimaryUserEditForm";
 import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
+import ContactPersonsPage from "./ContactPersons/ContactPersonsPage";
 
 const tabs = [
   "General Info",
@@ -48,18 +49,17 @@ const ClientDetailPage = () => {
   }, [id]);
 
   const handleSave = async (updatedData) => {
-  try {
-    const response = await api.put(`/clients/${id}`, updatedData, {
-      withCredentials: true,
-    });
-    setClient(response.data.data);
-    setEditingSection(null);
-  } catch (err) {
-    console.error("Update failed", err);
-    alert("Failed to update client");
-  }
-};
-
+    try {
+      const response = await api.put(`/clients/${id}`, updatedData, {
+        withCredentials: true,
+      });
+      setClient(response.data.data);
+      setEditingSection(null);
+    } catch (err) {
+      console.error("Update failed", err);
+      alert("Failed to update client");
+    }
+  };
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this client?")) return;
@@ -111,48 +111,42 @@ const ClientDetailPage = () => {
 
         {/* Tab Content */}
         {activeTab === "General Info" && (
-  <>
-    {!editingSection ? (
-      <ClientView
-        client={client}
-        onEditGeneral={() => setEditingSection("general")}
-        onEditPrimary={() => setEditingSection("primary")}
-        onEditSettings={() => setEditingSection("settings")}
-        onDelete={handleDelete}
-      />
-    ) : editingSection === "general" ? (
-      <GeneralInfoEditForm
-        client={client}
-        onSave={handleSave}
-        onCancel={() => setEditingSection(null)}
-      />
-    ) : editingSection === "primary" ? (
-      <PrimaryUserEditForm
-        client={client}
-        onSave={handleSave}
-        onCancel={() => setEditingSection(null)}
-      />
-    ) : editingSection === "settings" ? (
-      <SettingsEditForm
-        client={client}
-        onSave={(updated) => {
-          console.log("Save settings info", updated);
-          setEditingSection(null);
-        }}
-        onCancel={() => setEditingSection(null)}
-      />
-    ) : null}
-  </>
-)}
+          <>
+            {!editingSection ? (
+              <ClientView
+                client={client}
+                onEditGeneral={() => setEditingSection("general")}
+                onEditPrimary={() => setEditingSection("primary")}
+                onEditSettings={() => setEditingSection("settings")}
+                onDelete={handleDelete}
+              />
+            ) : editingSection === "general" ? (
+              <GeneralInfoEditForm
+                client={client}
+                onSave={handleSave}
+                onCancel={() => setEditingSection(null)}
+              />
+            ) : editingSection === "primary" ? (
+              <PrimaryUserEditForm
+                client={client}
+                onSave={handleSave}
+                onCancel={() => setEditingSection(null)}
+              />
+            ) : editingSection === "settings" ? (
+              <SettingsEditForm
+                client={client}
+                onSave={(updated) => {
+                  console.log("Save settings info", updated);
+                  setEditingSection(null);
+                }}
+                onCancel={() => setEditingSection(null)}
+              />
+            ) : null}
+          </>
+        )}
 
         {activeTab === "Contact Persons" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Contact Persons</h2>
-            {/* Placeholder – you’ll define this later */}
-            <p className="text-gray-500">
-              Contact person details will go here.
-            </p>
-          </div>
+          <ContactPersonsPage clientId={id} />
         )}
 
         {activeTab === "Client Pools" && (

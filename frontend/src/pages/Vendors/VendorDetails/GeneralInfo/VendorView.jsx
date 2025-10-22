@@ -29,7 +29,7 @@ const VendorView = ({
               <button className="bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700">
                 Quick Links ▾
               </button>
-              {/* Add dropdown menu here if needed */}
+              {/* Add dropdown menu here */}
             </div>
             <button
               onClick={onEditGeneral}
