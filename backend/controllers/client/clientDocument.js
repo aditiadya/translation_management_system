@@ -75,29 +75,39 @@ export const createClientDocument = async (req, res) => {
 // Get all
 export const getAllClientDocuments = async (req, res) => {
   const adminId = req.user.id;
-  const clientId = req.params.client_id;
+  const { client_id } = req.query;
 
   try {
+    if (!client_id) {
+      return res.status(400).json({
+        success: false,
+        message: "client_id is required",
+      });
+    }
+
     const client = await ClientDetails.findOne({
-      where: { id: clientId, admin_id: adminId },
+      where: { id: client_id, admin_id: adminId },
     });
 
-    if (!client)
-      return res
-        .status(404)
-        .json({ success: false, message: "Client not found" });
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "Client not found or not associated with this admin",
+      });
+    }
 
     const documents = await ClientDocuments.findAll({
-      where: { client_id: clientId },
+      where: { client_id },
       order: [["uploaded_at", "DESC"]],
     });
 
     return res.status(200).json({
       success: true,
+      count: documents.length,
       data: documents,
     });
   } catch (error) {
-    console.error("GET CLIENT DOCUMENTS ERROR:", error);
+    console.error("GET ALL CLIENT DOCUMENTS ERROR:", error);
     const err = toDocumentError(error);
     return res.status(err.code).json(err.body);
   }
@@ -109,20 +119,28 @@ export const getClientDocumentById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const doc = await ClientDocuments.findByPk(id, {
+    const document = await ClientDocuments.findByPk(id, {
       include: [{ model: ClientDetails, as: "client" }],
     });
 
-    if (!doc)
-      return res.status(404).json({ success: false, message: "Document not found" });
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: "Document not found",
+      });
+    }
 
-    if (doc.client.admin_id !== adminId)
+    if (document.client.admin_id !== adminId) {
       return res.status(403).json({
         success: false,
-        message: "Unauthorized to access this document",
+        message: "Access denied. This document does not belong to your clients.",
       });
+    }
 
-    return res.status(200).json({ success: true, data: doc });
+    return res.status(200).json({
+      success: true,
+      data: document,
+    });
   } catch (error) {
     console.error("GET CLIENT DOCUMENT BY ID ERROR:", error);
     const err = toDocumentError(error);
@@ -134,33 +152,59 @@ export const getClientDocumentById = async (req, res) => {
 export const updateClientDocument = async (req, res) => {
   const adminId = req.user.id;
   const { id } = req.params;
+  const file = req.file;
+  const data = pickAllowed(req.body, ["document_name", "description"]);
 
   try {
-    const doc = await ClientDocuments.findByPk(id, {
+    const document = await ClientDocuments.findByPk(id, {
       include: [{ model: ClientDetails, as: "client" }],
     });
 
-    if (!doc)
-      return res.status(404).json({ success: false, message: "Document not found" });
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: "Document not found",
+      });
+    }
 
-    if (doc.client.admin_id !== adminId)
-      return res
-        .status(403)
-        .json({ success: false, message: "Unauthorized to update this document" });
+    if (document.client.admin_id !== adminId) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. This document does not belong to your clients.",
+      });
+    }
 
-    const data = pickAllowed(req.body, ["document_name", "description"]);
+    if (file) {
+      const oldPath = path.resolve(document.file_path);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
 
-    await doc.update(data);
+      const relativePath = path.posix.join("uploads", "client_documents", file.filename);
+      document.file_name = file.filename;
+      document.file_size = file.size;
+      document.file_type = file.mimetype;
+      document.file_path = relativePath;
+    }
+
+    if (data.document_name) document.document_name = data.document_name.trim();
+    if (data.description !== undefined) document.description = data.description.trim();
+
+    await document.save();
 
     return res.status(200).json({
       success: true,
-      message: "Document updated successfully",
-      data: doc,
+      message: file
+        ? "Document and file updated successfully"
+        : "Document details updated successfully",
+      data: document,
     });
   } catch (error) {
     console.error("UPDATE CLIENT DOCUMENT ERROR:", error);
-    const err = toDocumentError(error);
-    return res.status(err.code).json(err.body);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating document",
+    });
   }
 };
 
@@ -170,26 +214,35 @@ export const deleteClientDocument = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const doc = await ClientDocuments.findByPk(id, {
+    const document = await ClientDocuments.findByPk(id, {
       include: [{ model: ClientDetails, as: "client" }],
     });
 
-    if (!doc)
-      return res.status(404).json({ success: false, message: "Document not found" });
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: "Document not found",
+      });
+    }
 
-    if (doc.client.admin_id !== adminId)
-      return res
-        .status(403)
-        .json({ success: false, message: "Unauthorized to delete this document" });
+    if (document.client.admin_id !== adminId) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. This document does not belong to your clients.",
+      });
+    }
 
-    const fullPath = path.join(process.cwd(), doc.file_path);
-    if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+    const filePath = path.resolve(document.file_path);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
 
-    await doc.destroy();
+    await document.destroy();
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Document deleted successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "Document deleted successfully",
+    });
   } catch (error) {
     console.error("DELETE CLIENT DOCUMENT ERROR:", error);
     const err = toDocumentError(error);
