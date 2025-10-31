@@ -79,9 +79,9 @@ AdminLanguagePair.associate = (models) => {
       as: "targetLanguage",
     });
   }
-  AdminService.belongsToMany(models.VendorDetails, {
-    through: models.VendorService,
-    foreignKey: "service_id",
+  AdminLanguagePair.belongsToMany(models.VendorDetails, {
+    through: models.VendorLanguagePair,
+    foreignKey: "language_pair_id",
     otherKey: "vendor_id",
     as: "vendors",
   });

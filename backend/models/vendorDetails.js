@@ -128,6 +128,13 @@ VendorDetails.associate = (models) => {
     otherKey: "language_pair_id",
     as: "languagePairs",
   });
+
+  VendorDetails.belongsToMany(models.VendorSpecialization, {
+    through: models.VendorSpecialization,
+    foreignKey: "vendor_id",
+    otherKey: "specialization_id",
+    as: "vendorSpecializations",
+  });
 };
 
 export default VendorDetails;

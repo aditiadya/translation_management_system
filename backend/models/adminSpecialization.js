@@ -50,6 +50,13 @@ AdminSpecialization.associate = (models) => {
       as: "admin",
     });
   }
+
+  AdminSpecialization.belongsToMany(models.VendorSpecialization, {
+    through: models.VendorSpecialization,
+    foreignKey: "specialization_id",
+    otherKey: "vendor_id",
+    as: "vendors",
+  });
 };
 
 export default AdminSpecialization;
