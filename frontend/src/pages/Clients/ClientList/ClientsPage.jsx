@@ -41,25 +41,25 @@ const ClientsPage = () => {
           <h1 className="text-3xl font-bold text-gray-800">Clients</h1>
           <div>
             <button
-            onClick={() => navigate("/clients/create-client")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
-          >
-            New Client
-          </button>
+              onClick={() => navigate("/clients/create-client")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+            >
+              New Client
+            </button>
 
-          <button
-            onClick={() => navigate("/clients")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
-          >
-            Import from Excel
-          </button>
+            <button
+              onClick={() => navigate("/clients")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+            >
+              Import from Excel
+            </button>
 
-          <button
-            onClick={() => navigate("/clients")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
-          >
-            Export to Excel
-          </button>
+            <button
+              onClick={() => navigate("/clients")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+            >
+              Export to Excel
+            </button>
           </div>
         </div>
 

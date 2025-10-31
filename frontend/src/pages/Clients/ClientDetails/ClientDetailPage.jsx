@@ -8,6 +8,7 @@ import GeneralInfoEditForm from "./GeneralInfo/GeneralInfoEditForm";
 import PrimaryUserEditForm from "./GeneralInfo/PrimaryUserEditForm";
 import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
 import ContactPersonsPage from "./ContactPersons/ContactPersonsPage";
+import DocumentsPage from "./ClientDocuments/DocumentsPage";
 
 const tabs = [
   "General Info",
@@ -179,12 +180,7 @@ const ClientDetailPage = () => {
           </div>
         )}
 
-        {activeTab === "Documents" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Documents</h2>
-            <p className="text-gray-500">Client documents will go here.</p>
-          </div>
-        )}
+        {activeTab === "Documents" && <DocumentsPage clientId={id} />}
 
         {activeTab === "Project Charts" && (
           <div className="p-4 bg-white rounded-lg shadow">

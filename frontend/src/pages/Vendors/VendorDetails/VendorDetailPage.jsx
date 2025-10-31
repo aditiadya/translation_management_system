@@ -8,7 +8,7 @@ import GeneralInfoEditForm from "./GeneralInfo/GeneralInfoEditForm";
 import PrimaryUserEditForm from "./GeneralInfo/PrimaryUserEditForm";
 import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
 import ContactPersonsPage from "./ContactPersons/ContactPersonPage";
-import DocumentsPage from "./Document/DocumentsPage";
+import DocumentsPage from "./VendorDocuments/DocumentsPage";
 
 const tabs = [
   "General Info",
@@ -30,7 +30,6 @@ const VendorDetailPage = () => {
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
   const [activeTab, setActiveTab] = useState("General Info");
 
