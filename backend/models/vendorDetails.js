@@ -114,6 +114,20 @@ VendorDetails.associate = (models) => {
     as: "primary_users",
     onDelete: "CASCADE",
   });
+
+  VendorDetails.belongsToMany(models.AdminService, {
+    through: models.VendorService,
+    foreignKey: "vendor_id",
+    otherKey: "service_id",
+    as: "services",
+  });
+
+  VendorDetails.belongsToMany(models.AdminLanguagePair, {
+    through: models.VendorLanguagePair,
+    foreignKey: "vendor_id",
+    otherKey: "language_pair_id",
+    as: "languagePairs",
+  });
 };
 
 export default VendorDetails;

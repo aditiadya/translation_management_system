@@ -50,6 +50,12 @@ AdminService.associate = (models) => {
       as: "admin",
     });
   }
+  AdminService.belongsToMany(models.VendorDetails, {
+    through: models.VendorService,
+    foreignKey: "service_id",
+    otherKey: "vendor_id",
+    as: "vendors",
+  });
 };
 
 export default AdminService;
