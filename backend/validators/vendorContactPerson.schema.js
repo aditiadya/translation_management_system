@@ -33,7 +33,6 @@ export const updateContactPersonSchema = Joi.object({
       "number.base": "ID must be a number",
     }),
   }),
-  // Validate the actual request body directly
   first_name: Joi.string().trim().optional(),
   last_name: Joi.string().trim().optional().allow(null, ""),
   email: Joi.string().email().optional(),

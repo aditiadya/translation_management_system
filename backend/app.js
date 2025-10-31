@@ -27,6 +27,7 @@ import clientDocumentsRoutes from "./routes/clientDocumentsRoutes.js"
 import vendorDetailsRoutes from "./routes/vendorDetailsRoutes.js"
 import vendorContactPersonRoutes from "./routes/vendorContactPersonRoutes.js"
 import vendorDocumentsRoutes from "./routes/vendorDocumentsRoutes.js"
+import vendorServicesRoutes from "./routes/vendorServicesRoutes.js"
 
 const app = express();
 
@@ -69,6 +70,7 @@ app.use("/api/client-documents", clientDocumentsRoutes);
 app.use("/api/vendors", vendorDetailsRoutes);
 app.use("/api/vendor/contact-persons", vendorContactPersonRoutes);
 app.use("/api/vendor-documents", vendorDocumentsRoutes);
+app.use("/api/vendor-services", vendorServicesRoutes);
 
 
 export default app;
