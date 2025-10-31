@@ -29,6 +29,7 @@ import vendorContactPersonRoutes from "./routes/vendorContactPersonRoutes.js"
 import vendorDocumentsRoutes from "./routes/vendorDocumentsRoutes.js"
 import vendorServicesRoutes from "./routes/vendorServicesRoutes.js"
 import vendorSpecializationsRoutes from "./routes/vendorSpecializationsRoutes.js"
+import vendorLanguagePairsRoutes from "./routes/vendorLanguagePairsRoutes.js"
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use("/api/vendor/contact-persons", vendorContactPersonRoutes);
 app.use("/api/vendor-documents", vendorDocumentsRoutes);
 app.use("/api/vendor-services", vendorServicesRoutes);
 app.use("/api/vendor-specializations", vendorSpecializationsRoutes);
+app.use("/api/vendor-language-pairs", vendorLanguagePairsRoutes);
 
 
 export default app;
