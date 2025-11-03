@@ -1,7 +1,7 @@
 import db from "../../models/index.js";
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const { VendorService, VendorDetails, AdminService } = db;
+const { VendorService, VendorDetails, AdminService, VendorSettings, } = db;
 
 const VENDOR_SERVICE_ALLOWED_FIELDS = ["vendor_id", "service_id"];
 
@@ -163,6 +163,79 @@ export const getVendorServiceById = async (req, res) => {
     res.status(err.code).json(err.body);
   }
 };
+
+// Get all the services under a specific vendor
+export const getVendorServicesForVendor = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { id } = req.params;
+
+    const vendor = await VendorDetails.findOne({
+      where: { id: id, admin_id: adminId },
+      include: [
+        {
+          model: VendorSettings,
+          as: "settings",
+          attributes: ["works_with_all_services"],
+        },
+      ],
+      attributes: ["id", "company_name", "admin_id"],
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found or does not belong to your admin account",
+      });
+    }
+
+    const worksWithAll = vendor.settings?.works_with_all_services;
+
+    if (worksWithAll) {
+      const adminServices = await AdminService.findAll({
+        where: { admin_id: adminId },
+        attributes: ["id", "name", "admin_id"],
+        order: [["id", "ASC"]],
+      });
+
+      return res.json({
+        success: true,
+        message: "Vendor works with all admin services",
+        data: {
+          vendor,
+          services: adminServices,
+        },
+      });
+    }
+
+    const vendorServices = await VendorService.findAll({
+      where: { vendor_id: vendor.id },
+      include: [
+        {
+          model: AdminService,
+          as: "service",
+          attributes: ["id", "name", "admin_id"],
+          where: { admin_id: adminId },
+        },
+      ],
+      order: [["id", "ASC"]],
+    });
+
+    return res.json({
+      success: true,
+      message: "Vendor-specific services fetched successfully",
+      data: {
+        vendor,
+        services: vendorServices.map((v) => v.service),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching vendor services:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
 
 // Update
 export const updateVendorService = async (req, res) => {

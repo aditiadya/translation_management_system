@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import db from "../../models/index.js";
-const { AdminAuth, VendorDetails, VendorPrimaryUserDetails } = db;
+const { AdminAuth, VendorDetails, VendorPrimaryUserDetails, VendorSettings} = db;
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
 const VENDOR_ALLOWED_FIELDS = [
@@ -104,6 +104,13 @@ export const createVendor = async (req, res) => {
       nationality: data.nationality,
     });
 
+    await VendorSettings.create({
+      vendor_id: vendorDetails.id,
+      works_with_all_services: true,
+      works_with_all_language_pairs: true,
+      works_with_all_specializations: true,
+    });
+
     let activationLink = null;
     if (data.can_login) {
       activationLink = `${
@@ -186,7 +193,7 @@ export const updateVendor = async (req, res) => {
       "zoom_id",
       "teams_id",
       "gender",
-      "nationality"
+      "nationality",
     ];
 
     if (primaryUser) {

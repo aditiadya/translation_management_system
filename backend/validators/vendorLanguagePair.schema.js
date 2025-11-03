@@ -65,3 +65,14 @@ export const getAllVendorLanguagePairsSchema = Joi.object({
     }),
   }),
 });
+
+// Get all language pairs for a particular vendor
+export const getVendorLanguagePairsForVendorSchema = Joi.object({
+  params: Joi.object({
+    id: Joi.number().integer().positive().required().messages({
+      "any.required": "Vendor ID is required in URL params",
+      "number.base": "Vendor ID must be a number",
+      "number.positive": "Vendor ID must be a positive number",
+    }),
+  }),
+});

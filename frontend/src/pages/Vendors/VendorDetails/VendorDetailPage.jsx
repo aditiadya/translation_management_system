@@ -9,6 +9,9 @@ import PrimaryUserEditForm from "./GeneralInfo/PrimaryUserEditForm";
 import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
 import ContactPersonsPage from "./ContactPersons/ContactPersonPage";
 import DocumentsPage from "./VendorDocuments/DocumentsPage";
+import VendorServicesPage from "./Services/VendorServicesPage";
+import VendorLanguagePairsPage from "./LanguagePairs/VendorLanguagePairsPage"
+import VendorSpecializationsPage from "./Specializations/VendorSpecializationsPage";
 
 const tabs = [
   "General Info",
@@ -151,60 +154,40 @@ const VendorDetailPage = () => {
           <ContactPersonsPage vendorId={id} />
         )}
 
-        {activeTab === "Payment Methods" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Payment Methods</h2>
-            <p className="text-gray-500">
-              Payment methods details will go here.
-            </p>
-          </div>
-        )}
+        {/* {activeTab === "Payment Methods" && (
+          <PaymentMethodsPage vendorId={id} />
+        )} */}
 
         {activeTab === "Services" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Services</h2>
-            <p className="text-gray-500">Service details will go here.</p>
-          </div>
+          <VendorServicesPage vendorId={id} />
         )}
 
         {activeTab === "Language Pairs" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Language Pairs</h2>
-            <p className="text-gray-500">Language Pair details will go here.</p>
-          </div>
+          <VendorLanguagePairsPage vendorId={id} />
         )}
 
         {activeTab === "Specializations" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Specializations</h2>
-            <p className="text-gray-500">
-              Specialization details will go here.
-            </p>
-          </div>
+          <VendorSpecializationsPage vendorId={id} />
         )}
 
+         {/* 
+
         {activeTab === "Price List" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Price List</h2>
-            <p className="text-gray-500">Price list details will go here.</p>
-          </div>
+          <PriceListPage vendorId={id} />
         )}
 
         {activeTab === "Taxes" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Taxes</h2>
-            <p className="text-gray-500">Tax details will go here.</p>
-          </div>
+          <TaxesPage vendorId={id} />
+        )} */}
+
+        {activeTab === "Documents" && (
+          <DocumentsPage vendorId={id} />
         )}
 
-        {activeTab === "Documents" && <DocumentsPage vendorId={id} />}
+        {/* {activeTab === "Availability Charts" && (
+          <AvailabilityChartsPage vendorId={id} />
+        )} */}
 
-        {activeTab === "Availability Charts" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Availability Charts</h2>
-            <p className="text-gray-500">Availability Charts will go here.</p>
-          </div>
-        )}
       </main>
     </>
   );

@@ -1,7 +1,7 @@
 import db from "../../models/index.js";
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const { VendorSpecialization, VendorDetails, AdminSpecialization } = db;
+const { VendorSpecialization, VendorDetails, AdminSpecialization, VendorSettings } = db;
 
 const VENDOR_SPECIALIZATION_ALLOWED_FIELDS = ["vendor_id", "specialization_id"];
 
@@ -166,6 +166,78 @@ export const getVendorSpecializationById = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
+// Get All under a specific vendor
+export const getVendorSpecializationsForVendor = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { id } = req.params;
+
+    const vendor = await VendorDetails.findOne({
+      where: { id, admin_id: adminId },
+      include: [
+        {
+          model: VendorSettings,
+          as: "settings",
+          attributes: ["works_with_all_specializations"],
+        },
+      ],
+      attributes: ["id", "company_name", "admin_id"],
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found or does not belong to your admin account",
+      });
+    }
+
+    const worksWithAll = vendor.settings?.works_with_all_specializations;
+
+    if (worksWithAll) {
+      const adminSpecializations = await AdminSpecialization.findAll({
+        where: { admin_id: adminId },
+        attributes: ["id", "name", "admin_id"],
+        order: [["id", "ASC"]],
+      });
+
+      return res.json({
+        success: true,
+        message: "Vendor works with all admin specializations",
+        data: {
+          vendor,
+          specializations: adminSpecializations,
+        },
+      });
+    }
+
+    const vendorSpecializations = await VendorSpecialization.findAll({
+      where: { vendor_id: vendor.id },
+      include: [
+        {
+          model: AdminSpecialization,
+          as: "specialization",
+          attributes: ["id", "name", "admin_id"],
+          where: { admin_id: adminId },
+        },
+      ],
+      order: [["id", "ASC"]],
+    });
+
+    return res.json({
+      success: true,
+      message: "Vendor-specific specializations fetched successfully",
+      data: {
+        vendor,
+        specializations: vendorSpecializations.map((v) => v.specialization),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching vendor specializations:", error);
     const err = toClientError(error);
     res.status(err.code).json(err.body);
   }

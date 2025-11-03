@@ -135,6 +135,12 @@ VendorDetails.associate = (models) => {
     otherKey: "specialization_id",
     as: "vendorSpecializations",
   });
+
+  VendorDetails.hasOne(models.VendorSettings, {
+  foreignKey: "vendor_id",
+  as: "settings",
+  onDelete: "CASCADE",
+});
 };
 
 export default VendorDetails;

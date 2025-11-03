@@ -1,7 +1,7 @@
 import db from "../../models/index.js";
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const { VendorLanguagePair, VendorDetails, AdminLanguagePair } = db;
+const { VendorLanguagePair, VendorDetails, AdminLanguagePair, VendorSettings } = db;
 
 const VENDOR_LANGUAGE_PAIR_ALLOWED_FIELDS = ["vendor_id", "language_pair_id"];
 
@@ -164,6 +164,78 @@ export const getVendorLanguagePairById = async (req, res) => {
     res.status(err.code).json(err.body);
   }
 };
+
+export const getVendorLanguagePairsForVendor = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { id } = req.params;
+
+    const vendor = await VendorDetails.findOne({
+      where: { id, admin_id: adminId },
+      include: [
+        {
+          model: VendorSettings,
+          as: "settings",
+          attributes: ["works_with_all_language_pairs"],
+        },
+      ],
+      attributes: ["id", "company_name", "admin_id"],
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found or does not belong to your admin account",
+      });
+    }
+
+    const worksWithAll = vendor.settings?.works_with_all_language_pairs;
+
+    if (worksWithAll) {
+      const adminLanguagePairs = await AdminLanguagePair.findAll({
+        where: { admin_id: adminId },
+        attributes: ["id", "source_language_id", "target_language_id", "admin_id"],
+        order: [["id", "ASC"]],
+      });
+
+      return res.json({
+        success: true,
+        message: "Vendor works with all admin language pairs",
+        data: {
+          vendor,
+          languagePairs: adminLanguagePairs,
+        },
+      });
+    }
+
+    const vendorLanguagePairs = await VendorLanguagePair.findAll({
+      where: { vendor_id: vendor.id },
+      include: [
+        {
+          model: AdminLanguagePair,
+          as: "languagePair",
+          attributes: ["id", "source_language_id", "target_language_id", "admin_id"],
+          where: { admin_id: adminId },
+        },
+      ],
+      order: [["id", "ASC"]],
+    });
+
+    return res.json({
+      success: true,
+      message: "Vendor-specific language pairs fetched successfully",
+      data: {
+        vendor,
+        languagePairs: vendorLanguagePairs.map((v) => v.languagePair),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching vendor language pairs:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
 
 // Update
 export const updateVendorLanguagePair = async (req, res) => {

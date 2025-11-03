@@ -29,11 +29,12 @@ export const addLanguagePair = async (req, res) => {
 
     const newPair = await AdminLanguagePair.create({
       ...data,
-      admin_id: req.user.id, // always from JWT/session
+      admin_id: req.user.id,
     });
 
     res.status(201).json({ success: true, data: newPair });
   } catch (error) {
+    console.error("Error adding language pair:", error);
     res.status(500).json({ success: false, message: "Server error", details: error.message });
   }
 };

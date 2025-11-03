@@ -5,6 +5,7 @@ import {
   getVendorLanguagePairById,
   getAllVendorLanguagePairs,
   deleteVendorLanguagePair,
+  getVendorLanguagePairsForVendor,
 } from "../controllers/vendor/vendorLanguagePairs.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
 import { validate } from "../middlewares/validate.js";
@@ -14,6 +15,7 @@ import {
   getVendorLanguagePairSchema,
   deleteVendorLanguagePairSchema,
   getAllVendorLanguagePairsSchema,
+  getVendorLanguagePairsForVendorSchema,
 } from "../validators/vendorLanguagePair.schema.js";
 
 const router = express.Router();
@@ -24,6 +26,7 @@ router.post("/", validate(createVendorLanguagePairSchema), createVendorLanguageP
 router.put("/:id", validate(updateVendorLanguagePairSchema), updateVendorLanguagePair);
 router.get("/:id", validate(getVendorLanguagePairSchema), getVendorLanguagePairById);
 router.get("/", validate(getAllVendorLanguagePairsSchema), getAllVendorLanguagePairs);
+router.get("/:id/language-pairs", validate(getVendorLanguagePairsForVendorSchema), getVendorLanguagePairsForVendor);
 router.delete("/:id", validate(deleteVendorLanguagePairSchema), deleteVendorLanguagePair);
 
 export default router;

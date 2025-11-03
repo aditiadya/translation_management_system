@@ -5,6 +5,7 @@ import {
   getVendorSpecializationById,
   getAllVendorSpecializations,
   deleteVendorSpecialization,
+  getVendorSpecializationsForVendor
 } from "../controllers/vendor/vendorSpecializations.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
 import { validate } from "../middlewares/validate.js";
@@ -14,6 +15,7 @@ import {
   getVendorSpecializationSchema,
   deleteVendorSpecializationSchema,
   getAllVendorSpecializationsSchema,
+  getVendorSpecializationsForVendorSchema
 } from "../validators/vendorSpecializations.schema.js";
 
 const router = express.Router();
@@ -24,6 +26,7 @@ router.post("/", validate(createVendorSpecializationSchema), createVendorSpecial
 router.put("/:id", validate(updateVendorSpecializationSchema), updateVendorSpecialization);
 router.get("/:id", validate(getVendorSpecializationSchema), getVendorSpecializationById);
 router.get("/", validate(getAllVendorSpecializationsSchema), getAllVendorSpecializations);
+router.get("/:id/specializations", validate(getVendorSpecializationsForVendorSchema), getVendorSpecializationsForVendor);
 router.delete("/:id", validate(deleteVendorSpecializationSchema), deleteVendorSpecialization);
 
 export default router;
