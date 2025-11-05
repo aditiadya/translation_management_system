@@ -177,7 +177,9 @@ export default function AccountActivation() {
             required
           />
           {fieldErrors.confirmPassword && (
-            <p className="text-red-600 text-sm">{fieldErrors.confirmPassword}</p>
+            <p className="text-red-600 text-sm">
+              {fieldErrors.confirmPassword}
+            </p>
           )}
         </div>
 

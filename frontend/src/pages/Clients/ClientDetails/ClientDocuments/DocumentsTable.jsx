@@ -32,7 +32,9 @@ const DocumentsTable = ({ documents, onDelete }) => {
               <td className="py-3 px-4 border-b text-center">
                 {formatDate(doc.uploaded_at)}
               </td>
-              <td className="py-3 px-4 border-b text-center">{doc.uploaded_by}</td>
+              <td className="py-3 px-4 border-b text-center">
+                {doc.uploaded_by}
+              </td>
               <td className="py-3 px-4 border-b text-center">
                 <button
                   onClick={() => onDelete(doc.id)}

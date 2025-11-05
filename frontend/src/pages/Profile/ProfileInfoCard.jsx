@@ -57,17 +57,71 @@ const ProfileInfoCard = ({
       {/* Personal Information */}
       <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
-        <FormField fieldKey="first_name" label="First Name" required {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="last_name" label="Last Name" required {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="gender" label="Gender" type="select" {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="username" label="Username" required {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="email" label="Email" required {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="phone" label="Phone (Optional)" {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="teams_id" label="Teams ID" {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="zoom_id" label="Zoom ID" {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="language_email" label="Language for Emails" type="select" required {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="time_zone" label="Time Zone" type="select" required {...{ isEditing, formData, admin, handleChange }} />
-        <FormField fieldKey="createdAt" label="Registered At" readOnly {...{ isEditing, formData, admin, handleChange }} />
+        <FormField
+          fieldKey="first_name"
+          label="First Name"
+          required
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="last_name"
+          label="Last Name"
+          required
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="gender"
+          label="Gender"
+          type="select"
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="username"
+          label="Username"
+          required
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="email"
+          label="Email"
+          required
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="phone"
+          label="Phone (Optional)"
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="teams_id"
+          label="Teams ID"
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="zoom_id"
+          label="Zoom ID"
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="language_email"
+          label="Language for Emails"
+          type="select"
+          required
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="time_zone"
+          label="Time Zone"
+          type="select"
+          required
+          {...{ isEditing, formData, admin, handleChange }}
+        />
+        <FormField
+          fieldKey="createdAt"
+          label="Registered At"
+          readOnly
+          {...{ isEditing, formData, admin, handleChange }}
+        />
       </div>
     </div>
   );

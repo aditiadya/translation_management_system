@@ -6,7 +6,6 @@ import EditLanguagePairPage from "./EditLanguagePairsPage";
 const VendorLanguagePairsPage = ({ vendorId }) => {
   const [worksWithAll, setWorksWithAll] = useState(false);
   const [languagePairs, setLanguagePairs] = useState([]);
-  const [adminLanguagePairs, setAdminLanguagePairs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showEditPage, setShowEditPage] = useState(false);
@@ -41,7 +40,6 @@ const VendorLanguagePairsPage = ({ vendorId }) => {
 
       const vendorData = vendorRes.data?.data?.languagePairs || [];
 
-      // 🔗 Merge vendor and admin language pair info by ID
       const merged = vendorData.map((vp) => {
         const match = adminPairs.find(
           (ap) => ap.source_language_id === vp.source_language_id && ap.target_language_id === vp.target_language_id
@@ -93,7 +91,6 @@ const VendorLanguagePairsPage = ({ vendorId }) => {
 
   return (
     <div className="space-y-8">
-      {/* Toggle Section */}
       <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <span className="text-gray-800 font-medium">
@@ -126,7 +123,6 @@ const VendorLanguagePairsPage = ({ vendorId }) => {
         )}
       </div>
 
-      {/* Table Header */}
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-bold text-gray-800">Language Pairs</h3>
         {!worksWithAll && (
@@ -139,14 +135,12 @@ const VendorLanguagePairsPage = ({ vendorId }) => {
         )}
       </div>
 
-      {/* Table */}
       <VendorLanguagePairsTable
         languagePairs={languagePairs}
         vendorId={vendorId}
         allowUpdate={!worksWithAll}
       />
 
-      {/* Edit Modal */}
       {showEditPage && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"

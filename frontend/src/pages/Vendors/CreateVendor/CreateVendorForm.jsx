@@ -43,7 +43,7 @@ const CreateVendorForm = () => {
     can_login: false,
     assignable_to_jobs: false,
     finances_visible: false,
-    
+
     first_name: "",
     last_name: "",
     email: "",
@@ -117,9 +117,7 @@ const CreateVendorForm = () => {
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-8">
       {/* Company Info */}
-      <h3 className="text-lg font-semibold text-gray-700">
-        Vendor Details
-      </h3>
+      <h3 className="text-lg font-semibold text-gray-700">Vendor Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
         <FormSelect
           label="Vendor Type"
@@ -143,7 +141,7 @@ const CreateVendorForm = () => {
             required
           />
         ) : (
-          <div /> 
+          <div />
         )}
 
         <FormSelect

@@ -1,5 +1,3 @@
-import React from "react";
-
 const CurrencyList = ({ userCurrencies, onEdit, onDelete }) => {
   return (
     <div className="overflow-x-auto shadow rounded-lg bg-white mt-6">
@@ -22,7 +20,11 @@ const CurrencyList = ({ userCurrencies, onEdit, onDelete }) => {
             userCurrencies.map((item, index) => (
               <tr
                 key={item.id}
-                className={index % 2 === 0 ? "bg-gray-50 hover:bg-gray-100" : "hover:bg-gray-100"}
+                className={
+                  index % 2 === 0
+                    ? "bg-gray-50 hover:bg-gray-100"
+                    : "hover:bg-gray-100"
+                }
               >
                 <td className="py-4 px-6">
                   {item.currency?.code} - {item.currency?.name}
@@ -30,7 +32,9 @@ const CurrencyList = ({ userCurrencies, onEdit, onDelete }) => {
                 <td className="py-4 px-6">
                   <span
                     className={`px-3 py-1 inline-block text-sm rounded-full ${
-                      item.active_flag ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-700"
+                      item.active_flag
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-200 text-gray-700"
                     }`}
                   >
                     {item.active_flag ? "Active" : "Inactive"}

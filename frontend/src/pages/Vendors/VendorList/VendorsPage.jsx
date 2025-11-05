@@ -41,25 +41,25 @@ const VendorsPage = () => {
           <h1 className="text-3xl font-bold text-gray-800">Vendors</h1>
           <div>
             <button
-            onClick={() => navigate("/vendors/create-vendor")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
-          >
-            New Vendor
-          </button>
+              onClick={() => navigate("/vendors/create-vendor")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+            >
+              New Vendor
+            </button>
 
-          <button
-            onClick={() => navigate("/vendors")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
-          >
-            Import from Excel
-          </button>
+            <button
+              onClick={() => navigate("/vendors")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+            >
+              Import from Excel
+            </button>
 
-          <button
-            onClick={() => navigate("/vendors")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
-          >
-            Export to Excel
-          </button>
+            <button
+              onClick={() => navigate("/vendors")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+            >
+              Export to Excel
+            </button>
           </div>
         </div>
 
@@ -100,7 +100,6 @@ const VendorsPage = () => {
                           : "hover:bg-gray-100"
                       }
                     >
-                      
                       <td className="py-4 px-6 text-gray-700">
                         {vendor.company_name || "—"}
                       </td>
@@ -120,7 +119,7 @@ const VendorsPage = () => {
                       <td className="py-4 px-6 text-gray-700">
                         {vendor.country || "—"}
                       </td>
-                      
+
                       <td className="py-4 px-6 text-gray-700">
                         {vendor.assignable_to_jobs ? "Yes" : "No"}
                       </td>

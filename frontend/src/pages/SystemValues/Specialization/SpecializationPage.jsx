@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../../../components/Navbar/Navbar";
 import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
@@ -33,9 +33,14 @@ const SpecializationPage = () => {
   const handleSave = async (data) => {
     try {
       if (editingSpec) {
-        const res = await api.put(`/admin-specializations/${editingSpec.id}`, data);
+        const res = await api.put(
+          `/admin-specializations/${editingSpec.id}`,
+          data
+        );
         setSpecializations(
-          specializations.map((s) => (s.id === editingSpec.id ? res.data.data : s))
+          specializations.map((s) =>
+            s.id === editingSpec.id ? res.data.data : s
+          )
         );
       } else {
         const res = await api.post("/admin-specializations", data);

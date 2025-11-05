@@ -13,12 +13,7 @@ const roles = [
   { id: "3", name: "Translation Manager" },
 ];
 
-const staticTimezones = [
-  "UTC−12:00",
-  "UTC−11:00",
-  "UTC−10:00",
-  "UTC−09:00",
-];
+const staticTimezones = ["UTC−12:00", "UTC−11:00", "UTC−10:00", "UTC−09:00"];
 
 const CreateManagerForm = () => {
   const navigate = useNavigate();
@@ -73,9 +68,13 @@ const CreateManagerForm = () => {
     const { name, value } = e.target;
     let errorMsg = "";
     if (
-      ["role_id", "first_name", "last_name", "email", "client_pool_id"].includes(
-        name
-      ) &&
+      [
+        "role_id",
+        "first_name",
+        "last_name",
+        "email",
+        "client_pool_id",
+      ].includes(name) &&
       !value
     ) {
       errorMsg =

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 const ServicesStep = lazy(() => import("./ServicesStep"));
 const PaymentMethodStep = lazy(() => import("./PaymentMethodStep"));
@@ -9,11 +9,23 @@ const CurrenciesStep = lazy(() => import("./CurrenciesStep"));
 
 const stepConfigs = [
   { name: "Services", Component: ServicesStep, dataKey: "services" },
-  { name: "Language Pairs", Component: LanguagePairsStep, dataKey: "languagePairs" },
+  {
+    name: "Language Pairs",
+    Component: LanguagePairsStep,
+    dataKey: "languagePairs",
+  },
   { name: "Units", Component: UnitsStep, dataKey: "units" },
-  { name: "Specializations", Component: SpecializationsStep, dataKey: "specializations" },
+  {
+    name: "Specializations",
+    Component: SpecializationsStep,
+    dataKey: "specializations",
+  },
   { name: "Currencies", Component: CurrenciesStep, dataKey: "currencies" },
-  { name: "Payment Methods", Component: PaymentMethodStep, dataKey: "paymentMethods" },
+  {
+    name: "Payment Methods",
+    Component: PaymentMethodStep,
+    dataKey: "paymentMethods",
+  },
 ];
 
 const Stepper = ({ steps, currentStep, highestStep, goToStep }) => {
@@ -29,18 +41,31 @@ const Stepper = ({ steps, currentStep, highestStep, goToStep }) => {
             key={step.name}
             className="flex flex-col items-center flex-1 relative"
           >
-
             <div
               onClick={() => isClickable && goToStep(index)}
               className={`z-10 w-4 h-4 rounded-full transition-all duration-500
-                ${isCompleted ? "bg-green-500 shadow-[0_0_1px_1px_rgba(34,197,94,0.7)]" : ""}
-                ${isCurrent ? "bg-blue-500 shadow-[0_0_1px_1px_rgba(59,130,246,0.7)] scale-110" : ""}
-                ${!isCompleted && !isCurrent ? "bg-gray-300 shadow-[0_0_6px_1px_rgba(156,163,175,0.5)]" : ""}
-                ${isClickable ? "cursor-pointer hover:scale-110" : "cursor-not-allowed opacity-60"}
+                ${
+                  isCompleted
+                    ? "bg-green-500 shadow-[0_0_1px_1px_rgba(34,197,94,0.7)]"
+                    : ""
+                }
+                ${
+                  isCurrent
+                    ? "bg-blue-500 shadow-[0_0_1px_1px_rgba(59,130,246,0.7)] scale-110"
+                    : ""
+                }
+                ${
+                  !isCompleted && !isCurrent
+                    ? "bg-gray-300 shadow-[0_0_6px_1px_rgba(156,163,175,0.5)]"
+                    : ""
+                }
+                ${
+                  isClickable
+                    ? "cursor-pointer hover:scale-110"
+                    : "cursor-not-allowed opacity-60"
+                }
               `}
-            >
-              
-            </div>
+            ></div>
 
             {index < steps.length - 1 && (
               <div
@@ -52,7 +77,11 @@ const Stepper = ({ steps, currentStep, highestStep, goToStep }) => {
 
             <div
               className={`mt-2 text-sm font-medium transition-colors duration-300 ${
-                isCurrent ? "text-blue-600" : isCompleted ? "text-gray-800" : "text-gray-400"
+                isCurrent
+                  ? "text-blue-600"
+                  : isCompleted
+                  ? "text-gray-800"
+                  : "text-gray-400"
               }`}
             >
               {step.name}
@@ -102,26 +131,33 @@ const SetupWizard = ({ onSubmit }) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto my-10 p-6">
-  <Stepper
-    steps={stepConfigs}
-    currentStep={currentStep}
-    highestStep={highestStepVisited}
-    goToStep={goToStep}
-  />
-
-  <div className="mx-auto mt-6 border rounded-2xl shadow-lg bg-white"
-       style={{ width: "800px", height: "400px" }}>
-
-    <Suspense fallback={<div className="text-center py-10 text-gray-500">Loading...</div>}>
-      <Component
-        data={wizardData[dataKey]}
-        setData={(data) => setWizardData({ ...wizardData, [dataKey]: data })}
-        onNext={isLastStep ? () => onSubmit(wizardData) : nextStep}
-        onBack={currentStep > 0 ? prevStep : undefined}
+      <Stepper
+        steps={stepConfigs}
+        currentStep={currentStep}
+        highestStep={highestStepVisited}
+        goToStep={goToStep}
       />
-    </Suspense>
-  </div>
-</div>
+
+      <div
+        className="mx-auto mt-6 border rounded-2xl shadow-lg bg-white"
+        style={{ width: "800px", height: "400px" }}
+      >
+        <Suspense
+          fallback={
+            <div className="text-center py-10 text-gray-500">Loading...</div>
+          }
+        >
+          <Component
+            data={wizardData[dataKey]}
+            setData={(data) =>
+              setWizardData({ ...wizardData, [dataKey]: data })
+            }
+            onNext={isLastStep ? () => onSubmit(wizardData) : nextStep}
+            onBack={currentStep > 0 ? prevStep : undefined}
+          />
+        </Suspense>
+      </div>
+    </div>
   );
 };
 

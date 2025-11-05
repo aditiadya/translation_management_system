@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../utils/axiosInstance";
 
 const LanguagePairsStep = ({ onNext, onBack }) => {
@@ -113,9 +113,10 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
       className="flex flex-col bg-white shadow-md rounded-lg"
       style={{ width: "800px", height: "400px" }}
     >
-      {/* Top: Heading + Add Form */}
       <div className="p-4 border-b">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Language Pairs</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Add Language Pairs
+        </h2>
 
         <div className="flex items-center gap-2 mb-2">
           <select
@@ -150,19 +151,16 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
             ))}
           </select>
           <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded disabled:bg-blue-200"
-        >
-          Add Pair
-        </button>
+            onClick={handleAdd}
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded disabled:bg-blue-200"
+          >
+            Add Pair
+          </button>
         </div>
 
         {error && <p className="text-red-500 mb-2">{error}</p>}
-
-        
       </div>
 
-      {/* Middle: Scrollable List */}
       <div className="flex-1 overflow-y-auto p-4">
         {pairs.length === 0 ? (
           <p className="text-gray-500">No language pairs added yet.</p>
@@ -232,36 +230,34 @@ const LanguagePairsStep = ({ onNext, onBack }) => {
                 )}
 
                 <div className="flex items-center space-x-2">
-  {editId === pair.id ? (
-    <button
-      onClick={() => handleUpdate(pair.id)}
-      className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded"
-    >
-      Save
-    </button>
-  ) : (
-    <button
-      onClick={() => handleEdit(pair)}
-      className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
-    >
-      Edit
-    </button>
-  )}
-  <button
-    onClick={() => handleDelete(pair.id)}
-    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
-  >
-    Delete
-  </button>
-</div>
-
+                  {editId === pair.id ? (
+                    <button
+                      onClick={() => handleUpdate(pair.id)}
+                      className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded"
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleEdit(pair)}
+                      className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(pair.id)}
+                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {/* Bottom: Navigation */}
       <div className="p-4 border-t flex justify-between">
         <button
           onClick={onBack}

@@ -18,11 +18,12 @@ const CreateManagerPage = () => {
         }`}
       >
         <div className="bg-white rounded-xl shadow-md p-8 mb-8">
-
-        <div className="flex items-center gap-4 mb-8">
-          <BackButton to="/managers" />
-          <h1 className="text-3xl font-bold text-gray-800">Create New Manager</h1>
-        </div>
+          <div className="flex items-center gap-4 mb-8">
+            <BackButton to="/managers" />
+            <h1 className="text-3xl font-bold text-gray-800">
+              Create New Manager
+            </h1>
+          </div>
 
           <CreateManagerForm />
         </div>

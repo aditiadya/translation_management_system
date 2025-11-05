@@ -4,7 +4,11 @@ import CheckboxField from "../../../components/Form/CheckboxField";
 import ConfirmModal from "../../../components/Modals/ConfirmModal";
 
 const UnitForm = ({ unitToEdit, onSave, onCancel }) => {
-  const [formData, setFormData] = useState({ name: "", active_flag: true, is_word: true });
+  const [formData, setFormData] = useState({
+    name: "",
+    active_flag: true,
+    is_word: true,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {

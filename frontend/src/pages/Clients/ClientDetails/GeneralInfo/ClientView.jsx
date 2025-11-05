@@ -30,12 +30,10 @@ const ClientView = ({
             <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">
               New Project
             </button>
-            {/* Quick links dropdown (placeholder) */}
             <div className="relative">
               <button className="bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700">
                 Quick Links ▾
               </button>
-              {/* Add dropdown menu here if needed */}
             </div>
             <button
               onClick={onEditGeneral}
@@ -155,7 +153,6 @@ const ClientView = ({
         </div>
       </section>
 
-      {/* ---------- Settings ---------- */}
       <section>
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-2xl font-bold text-gray-800">Settings</h3>

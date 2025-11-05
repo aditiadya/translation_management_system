@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../../../components/Navbar/Navbar";
 import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
@@ -34,7 +34,9 @@ const UnitPage = () => {
     try {
       if (editingUnit) {
         const res = await api.put(`/admin-units/${editingUnit.id}`, data);
-        setUnits(units.map((u) => (u.id === editingUnit.id ? res.data.data : u)));
+        setUnits(
+          units.map((u) => (u.id === editingUnit.id ? res.data.data : u))
+        );
       } else {
         const res = await api.post("/admin-units", data);
         setUnits([...units, res.data.data]);

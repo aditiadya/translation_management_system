@@ -20,7 +20,9 @@ const FormField = React.memo(
           <label className="block mb-2 text-sm font-medium text-gray-700">
             {label} {required && <span className="text-red-500">*</span>}
           </label>
-          <p className="text-gray-800  bg-gray-50 rounded-md w-3/4 p-2.5">{value}</p>
+          <p className="text-gray-800  bg-gray-50 rounded-md w-3/4 p-2.5">
+            {value}
+          </p>
         </div>
       );
     }

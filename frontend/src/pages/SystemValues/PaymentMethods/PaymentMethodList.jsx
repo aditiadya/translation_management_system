@@ -86,29 +86,24 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
                   index % 2 === 0 ? "bg-gray-50" : "bg-white"
                 } hover:bg-gray-100`}
               >
-                {/* Payment Method Type */}
                 <td className="py-4 px-4 capitalize">
                   {method.payment_method.replace("_", " ")}
                 </td>
 
-                {/* Payment Method Name */}
                 <td className="py-4 px-4 font-medium text-gray-800">
                   {renderPaymentMethodName(method)}
                 </td>
 
-                {/* Bank Info */}
                 <td className="py-4 px-4 align-top">
                   {renderBankInfo(method)}
                 </td>
 
-                {/* Note */}
                 <td className="py-4 px-4">
                   <div className="text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto pr-1">
                     {method.note || "-"}
                   </div>
                 </td>
 
-                {/* Is Enabled */}
                 <td className="py-4 px-4">
                   <span
                     className={`px-3 py-1 inline-block text-sm rounded-full ${
@@ -121,12 +116,10 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
                   </span>
                 </td>
 
-                {/* Created At */}
                 <td className="py-4 px-4 text-gray-600">
                   {formatDate(method.createdAt)}
                 </td>
 
-                {/* Actions */}
                 <td className="py-4 px-4 space-x-2 text-nowrap">
                   <button
                     onClick={() => onEdit(method)}

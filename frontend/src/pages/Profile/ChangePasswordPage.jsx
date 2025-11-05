@@ -19,10 +19,17 @@ const ChangePassword = () => {
 
   const validate = () => {
     const currentErrors = {};
-    if (!form.currentPassword) currentErrors.currentPassword = "Current password is required.";
-    if (!form.newPassword) currentErrors.newPassword = "New password is required.";
-    if (!form.confirmNewPassword) currentErrors.confirmNewPassword = "Please confirm your new password.";
-    if (form.newPassword && form.confirmNewPassword && form.newPassword !== form.confirmNewPassword) {
+    if (!form.currentPassword)
+      currentErrors.currentPassword = "Current password is required.";
+    if (!form.newPassword)
+      currentErrors.newPassword = "New password is required.";
+    if (!form.confirmNewPassword)
+      currentErrors.confirmNewPassword = "Please confirm your new password.";
+    if (
+      form.newPassword &&
+      form.confirmNewPassword &&
+      form.newPassword !== form.confirmNewPassword
+    ) {
       currentErrors.confirmNewPassword = "Passwords do not match.";
     }
     setErrors(currentErrors);
@@ -40,11 +47,18 @@ const ChangePassword = () => {
     const { name, value } = e.target;
     let errorMsg = "";
     if (!value) {
-      if (name === "currentPassword") errorMsg = "Current password is required.";
+      if (name === "currentPassword")
+        errorMsg = "Current password is required.";
       if (name === "newPassword") errorMsg = "New password is required.";
-      if (name === "confirmNewPassword") errorMsg = "Please confirm your new password.";
+      if (name === "confirmNewPassword")
+        errorMsg = "Please confirm your new password.";
     }
-    if (name === "confirmNewPassword" && form.newPassword && value && form.newPassword !== value) {
+    if (
+      name === "confirmNewPassword" &&
+      form.newPassword &&
+      value &&
+      form.newPassword !== value
+    ) {
       errorMsg = "Passwords do not match.";
     }
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
@@ -56,10 +70,14 @@ const ChangePassword = () => {
 
     try {
       setLoading(true);
-      const res = await api.post("/auth/change-password", {
-        currentPassword: form.currentPassword,
-        newPassword: form.newPassword,
-      }, { withCredentials: true });
+      const res = await api.post(
+        "/auth/change-password",
+        {
+          currentPassword: form.currentPassword,
+          newPassword: form.newPassword,
+        },
+        { withCredentials: true }
+      );
 
       setSuccess(res.data.message);
       setForm({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
@@ -67,7 +85,6 @@ const ChangePassword = () => {
       setTimeout(() => {
         navigate("/profile");
       }, 1000);
-
     } catch (err) {
       console.error("Change password error:", err.response?.data || err);
       setServerError(err.response?.data?.error || "Something went wrong");
@@ -123,7 +140,9 @@ const ChangePassword = () => {
               className={inputClass("currentPassword")}
             />
             {errors.currentPassword && (
-              <p className="text-red-500 text-sm mt-1">{errors.currentPassword}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.currentPassword}
+              </p>
             )}
           </div>
 
@@ -167,7 +186,9 @@ const ChangePassword = () => {
               className={inputClass("confirmNewPassword")}
             />
             {errors.confirmNewPassword && (
-              <p className="text-red-500 text-sm mt-1">{errors.confirmNewPassword}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.confirmNewPassword}
+              </p>
             )}
           </div>
 

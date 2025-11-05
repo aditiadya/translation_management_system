@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import ConfirmModal from "../../../components/Modals/ConfirmModal";
 
 const CurrencyForm = ({ currencyToEdit, currencies, onSave, onCancel }) => {
-  const [formData, setFormData] = useState({ currencyId: "", active_flag: true });
+  const [formData, setFormData] = useState({
+    currencyId: "",
+    active_flag: true,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {

@@ -1,5 +1,3 @@
-import React from 'react';
-
 const LanguagePairList = ({ pairs, onEdit, onDelete }) => {
   return (
     <div className="overflow-x-auto shadow rounded-lg bg-white mt-6">
@@ -20,20 +18,39 @@ const LanguagePairList = ({ pairs, onEdit, onDelete }) => {
             </tr>
           ) : (
             pairs.map((pair, index) => (
-              <tr key={pair.id} className={index % 2 === 0 ? "bg-gray-50 hover:bg-gray-100" : "hover:bg-gray-100"}>
+              <tr
+                key={pair.id}
+                className={
+                  index % 2 === 0
+                    ? "bg-gray-50 hover:bg-gray-100"
+                    : "hover:bg-gray-100"
+                }
+              >
                 <td className="py-4 px-6 font-medium">
                   {pair.sourceLanguage?.name} → {pair.targetLanguage?.name}
                 </td>
                 <td className="py-4 px-6">
-                  <span className={`px-3 py-1 text-sm rounded-full ${pair.active_flag ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-700"}`}>
+                  <span
+                    className={`px-3 py-1 text-sm rounded-full ${
+                      pair.active_flag
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
                     {pair.active_flag ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td className="py-4 px-6 space-x-2">
-                  <button onClick={() => onEdit(pair)} className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded">
+                  <button
+                    onClick={() => onEdit(pair)}
+                    className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
+                  >
                     Edit
                   </button>
-                  <button onClick={() => onDelete(pair.id)} className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded">
+                  <button
+                    onClick={() => onDelete(pair.id)}
+                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+                  >
                     Delete
                   </button>
                 </td>

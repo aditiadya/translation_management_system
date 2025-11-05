@@ -97,7 +97,9 @@ const ManagerView = ({ manager, onEdit, onResendInvitation, onDelete }) => {
               <span className="w-40 font-medium text-gray-700">
                 Client Pool:
               </span>
-              <span className="text-gray-900">{manager.client_pool?.name || "-"}</span>
+              <span className="text-gray-900">
+                {manager.client_pool?.name || "-"}
+              </span>
             </div>
 
             <div className="flex">

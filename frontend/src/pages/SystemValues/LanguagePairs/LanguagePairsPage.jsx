@@ -6,7 +6,6 @@ import LanguagePairList from "./LanguagePairList";
 import LanguagePairForm from "./LanguagePairForm";
 import ConfirmModal from "../../../components/Modals/ConfirmModal";
 
-
 const LanguagePairsPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [pairs, setPairs] = useState([]);
@@ -14,7 +13,7 @@ const LanguagePairsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [activePair, setActivePair] = useState(null); 
+  const [activePair, setActivePair] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [pairToDelete, setPairToDelete] = useState(null);
 
@@ -23,7 +22,7 @@ const LanguagePairsPage = () => {
       try {
         const [pairsRes, languagesRes] = await Promise.all([
           api.get("/admin-language-pairs"),
-          api.get("/languages"), 
+          api.get("/languages"),
         ]);
         setPairs(pairsRes.data.data);
         setLanguages(languagesRes.data);
@@ -43,8 +42,13 @@ const LanguagePairsPage = () => {
         const res = await api.post("/admin-language-pairs", formData);
         setPairs([...pairs, res.data.data]);
       } else {
-        const res = await api.put(`/admin-language-pairs/${activePair.id}`, formData);
-        setPairs(pairs.map((p) => (p.id === activePair.id ? res.data.data : p)));
+        const res = await api.put(
+          `/admin-language-pairs/${activePair.id}`,
+          formData
+        );
+        setPairs(
+          pairs.map((p) => (p.id === activePair.id ? res.data.data : p))
+        );
       }
       setIsFormVisible(false);
       setActivePair(null);
@@ -65,17 +69,17 @@ const LanguagePairsPage = () => {
       alert("Failed to delete language pair");
     }
   };
-  
+
   const handleAddNewClick = () => {
     setActivePair("new");
     setIsFormVisible(true);
   };
-  
+
   const handleEditClick = (pair) => {
     setActivePair(pair);
     setIsFormVisible(true);
   };
-  
+
   const handleCancelForm = () => {
     setIsFormVisible(false);
     setActivePair(null);
@@ -87,11 +91,18 @@ const LanguagePairsPage = () => {
     <>
       <Navbar />
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-      <main className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 flex-1 ${isSidebarOpen ? "md:ml-64" : "md:ml-20"}`}>
+      <main
+        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 flex-1 ${
+          isSidebarOpen ? "md:ml-64" : "md:ml-20"
+        }`}
+      >
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Language Pairs</h1>
           {!isFormVisible && (
-            <button onClick={handleAddNewClick} className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded shadow">
+            <button
+              onClick={handleAddNewClick}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded shadow"
+            >
               + New Language Pair
             </button>
           )}

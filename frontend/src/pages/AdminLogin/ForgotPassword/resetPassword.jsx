@@ -16,7 +16,8 @@ const ResetPassword = () => {
 
   const validate = () => {
     const currentErrors = {};
-    if (!form.newPassword) currentErrors.newPassword = "New password is required.";
+    if (!form.newPassword)
+      currentErrors.newPassword = "New password is required.";
     if (!form.confirmPassword) {
       currentErrors.confirmPassword = "Confirm password is required.";
     } else if (form.newPassword !== form.confirmPassword) {
@@ -30,9 +31,10 @@ const ResetPassword = () => {
     const { name, value } = e.target;
     let errorMsg = "";
     if (!value) {
-      errorMsg = name === "newPassword"
-        ? "New password is required."
-        : "Confirm password is required.";
+      errorMsg =
+        name === "newPassword"
+          ? "New password is required."
+          : "Confirm password is required.";
     }
     if (name === "confirmPassword" && value !== form.newPassword) {
       errorMsg = "Passwords do not match.";
@@ -147,7 +149,9 @@ const ResetPassword = () => {
               className={inputClass("confirmPassword")}
             />
             {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.confirmPassword}
+              </p>
             )}
           </div>
 

@@ -14,10 +14,24 @@ const methodOptions = [
 ];
 
 const INITIAL_STATE = {
-  payment_method: "", note: "", active_flag: true, payment_method_name: "",
-  beneficiary_name: "", beneficiary_address: "", bank_name: "", account_number: "",
-  ifsc_code: "", swift: "", iban: "", sort_code: "", bank_address: "", country: "",
-  state_region: "", city: "", postal_code: "", email: "",
+  payment_method: "",
+  note: "",
+  active_flag: true,
+  payment_method_name: "",
+  beneficiary_name: "",
+  beneficiary_address: "",
+  bank_name: "",
+  account_number: "",
+  ifsc_code: "",
+  swift: "",
+  iban: "",
+  sort_code: "",
+  bank_address: "",
+  country: "",
+  state_region: "",
+  city: "",
+  postal_code: "",
+  email: "",
 };
 
 const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
@@ -29,11 +43,22 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
     if (methodToEdit) {
       let detailsToFlatten = {};
 
-      if (methodToEdit.payment_method === "bank_transfer" && methodToEdit.bank_transfer_detail) {
+      if (
+        methodToEdit.payment_method === "bank_transfer" &&
+        methodToEdit.bank_transfer_detail
+      ) {
         detailsToFlatten = methodToEdit.bank_transfer_detail;
-      } else if (["paypal", "payoneer", "skrill"].includes(methodToEdit.payment_method) && methodToEdit.email_payment_detail) {
+      } else if (
+        ["paypal", "payoneer", "skrill"].includes(
+          methodToEdit.payment_method
+        ) &&
+        methodToEdit.email_payment_detail
+      ) {
         detailsToFlatten = methodToEdit.email_payment_detail;
-      } else if (methodToEdit.payment_method === "other" && methodToEdit.other_payment_detail) {
+      } else if (
+        methodToEdit.payment_method === "other" &&
+        methodToEdit.other_payment_detail
+      ) {
         detailsToFlatten = methodToEdit.other_payment_detail;
       }
 
@@ -67,7 +92,10 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
       setError("Bank Name is required for Bank Transfer.");
       return;
     }
-    if (["paypal", "payoneer", "skrill"].includes(formData.payment_method) && !formData.email) {
+    if (
+      ["paypal", "payoneer", "skrill"].includes(formData.payment_method) &&
+      !formData.email
+    ) {
       setError("Email is required for this payment method.");
       return;
     }
@@ -89,12 +117,24 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
 
     if (formData.payment_method === "bank_transfer") {
       payload.details = {
-        payment_method_name: formData.payment_method_name, beneficiary_name: formData.beneficiary_name, beneficiary_address: formData.beneficiary_address,
-        bank_name: formData.bank_name, account_number: formData.account_number, ifsc_code: formData.ifsc_code, swift: formData.swift,
-        iban: formData.iban, sort_code: formData.sort_code, bank_address: formData.bank_address, country: formData.country,
-        state_region: formData.state_region, city: formData.city, postal_code: formData.postal_code,
+        payment_method_name: formData.payment_method_name,
+        beneficiary_name: formData.beneficiary_name,
+        beneficiary_address: formData.beneficiary_address,
+        bank_name: formData.bank_name,
+        account_number: formData.account_number,
+        ifsc_code: formData.ifsc_code,
+        swift: formData.swift,
+        iban: formData.iban,
+        sort_code: formData.sort_code,
+        bank_address: formData.bank_address,
+        country: formData.country,
+        state_region: formData.state_region,
+        city: formData.city,
+        postal_code: formData.postal_code,
       };
-    } else if (["paypal", "payoneer", "skrill"].includes(formData.payment_method)) {
+    } else if (
+      ["paypal", "payoneer", "skrill"].includes(formData.payment_method)
+    ) {
       payload.details = { email: formData.email };
     } else if (formData.payment_method === "other") {
       payload.details = { payment_method_name: formData.payment_method_name };
@@ -113,8 +153,19 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
           className="absolute top-7 left-7 text-gray-400 hover:text-gray-600 transition-colors"
           aria-label="Back"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
         </button>
 
@@ -134,7 +185,10 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6">
-            <PaymentMethodFields formData={formData} handleChange={handleChange} />
+            <PaymentMethodFields
+              formData={formData}
+              handleChange={handleChange}
+            />
 
             <div className="md:col-span-2">
               <FormTextarea
@@ -160,10 +214,17 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <div className="flex justify-end space-x-4 pt-4">
-            <button type="button" onClick={onCancel} className="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 transition">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 transition"
+            >
               Cancel
             </button>
-            <button type="submit" className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition shadow-md">
+            <button
+              type="submit"
+              className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition shadow-md"
+            >
               Save
             </button>
           </div>

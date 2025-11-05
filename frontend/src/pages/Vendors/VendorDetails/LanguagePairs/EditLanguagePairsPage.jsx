@@ -12,12 +12,10 @@ const EditLanguagePairsPage = ({ vendorId, onUpdateComplete }) => {
       try {
         setLoading(true);
 
-        // Fetch all admin language pairs
         const { data: adminPairsRes } = await api.get("/admin-language-pairs", {
           withCredentials: true,
         });
 
-        // Fetch vendor-specific language pairs
         const { data: vendorPairsRes } = await api.get(
           `/vendor-language-pairs/${vendorId}/language-pairs`,
           { withCredentials: true }
@@ -75,7 +73,6 @@ const EditLanguagePairsPage = ({ vendorId, onUpdateComplete }) => {
       const selected = isPairSelected(pair.id);
 
       if (!selected) {
-        // ✅ Add vendor-language-pair
         const alreadyExists = vendorLanguagePairs.some(
           (vp) => Number(vp.language_pair_id) === Number(pair.id)
         );
@@ -103,7 +100,6 @@ const EditLanguagePairsPage = ({ vendorId, onUpdateComplete }) => {
           },
         ]);
       } else {
-        // ❌ Remove vendor-language-pair
         const vendorPair = vendorLanguagePairs.find(
           (vp) => Number(vp.language_pair_id) === Number(pair.id)
         );

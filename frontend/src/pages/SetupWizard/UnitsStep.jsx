@@ -99,7 +99,6 @@ const UnitsStep = ({ onNext, onBack }) => {
       className="flex flex-col bg-white shadow-md rounded-lg"
       style={{ width: "800px", height: "400px" }}
     >
-      {/* Top: Heading + Form */}
       <div className="p-4 border-b">
         <h2 className="text-2xl font-bold mb-4 text-center">Add Units</h2>
 
@@ -123,7 +122,6 @@ const UnitsStep = ({ onNext, onBack }) => {
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
-      {/* Middle: Scrollable list */}
       <div className="flex-1 overflow-y-auto p-4">
         {units.length === 0 ? (
           <p className="text-gray-500">No units added yet.</p>
@@ -193,7 +191,6 @@ const UnitsStep = ({ onNext, onBack }) => {
         )}
       </div>
 
-      {/* Bottom: Navigation buttons */}
       <div className="p-4 border-t flex justify-between">
         <button
           onClick={onBack}

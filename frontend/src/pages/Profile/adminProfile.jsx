@@ -41,8 +41,14 @@ const ProfilePage = () => {
 
   const handleSave = async () => {
     try {
-      const { email, gender, teams_id, zoom_id, language_email, ...updateData } =
-        formData;
+      const {
+        email,
+        gender,
+        teams_id,
+        zoom_id,
+        language_email,
+        ...updateData
+      } = formData;
 
       const res = await api.put("/admin-details", updateData);
 

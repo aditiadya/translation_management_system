@@ -77,7 +77,9 @@ const PaymentMethodPage = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <BackButton to="/system-values" />
-            <h1 className="text-3xl font-bold text-gray-800">Payment Methods</h1>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Payment Methods
+            </h1>
           </div>
 
           {!isFormVisible && (

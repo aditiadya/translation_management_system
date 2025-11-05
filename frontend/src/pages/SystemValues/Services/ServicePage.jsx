@@ -39,8 +39,13 @@ const ServicesPage = () => {
         const res = await api.post("/admin-services", formData);
         setServices([...services, res.data.data]);
       } else {
-        const res = await api.put(`/admin-services/${activeService.id}`, formData);
-        setServices(services.map((s) => (s.id === activeService.id ? res.data.data : s)));
+        const res = await api.put(
+          `/admin-services/${activeService.id}`,
+          formData
+        );
+        setServices(
+          services.map((s) => (s.id === activeService.id ? res.data.data : s))
+        );
       }
       setIsFormVisible(false);
       setActiveService(null);
@@ -61,22 +66,21 @@ const ServicesPage = () => {
       alert("Failed to delete service");
     }
   };
-  
+
   const handleAddNewClick = () => {
     setActiveService("new");
     setIsFormVisible(true);
   };
-  
+
   const handleEditClick = (service) => {
     setActiveService(service);
     setIsFormVisible(true);
   };
-  
+
   const handleCancelForm = () => {
     setIsFormVisible(false);
     setActiveService(null);
   };
-
 
   if (loading) return <div className="text-center mt-20">Loading...</div>;
 

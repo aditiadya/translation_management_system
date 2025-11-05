@@ -42,7 +42,6 @@ const ServiceForm = ({ serviceToEdit, onSave, onCancel }) => {
   return (
     <div className="flex justify-center items-start min-h-screen bg-gray-50 px-4 pt-12">
       <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg relative">
-
         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
           {serviceToEdit ? "Edit Service" : "Create Service"}
         </h2>

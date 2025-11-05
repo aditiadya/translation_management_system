@@ -28,7 +28,8 @@ const DocumentsPage = ({ clientId }) => {
   }, [clientId]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this document?")) return;
+    if (!window.confirm("Are you sure you want to delete this document?"))
+      return;
     try {
       await api.delete(`/client-documents/${id}`, { withCredentials: true });
       setDocuments((prev) => prev.filter((doc) => doc.id !== id));
@@ -46,7 +47,9 @@ const DocumentsPage = ({ clientId }) => {
   return (
     <main className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-lg font-semibold text-gray-700">Client Documents</h1>
+        <h1 className="text-lg font-semibold text-gray-700">
+          Client Documents
+        </h1>
 
         <div className="flex space-x-4">
           <button
@@ -57,7 +60,7 @@ const DocumentsPage = ({ clientId }) => {
           </button>
 
           <button
-            onClick={() => alert('Add URL feature coming soon!')}
+            onClick={() => alert("Add URL feature coming soon!")}
             className="flex items-center bg-gray-600 hover:bg-gray-700 text-white font-medium px-6 py-2 rounded shadow"
           >
             <FaLink className="mr-2" /> Add URL
@@ -67,9 +70,13 @@ const DocumentsPage = ({ clientId }) => {
 
       <div className="overflow-x-auto shadow rounded-lg bg-white">
         {loading ? (
-          <div className="text-center text-gray-500 py-6">Loading documents...</div>
+          <div className="text-center text-gray-500 py-6">
+            Loading documents...
+          </div>
         ) : documents.length === 0 ? (
-          <div className="text-center text-gray-500 py-6">No documents found.</div>
+          <div className="text-center text-gray-500 py-6">
+            No documents found.
+          </div>
         ) : (
           <DocumentsTable documents={documents} onDelete={handleDelete} />
         )}

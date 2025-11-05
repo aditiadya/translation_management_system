@@ -77,13 +77,12 @@ const AddClientPoolPage = () => {
           isSidebarOpen ? "md:ml-64" : "md:ml-20"
         }`}
       >
-        
         <div className="bg-white rounded-xl shadow-md p-8 mb-8">
-            <div className="flex items-center gap-4 mb-8">
-        <BackButton to="/client-pools"  className={"mt-1"}/>
-          <h1 className="text-3xl font-bold text-gray-800">
-            Create Client Pool
-          </h1>
+          <div className="flex items-center gap-4 mb-8">
+            <BackButton to="/client-pools" className={"mt-1"} />
+            <h1 className="text-3xl font-bold text-gray-800">
+              Create Client Pool
+            </h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

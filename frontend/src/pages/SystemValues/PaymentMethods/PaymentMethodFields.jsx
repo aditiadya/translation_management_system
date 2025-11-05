@@ -110,7 +110,6 @@ const PaymentMethodFields = ({ formData, handleChange }) => {
             onChange={handleChange}
             required
           />
-          
         </>
       );
 
@@ -124,7 +123,6 @@ const PaymentMethodFields = ({ formData, handleChange }) => {
             onChange={handleChange}
             required
           />
-          
         </>
       );
 

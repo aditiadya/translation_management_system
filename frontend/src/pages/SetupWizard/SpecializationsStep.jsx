@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../utils/axiosInstance";
 
 const SpecializationsStep = ({ onNext, onBack }) => {
@@ -100,9 +100,10 @@ const SpecializationsStep = ({ onNext, onBack }) => {
       className="flex flex-col bg-white shadow-md rounded-lg"
       style={{ width: "800px", height: "400px" }}
     >
-      {/* Top: Heading + Form */}
       <div className="p-4 border-b">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Specializations</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Add Specializations
+        </h2>
 
         <div className="flex mb-2">
           <input
@@ -124,7 +125,6 @@ const SpecializationsStep = ({ onNext, onBack }) => {
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
-      {/* Middle: Scrollable list */}
       <div className="flex-1 overflow-y-auto p-4">
         {specializations.length === 0 ? (
           <p className="text-gray-500">No specializations added yet.</p>
@@ -194,7 +194,6 @@ const SpecializationsStep = ({ onNext, onBack }) => {
         )}
       </div>
 
-      {/* Bottom: Navigation buttons */}
       <div className="p-4 border-t flex justify-between">
         <button
           onClick={onBack}

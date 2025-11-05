@@ -2,7 +2,14 @@ import { useState } from "react";
 import api from "../../utils/axiosInstance";
 import ConfirmModal from "../../components/Modals/ConfirmModal";
 
-const PoolInfoCard = ({ pool, isEditing, setIsEditing, infoForm, setInfoForm, setPool }) => {
+const PoolInfoCard = ({
+  pool,
+  isEditing,
+  setIsEditing,
+  infoForm,
+  setInfoForm,
+  setPool,
+}) => {
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 

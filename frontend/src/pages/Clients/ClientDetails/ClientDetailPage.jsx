@@ -28,7 +28,6 @@ const ClientDetailPage = () => {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
   const [activeTab, setActiveTab] = useState("General Info");
 
@@ -93,7 +92,6 @@ const ClientDetailPage = () => {
           isSidebarOpen ? "md:ml-64" : "md:ml-20"
         }`}
       >
-        {/* Tabs */}
         <div className="border-b mb-6 flex space-x-6">
           {tabs.map((tab) => (
             <button
@@ -146,48 +144,20 @@ const ClientDetailPage = () => {
           </>
         )}
 
-        {activeTab === "Contact Persons" && (
-          <ContactPersonsPage clientId={id} />
-        )}
+        {activeTab === "Contact Persons" && <ContactPersonsPage clientId={id} />}
 
-        {activeTab === "Client Pools" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Client Pools</h2>
-            <p className="text-gray-500">Client pool details will go here.</p>
-          </div>
-        )}
+        {/* {activeTab === "Client Pools" && <ClientPoolsPage clientId={id} />} */}
 
-        {activeTab === "CRM" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">CRM</h2>
-            <p className="text-gray-500">
-              CRM integration details will go here.
-            </p>
-          </div>
-        )}
+        {/* {activeTab === "CRM" && <CRMPage clientId={id} />} */}
 
-        {activeTab === "Price List" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Price List</h2>
-            <p className="text-gray-500">Price list details will go here.</p>
-          </div>
-        )}
+        {/* {activeTab === "Price List" && <PriceListPage clientId={id} />} */}
 
-        {activeTab === "Taxes" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Taxes</h2>
-            <p className="text-gray-500">Tax details will go here.</p>
-          </div>
-        )}
+        {/* {activeTab === "Taxes" && <TaxesPage clientId={id} />} */}
 
         {activeTab === "Documents" && <DocumentsPage clientId={id} />}
 
-        {activeTab === "Project Charts" && (
-          <div className="p-4 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Project Charts</h2>
-            <p className="text-gray-500">Charts and reports will go here.</p>
-          </div>
-        )}
+        {/* {activeTab === "Project Charts" && <ProjectChartsPage clientId={id} />} */}
+
       </main>
     </>
   );
