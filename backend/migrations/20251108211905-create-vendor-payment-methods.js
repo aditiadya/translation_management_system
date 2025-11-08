@@ -33,6 +33,11 @@ export async function up(queryInterface, Sequelize) {
       allowNull: false,
       defaultValue: true,
     },
+    is_default: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     created_at: {
       type: Sequelize.DATE,
       allowNull: false,
