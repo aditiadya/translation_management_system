@@ -44,9 +44,9 @@ const DocumentsPage = ({ vendorId }) => {
   };
 
   return (
-    <main className="p-6">
+    <main>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-lg font-semibold text-gray-700">Vendor Documents</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Vendor Documents</h1>
 
         <div className="flex space-x-4">
           <button

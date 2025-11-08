@@ -9,7 +9,7 @@ const VendorLanguagePairsTable = ({ languagePairs = [] }) => {
 
   return (
     <div className="overflow-x-auto mt-6">
-      <table className="min-w-full border border-gray-200 rounded-lg shadow-sm">
+      <table className="w-1/2 border border-gray-200 rounded-lg shadow-sm">
         <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
           <tr>
             <th className="px-6 py-3 text-left">Source Language</th>
