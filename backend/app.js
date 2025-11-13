@@ -32,6 +32,7 @@ import vendorSpecializationsRoutes from "./routes/vendorSpecializationsRoutes.js
 import vendorLanguagePairsRoutes from "./routes/vendorLanguagePairsRoutes.js"
 import vendorSettingRoutes from "./routes/vendorSettingRoutes.js"
 import vendorPaymentMethodRoutes from "./routes/vendorPaymentMethodRoutes.js"
+import vendorPriceListRoutes from "./routes/vendorPriceListRoutes.js"
 
 const app = express();
 
@@ -79,6 +80,7 @@ app.use("/api/vendor-specializations", vendorSpecializationsRoutes);
 app.use("/api/vendor-language-pairs", vendorLanguagePairsRoutes);
 app.use("/api/vendor-settings", vendorSettingRoutes);
 app.use("/api/vendor-payment-methods", vendorPaymentMethodRoutes);
+app.use("/api/vendor-price-list", vendorPriceListRoutes);
 
 
 export default app;
