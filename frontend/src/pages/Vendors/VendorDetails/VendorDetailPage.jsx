@@ -12,6 +12,7 @@ import DocumentsPage from "./VendorDocuments/DocumentsPage";
 import VendorServicesPage from "./Services/VendorServicesPage";
 import VendorLanguagePairsPage from "./LanguagePairs/VendorLanguagePairsPage"
 import VendorSpecializationsPage from "./Specializations/VendorSpecializationsPage";
+import PaymentMethodsPage from "./PaymentMethods/PaymentMethodPage";
 
 const tabs = [
   "General Info",
@@ -154,9 +155,9 @@ const VendorDetailPage = () => {
           <ContactPersonsPage vendorId={id} />
         )}
 
-        {/* {activeTab === "Payment Methods" && (
+        {activeTab === "Payment Methods" && (
           <PaymentMethodsPage vendorId={id} />
-        )} */}
+        )}
 
         {activeTab === "Services" && (
           <VendorServicesPage vendorId={id} />
