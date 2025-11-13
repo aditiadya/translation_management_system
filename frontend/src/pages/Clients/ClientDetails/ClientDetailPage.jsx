@@ -9,6 +9,7 @@ import PrimaryUserEditForm from "./GeneralInfo/PrimaryUserEditForm";
 import SettingsEditForm from "./GeneralInfo/SettingsEditForm";
 import ContactPersonsPage from "./ContactPersons/ContactPersonsPage";
 import DocumentsPage from "./ClientDocuments/DocumentsPage";
+import PriceListPage from "./PriceList/PriceListPage";
 
 const tabs = [
   "General Info",
@@ -150,7 +151,7 @@ const ClientDetailPage = () => {
 
         {/* {activeTab === "CRM" && <CRMPage clientId={id} />} */}
 
-        {/* {activeTab === "Price List" && <PriceListPage clientId={id} />} */}
+        {activeTab === "Price List" && <PriceListPage clientId={id} />}
 
         {/* {activeTab === "Taxes" && <TaxesPage clientId={id} />} */}
 

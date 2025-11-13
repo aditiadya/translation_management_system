@@ -23,6 +23,7 @@ import clientDetailsRoutes from "./routes/clientDetailsRoutes.js"
 import clientPoolRoutes from "./routes/clientPoolRoutes.js"
 import clientContactPersonRoutes from "./routes/clientContactPersonRoutes.js"
 import clientDocumentsRoutes from "./routes/clientDocumentsRoutes.js"
+import clientPriceListRoutes from "./routes/clientPriceListRoutes.js"
 
 import vendorDetailsRoutes from "./routes/vendorDetailsRoutes.js"
 import vendorContactPersonRoutes from "./routes/vendorContactPersonRoutes.js"
@@ -71,6 +72,7 @@ app.use("/api/clients", clientDetailsRoutes);
 app.use("/api/client-pools", clientPoolRoutes);
 app.use("/api/client/contact-persons", clientContactPersonRoutes);
 app.use("/api/client-documents", clientDocumentsRoutes);
+app.use("/api/client-price-list", clientPriceListRoutes);
 
 app.use("/api/vendors", vendorDetailsRoutes);
 app.use("/api/vendor/contact-persons", vendorContactPersonRoutes);
