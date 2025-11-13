@@ -1,7 +1,5 @@
 import 'dotenv/config';  
 import app from './app.js';
-import db from './models/index.js';
-const { AdminAuth, AdminDetails } = db;
 import { connectDB } from './config/db.js';
 import { sequelize } from './config/db.js';
 
