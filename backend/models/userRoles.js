@@ -49,7 +49,7 @@ UserRoles.associate = (models) => {
   if (models.Roles) {
     UserRoles.belongsTo(models.Roles, {
       foreignKey: 'role_id',
-      as: 'role',
+      as: 'role_details',
       onDelete: 'CASCADE',
     });
   }

@@ -82,7 +82,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
             <option value="">Select service</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.service?.name}
+                {s.name}
               </option>
             ))}
           </select>
@@ -100,7 +100,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
             <option value="">Select language pair</option>
             {languagePairs.map((lp) => (
               <option key={lp.id} value={lp.id}>
-                {lp.language_pair?.source_language_id} → {lp.language_pair?.target_language_id}
+                {lp.source_language_id} → {lp.target_language_id}
               </option>
             ))}
           </select>
@@ -118,7 +118,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
             <option value="">Select specialization</option>
             {specializations.map((sp) => (
               <option key={sp.id} value={sp.id}>
-                {sp.specialization?.name}
+                {sp.name}
               </option>
             ))}
           </select>

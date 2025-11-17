@@ -15,10 +15,12 @@ import {
 
 const router = express.Router();
 
-router.post("/", authenticateToken, createVendorPrice);
-router.get("/", authenticateToken, getAllVendorPrices);
-router.get("/:id", authenticateToken, getVendorPriceById);
-router.put("/:id", authenticateToken, updateVendorPrice);
-router.delete("/:id", authenticateToken, deleteVendorPrice);
+router.use(authenticateToken);
+
+router.post("/", createVendorPrice);
+router.get("/", getAllVendorPrices);
+router.get("/:id", getVendorPriceById);
+router.put("/:id", updateVendorPrice);
+router.delete("/:id", deleteVendorPrice);
 
 export default router;

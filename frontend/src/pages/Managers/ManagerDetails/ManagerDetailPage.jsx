@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import Sidebar from "../../../components/Sidebar/Sidebar";
@@ -15,30 +15,30 @@ const ManagerDetailPage = () => {
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
+  const fetchManager = async () => {
+    try {
+      const response = await api.get(`/managers/${id}`, {
+        withCredentials: true,
+      });
+      setManager(response.data.data);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch manager details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchManager = async () => {
-      try {
-        const response = await api.get(`/managers/${id}`, {
-          withCredentials: true,
-        });
-        setManager(response.data.data);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to fetch manager details");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchManager();
   }, [id]);
 
+  
+
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this manager?"))
-      return;
 
     try {
       await api.delete(`/managers/${id}`, { withCredentials: true });
-      alert("Manager deleted successfully");
       navigate("/managers");
     } catch (err) {
       console.error(err);
@@ -91,6 +91,7 @@ const ManagerDetailPage = () => {
             id={id}
             navigate={navigate}
             setIsEditing={setIsEditing}
+            refreshManager={fetchManager}
           />
         )}
       </main>

@@ -17,10 +17,10 @@ const CreateManagerPage = () => {
           isSidebarOpen ? "md:ml-64" : "md:ml-20"
         }`}
       >
-        <div className="bg-white rounded-xl shadow-md p-8 mb-8">
-          <div className="flex items-center gap-4 mb-8">
+        <div>
+          <div className="flex items-center gap-3 mb-5">
             <BackButton to="/managers" />
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-gray-900">
               Create New Manager
             </h1>
           </div>

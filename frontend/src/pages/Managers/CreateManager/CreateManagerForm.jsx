@@ -5,13 +5,6 @@ import { AuthContext } from "../../../context/AuthContext";
 import FormInput from "../../../components/Form/FormInput";
 import FormSelect from "../../../components/Form/FormSelect";
 import CheckboxField from "../../../components/Form/CheckboxField";
-import Button from "../../../components/Button/Button";
-
-const roles = [
-  { id: "1", name: "Administrator" },
-  { id: "2", name: "Project Manager" },
-  { id: "3", name: "Translation Manager" },
-];
 
 const staticTimezones = ["UTC−12:00", "UTC−11:00", "UTC−10:00", "UTC−09:00"];
 
@@ -37,6 +30,7 @@ const CreateManagerForm = () => {
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
   const [clientPools, setClientPools] = useState([]);
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     const fetchClientPools = async () => {
@@ -52,14 +46,25 @@ const CreateManagerForm = () => {
     fetchClientPools();
   }, [user.id]);
 
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await api.get("/manager-roles", { withCredentials: true });
+        setRoles(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch roles:", err.response || err);
+      }
+    };
+
+    fetchRoles();
+  }, []);
+
   const validate = () => {
     const currentErrors = {};
     if (!form.role_id) currentErrors.role_id = "Role is required.";
     if (!form.first_name) currentErrors.first_name = "First name is required.";
     if (!form.last_name) currentErrors.last_name = "Last name is required.";
     if (!form.email) currentErrors.email = "Email is required.";
-    if (!form.client_pool_id)
-      currentErrors.client_pool_id = "Client Pool is required.";
     setErrors(currentErrors);
     return Object.keys(currentErrors).length === 0;
   };
@@ -68,13 +73,7 @@ const CreateManagerForm = () => {
     const { name, value } = e.target;
     let errorMsg = "";
     if (
-      [
-        "role_id",
-        "first_name",
-        "last_name",
-        "email",
-        "client_pool_id",
-      ].includes(name) &&
+      ["role_id", "first_name", "last_name", "email"].includes(name) &&
       !value
     ) {
       errorMsg =
@@ -82,8 +81,6 @@ const CreateManagerForm = () => {
           ? "Role is required."
           : name === "email"
           ? "Email is required."
-          : name === "client_pool_id"
-          ? "Client Pool is required."
           : `${name.replace("_", " ")} is required.`;
     }
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
@@ -100,12 +97,25 @@ const CreateManagerForm = () => {
     setSuccess("");
   };
 
+  const formatFormData = () => {
+    const f = { ...form };
+
+    if (f.client_pool_id === "") f.client_pool_id = null;
+    else f.client_pool_id = Number(f.client_pool_id);
+
+    if (f.role_id !== "") f.role_id = Number(f.role_id);
+
+    return f;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     try {
-      const response = await api.post("/managers", form, {
+      const payload = formatFormData();
+
+      const response = await api.post("/managers", payload, {
         withCredentials: true,
       });
 
@@ -123,18 +133,33 @@ const CreateManagerForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-8">
-        <FormSelect
-          label="Role"
-          name="role_id"
-          value={form.role_id}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          options={roles.map((r) => ({ value: r.id, label: r.name }))}
-          error={errors.role_id}
-          required
-        />
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="bg-white shadow rounded-lg p-8 space-y-5"
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1">
+        <div>
+          <FormSelect
+            label="Role"
+            name="role_id"
+            value={form.role_id}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            options={roles.map((r) => ({ value: r.id, label: r.name }))}
+            error={errors.role_id}
+            required
+          />
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => navigate("/system-roles")}
+              className="text-blue-600 underline text-sm hover:text-blue-800 transition"
+            >
+              System roles and access permissions
+            </button>
+          </div>
+        </div>
 
         <FormSelect
           label="Client Pool"
@@ -147,7 +172,6 @@ const CreateManagerForm = () => {
             label: pool.name,
           }))}
           error={errors.client_pool_id}
-          required
         />
 
         <FormInput
@@ -229,6 +253,12 @@ const CreateManagerForm = () => {
         name="can_login"
         checked={form.can_login}
         onChange={handleChange}
+        hint={
+          <span className="text-gray-500 text-sm mt-1">
+            Fields marked with <span className="text-red-600">*</span> are
+            mandatory.
+          </span>
+        }
       />
 
       {serverError && (
@@ -242,8 +272,20 @@ const CreateManagerForm = () => {
         </div>
       )}
 
-      <div className="flex justify-center">
-        <Button type="submit">Create Manager</Button>
+      <div className="mt-4 space-x-4">
+        <button
+          type="submit"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+        >
+          Submit
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/managers")}
+          className="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+        >
+          Cancel
+        </button>
       </div>
     </form>
   );

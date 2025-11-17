@@ -21,7 +21,7 @@ const ManagerView = ({ manager, onEdit, onResendInvitation, onDelete }) => {
         <div className="space-x-4">
           <button
             onClick={onEdit}
-            className="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
           >
             Update
           </button>
@@ -85,11 +85,7 @@ const ManagerView = ({ manager, onEdit, onResendInvitation, onDelete }) => {
             <div className="flex">
               <span className="w-40 font-medium text-gray-700">Role:</span>
               <span className="text-gray-900">
-                {manager.role.role_id === 1
-                  ? "Administrator"
-                  : manager.role.role_id === 2
-                  ? "Project Manager"
-                  : "Translation Manager"}
+                {manager.role.role_details?.name || "-"}
               </span>
             </div>
 
@@ -126,7 +122,7 @@ const ManagerView = ({ manager, onEdit, onResendInvitation, onDelete }) => {
           message="Are you sure you want to delete this manager?"
           onCancel={() => setIsModalOpen(false)}
           onConfirm={handleConfirmDelete}
-          confirmText="Yes, Delete"
+          confirmText="Delete"
           confirmColor="bg-red-600"
           confirmHoverColor="hover:bg-red-700"
         />

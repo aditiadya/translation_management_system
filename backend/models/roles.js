@@ -9,7 +9,7 @@ const Roles = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    roles: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -19,6 +19,10 @@ const Roles = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    category: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -26,6 +30,7 @@ const Roles = sequelize.define(
   },
   {
     tableName: "roles",
+    timestamps: false
   }
 );
 

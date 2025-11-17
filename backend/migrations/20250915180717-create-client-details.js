@@ -1,15 +1,13 @@
-import { DataTypes } from "sequelize";
-
-export async function up(queryInterface) {
+export async function up(queryInterface, Sequelize) {
   await queryInterface.createTable("client_details", {
     id: {
-      type: DataTypes.INTEGER,
+      type: Sequelize.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false,
     },
     auth_id: {
-      type: DataTypes.INTEGER,
+      type: Sequelize.INTEGER,
       allowNull: false,
       references: {
         model: "admin_auth",
@@ -27,75 +25,75 @@ export async function up(queryInterface) {
       onDelete: "CASCADE",
     },
     type: {
-      type: DataTypes.ENUM("Company", "Individual"),
+      type: Sequelize.ENUM("Company", "Individual"),
       allowNull: false,
     },
     company_name: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: true,
     },
     legal_entity: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: false,
     },
     status: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: false,
     },
     country: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: false,
     },
     state_region: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: true,
     },
     city: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: true,
     },
     postal_code: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: true,
     },
     address: {
-      type: DataTypes.TEXT,
+      type: Sequelize.TEXT,
       allowNull: true,
     },
     pan_tax_number: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: true,
     },
     gstin_vat_number: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: true,
     },
     website: {
-      type: DataTypes.STRING,
+      type: Sequelize.STRING,
       allowNull: true,
     },
     note: {
-      type: DataTypes.TEXT,
+      type: Sequelize.TEXT,
       allowNull: true,
     },
     can_login: {
-      type: DataTypes.BOOLEAN,
+      type: Sequelize.BOOLEAN,
       defaultValue: false,
     },
     createdAt: {
       allowNull: false,
-      type: DataTypes.DATE,
+      type: Sequelize.DATE,
       defaultValue: DataTypes.NOW,
     },
     updatedAt: {
       allowNull: false,
-      type: DataTypes.DATE,
+      type: Sequelize.DATE,
       defaultValue: DataTypes.NOW,
     },
   });
 
 }
 
-export async function down(queryInterface) {
+export async function down(queryInterface, Sequelize) {
   await queryInterface.dropTable("client_details");
 }

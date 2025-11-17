@@ -64,7 +64,7 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
           <tr className="bg-gray-100 text-black uppercase text-sm">
             <th className="py-3 px-4 text-left w-1/6">Payment Method Type</th>
             <th className="py-3 px-4 text-left w-1/6">Payment Method Name</th>
-            <th className="py-3 px-4 text-left w-1/3">Bank Info</th>
+            <th className="py-3 px-4 text-left w-1/3">Details</th>
             <th className="py-3 px-4 text-left w-1/4">Note</th>
             <th className="py-3 px-4 text-left w-1/12">Is Enabled</th>
             <th className="py-3 px-4 text-left w-1/6">Created At</th>

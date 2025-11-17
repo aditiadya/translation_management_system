@@ -203,10 +203,16 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
 
             <div className="md:col-span-2">
               <CheckboxField
-                label="Set as active payment method"
+                label="Active"
                 name="active_flag"
                 checked={formData.active_flag}
                 onChange={handleChange}
+                hint={
+          <span className="text-gray-500 text-sm mt-1">
+            Fields marked with <span className="text-red-600">*</span> are
+            mandatory.
+          </span>
+        }
               />
             </div>
           </div>

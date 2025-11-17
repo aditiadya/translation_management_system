@@ -41,7 +41,7 @@ const ManagersPage = () => {
           <h1 className="text-3xl font-bold text-gray-800">Managers</h1>
           <button
             onClick={() => navigate("/managers/create-manager")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded shadow"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
           >
             + New Manager
           </button>
@@ -55,7 +55,7 @@ const ManagersPage = () => {
           <div className="overflow-x-auto shadow rounded-lg bg-white">
             <table className="min-w-full leading-normal">
               <thead>
-                <tr className="bg-white text-black uppercase text-sm">
+                <tr className="bg-white text-sm text-black uppercase text-sm">
                   <th className="py-3 px-6 text-left">Name</th>
                   <th className="py-3 px-6 text-left">Role</th>
                   <th className="py-3 px-6 text-left">Client Pool</th>
@@ -79,27 +79,21 @@ const ManagersPage = () => {
                         : "hover:bg-gray-100"
                     }
                   >
-                    <td className="py-4 px-6 text-blue-600 underline hover:text-indigo-600 whitespace-nowrap">
+                    <td className="py-4 px-6 text-sm text-blue-600 underline hover:text-indigo-600 whitespace-nowrap">
                       <Link to={`/managers/${manager.id}`}>
                         {manager.first_name} {manager.last_name}
                       </Link>
                     </td>
-                    <td className="py-4 px-6 text-gray-700">
-                      {manager.role.role_id === 1
-                        ? "Administrator"
-                        : manager.role.role_id === 2
-                        ? "Project Manager"
-                        : manager.role.role_id === 3
-                        ? "Translation Manager"
-                        : "Unknown"}
+                    <td className="py-4 px-6 text-sm text-gray-700">
+                      {manager.role.role_details?.name}
                     </td>
-                    <td className="py-4 px-6 text-gray-700">
+                    <td className="py-4 px-6 text-sm text-gray-700">
                       {manager.client_pool?.name || "-"}
                     </td>
-                    <td className="py-4 px-6 text-gray-700 capitalize">
+                    <td className="py-4 px-6 text-sm text-gray-700 capitalize">
                       {manager.gender}
                     </td>
-                    <td className="py-4 px-6 text-blue-600">
+                    <td className="py-4 px-6 text-sm text-blue-600">
                       <a
                         href={`mailto:${manager.auth.email}`}
                         className="underline hover:text-indigo-600"
@@ -107,13 +101,13 @@ const ManagersPage = () => {
                         {manager.auth.email}
                       </a>
                     </td>
-                    <td className="py-4 px-6 text-gray-700">
+                    <td className="py-4 px-6 text-sm text-gray-700">
                       {manager.teams_id}
                     </td>
-                    <td className="py-4 px-6 text-gray-700">
+                    <td className="py-4 px-6 text-sm text-gray-700">
                       {manager.zoom_id}
                     </td>
-                    <td className="py-4 px-6 text-gray-700">{manager.phone}</td>
+                    <td className="py-4 px-6 text-sm text-gray-700">{manager.phone}</td>
                     <td className="py-4 px-6">
                       <span
                         className={`px-3 py-1 inline-block text-sm rounded-full ${
@@ -125,7 +119,7 @@ const ManagersPage = () => {
                         {manager.can_login ? "Enabled" : "Disabled"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-gray-500">—</td>
+                    <td className="py-4 px-6 text-sm text-gray-500">—</td>
                   </tr>
                 ))}
               </tbody>

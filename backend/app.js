@@ -35,6 +35,8 @@ import vendorSettingRoutes from "./routes/vendorSettingRoutes.js"
 import vendorPaymentMethodRoutes from "./routes/vendorPaymentMethodRoutes.js"
 import vendorPriceListRoutes from "./routes/vendorPriceListRoutes.js"
 
+import managerRolesRoutes from "./routes/managerRolesRoutes.js";
+
 const app = express();
 
 const corsOptions = {
@@ -83,6 +85,8 @@ app.use("/api/vendor-language-pairs", vendorLanguagePairsRoutes);
 app.use("/api/vendor-settings", vendorSettingRoutes);
 app.use("/api/vendor-payment-methods", vendorPaymentMethodRoutes);
 app.use("/api/vendor-price-list", vendorPriceListRoutes);
+
+app.use("/api/manager-roles", managerRolesRoutes);
 
 
 export default app;

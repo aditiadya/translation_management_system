@@ -14,12 +14,10 @@ import PriceListPage from "./PriceList/PriceListPage";
 const tabs = [
   "General Info",
   "Contact Persons",
-  "Client Pools",
   "CRM",
   "Price List",
   "Taxes",
   "Documents",
-  "Project Charts",
 ];
 
 const ClientDetailPage = () => {
@@ -147,8 +145,6 @@ const ClientDetailPage = () => {
 
         {activeTab === "Contact Persons" && <ContactPersonsPage clientId={id} />}
 
-        {/* {activeTab === "Client Pools" && <ClientPoolsPage clientId={id} />} */}
-
         {/* {activeTab === "CRM" && <CRMPage clientId={id} />} */}
 
         {activeTab === "Price List" && <PriceListPage clientId={id} />}
@@ -156,8 +152,6 @@ const ClientDetailPage = () => {
         {/* {activeTab === "Taxes" && <TaxesPage clientId={id} />} */}
 
         {activeTab === "Documents" && <DocumentsPage clientId={id} />}
-
-        {/* {activeTab === "Project Charts" && <ProjectChartsPage clientId={id} />} */}
 
       </main>
     </>

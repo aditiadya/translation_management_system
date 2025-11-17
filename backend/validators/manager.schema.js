@@ -76,7 +76,7 @@ export const updateManagerSchema = Joi.object({
     "string.base": "Last name must be a string",
   }),
 
-  gender: Joi.string().valid("Male", "Female", "Other").optional().allow(null, "").messages({
+  gender: Joi.string().valid("male", "female", "other").optional().allow(null, "").messages({
     "any.only": "Gender must be Male, Female, or Other",
   }),
 
