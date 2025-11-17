@@ -37,8 +37,8 @@ const ManagersPage = () => {
           isSidebarOpen ? "md:ml-64" : "md:ml-20"
         }`}
       >
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Managers</h1>
+        <div className="flex justify-between items-center gap-3 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">Managers</h2>
           <button
             onClick={() => navigate("/managers/create-manager")}
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
@@ -55,7 +55,7 @@ const ManagersPage = () => {
           <div className="overflow-x-auto shadow rounded-lg bg-white">
             <table className="min-w-full leading-normal">
               <thead>
-                <tr className="bg-white text-sm text-black uppercase text-sm">
+                <tr className="bg-white text-black uppercase text-sm">
                   <th className="py-3 px-6 text-left">Name</th>
                   <th className="py-3 px-6 text-left">Role</th>
                   <th className="py-3 px-6 text-left">Client Pool</th>
