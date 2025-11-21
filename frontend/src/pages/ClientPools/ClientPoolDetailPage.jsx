@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../utils/axiosInstance";
-import Navbar from "../../components/Navbar/Navbar";
-import Sidebar from "../../components/Sidebar/Sidebar";
 import PoolInfoCard from "./PoolInfoCard";
 import ClientsCard from "./ClientsCard";
 import ManagersCard from "./ManagersCard";
@@ -16,7 +14,6 @@ const ClientPoolDetailsPage = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [isEditingClients, setIsEditingClients] = useState(false);
   const [isEditingManagers, setIsEditingManagers] = useState(false);
@@ -97,13 +94,6 @@ const ClientPoolDetailsPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-      <main
-        className={`transition-all duration-300 bg-gray-100 min-h-screen p-8 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Client Pool</h1>
         </div>
@@ -137,7 +127,6 @@ const ClientPoolDetailsPage = () => {
           handleMultiSelect={handleMultiSelect}
           setPool={setPool}
         />
-      </main>
     </>
   );
 };

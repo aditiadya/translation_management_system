@@ -35,24 +35,50 @@ export default function AccountActivation() {
     checkToken();
   }, [token]);
 
+  const validateUsernameRules = (username) => {
+  const errors = [];
+
+  if (username.length < 6) {
+    errors.push("Minimum 6 characters required.");
+  }
+
+  if (!/^[A-Za-z0-9.]+$/.test(username)) {
+    errors.push("Allowed characters: English letter, number and dot (.)");
+  }
+
+  return errors;
+};
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleBlur = (e) => {
-    const { name, value } = e.target;
-    let message = "";
+  const { name, value } = e.target;
+  let message = "";
 
-    if (!value.trim()) {
-      message = `${name.charAt(0).toUpperCase() + name.slice(1)} is required`;
-    } else if (name === "password" && value.length < 6) {
-      message = "Password must be at least 6 characters";
-    } else if (name === "confirmPassword" && value !== form.password) {
-      message = "Passwords do not match";
+  if (!value.trim()) {
+    message = `${name.charAt(0).toUpperCase() + name.slice(1)} is required`;
+  } 
+  else if (name === "username") {
+    const basicPattern = /^[A-Za-z0-9.]+$/;
+
+    if (value.length < 6) {
+      message = "Username must be at least 6 characters";
+    } else if (!basicPattern.test(value)) {
+      message = "Only letters, numbers, and dots are allowed";
     }
+  }
+  else if (name === "password" && value.length < 8) {
+    message = "Password must be at least 8 characters";
+  } 
+  else if (name === "confirmPassword" && value !== form.password) {
+    message = "Passwords do not match";
+  }
 
-    setFieldErrors({ ...fieldErrors, [name]: message });
-  };
+  setFieldErrors({ ...fieldErrors, [name]: message });
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,6 +91,17 @@ export default function AccountActivation() {
     }
 
     try {
+
+      if (form.username.length < 6) {
+  setError("Username must be at least 6 characters");
+  return;
+}
+
+if (!/^[A-Za-z0-9.]+$/.test(form.username)) {
+  setError("Username can only contain letters, numbers, and dots");
+  return;
+}
+
       const res = await api.post(`/auth/activate/${token}`, {
         username: form.username,
         password: form.password,
@@ -132,20 +169,38 @@ export default function AccountActivation() {
 
         {/* Username */}
         <div className="mb-4">
-          <label className="block mb-1 font-medium">Username</label>
-          <input
-            type="text"
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            className="w-full border rounded-lg p-2"
-            required
-          />
-          {fieldErrors.username && (
-            <p className="text-red-600 text-sm">{fieldErrors.username}</p>
-          )}
-        </div>
+  <label className="block mb-1 font-medium">Username</label>
+
+  <input
+    type="text"
+    name="username"
+    value={form.username}
+    onChange={handleChange}
+    onBlur={handleBlur}
+    className="w-full border rounded-lg p-2"
+    required
+  />
+
+  {/* Field error */}
+  {fieldErrors.username && (
+    <p className="text-red-600 text-sm mt-1">{fieldErrors.username}</p>
+  )}
+
+  {/* Username Rules */}
+  {form.username.length > 0 && (
+    <div className="mt-2 text-sm">
+      {validateUsernameRules(form.username).length === 0 ? (
+        <p className="text-green-600">✓ Username looks good</p>
+      ) : (
+        <ul className="text-red-600 list-disc ml-4">
+          {validateUsernameRules(form.username).map((rule, index) => (
+            <li key={index}>{rule}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )}
+</div>
 
         {/* Password */}
         <div className="mb-4">

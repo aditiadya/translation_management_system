@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import ConfirmModal from "../../../components/Modals/ConfirmModal";
+import CheckboxField from "../../../components/Form/CheckboxField";
 
 const CurrencyForm = ({ currencyToEdit, currencies, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     currencyId: "",
     active_flag: true,
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (currencyToEdit) {
@@ -30,12 +29,7 @@ const CurrencyForm = ({ currencyToEdit, currencies, onSave, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.currencyId) return alert("Please select a currency.");
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmSave = () => {
     onSave(formData);
-    setIsModalOpen(false);
   };
 
   return (
@@ -49,7 +43,7 @@ const CurrencyForm = ({ currencyToEdit, currencies, onSave, onCancel }) => {
           name="currencyId"
           value={formData.currencyId}
           onChange={handleChange}
-          className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full p-3 mb-5 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="" disabled>
             Select currency
@@ -61,17 +55,20 @@ const CurrencyForm = ({ currencyToEdit, currencies, onSave, onCancel }) => {
           ))}
         </select>
 
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="active_flag"
-            checked={formData.active_flag}
-            onChange={handleChange}
-          />
-          Active
-        </label>
+        <CheckboxField
+          label="Active"
+          name="active_flag"
+          checked={formData.active_flag}
+          onChange={handleChange}
+          hint={
+            <span className="text-gray-500 text-sm mt-1">
+              Fields marked with <span className="text-red-600">*</span> are
+              mandatory.
+            </span>
+          }
+        />
 
-        <div className="flex justify-center gap-4 mt-4">
+        <div className="flex justify-end gap-4 mt-4">
           <button
             type="submit"
             className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
@@ -87,18 +84,6 @@ const CurrencyForm = ({ currencyToEdit, currencies, onSave, onCancel }) => {
           </button>
         </div>
       </form>
-
-      {isModalOpen && (
-        <ConfirmModal
-          title="Confirm Save"
-          message="Do you want to save these changes?"
-          onCancel={() => setIsModalOpen(false)}
-          onConfirm={handleConfirmSave}
-          confirmText="Save"
-          confirmColor="bg-green-600"
-          confirmHoverColor="hover:bg-green-700"
-        />
-      )}
     </div>
   );
 };

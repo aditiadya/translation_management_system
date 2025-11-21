@@ -1,4 +1,3 @@
-import React from "react";
 import FormField from "./FormField";
 
 const ProfileInfoCard = ({
@@ -123,6 +122,12 @@ const ProfileInfoCard = ({
           {...{ isEditing, formData, admin, handleChange }}
         />
       </div>
+      {isEditing && (
+        <p className="text-sm text-gray-500 mt-2">
+          Fields marked with{" "}
+          <span className="text-red-500 font-semibold">*</span> are mandatory.
+        </p>
+      )}
     </div>
   );
 };

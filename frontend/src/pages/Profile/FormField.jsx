@@ -1,5 +1,19 @@
 import React from "react";
 
+const formatDateTime = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  const ss = String(date.getSeconds()).padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+};
+
 const FormField = React.memo(
   ({
     fieldKey,
@@ -12,7 +26,11 @@ const FormField = React.memo(
     admin,
     handleChange,
   }) => {
-    const value = isEditing ? formData[fieldKey] ?? "" : admin[fieldKey] ?? "-";
+    let value = isEditing ? formData[fieldKey] ?? "" : admin[fieldKey] ?? "-";
+
+    if (fieldKey === "createdAt" || fieldKey === "updatedAt") {
+      value = value ? formatDateTime(value) : "-";
+    }
 
     if (readOnly) {
       return (
@@ -20,7 +38,7 @@ const FormField = React.memo(
           <label className="block mb-2 text-sm font-medium text-gray-700">
             {label} {required && <span className="text-red-500">*</span>}
           </label>
-          <p className="text-gray-800  bg-gray-50 rounded-md w-3/4 p-2.5">
+          <p className="text-gray-800 bg-gray-50 rounded-md w-3/4 p-2.5">
             {value}
           </p>
         </div>
@@ -32,6 +50,7 @@ const FormField = React.memo(
         <label className="block mb-2 text-sm font-medium text-gray-700">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
+
         {isEditing ? (
           type === "select" ? (
             <select
@@ -48,6 +67,7 @@ const FormField = React.memo(
                   <option value="other">Other</option>
                 </>
               )}
+
               {fieldKey === "language_email" && (
                 <>
                   <option value="en">English</option>
@@ -55,6 +75,7 @@ const FormField = React.memo(
                   <option value="fr">French</option>
                 </>
               )}
+
               {fieldKey === "time_zone" && (
                 <>
                   <option value="IST">India Standard Time (IST)</option>

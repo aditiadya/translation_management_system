@@ -1,7 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "../../../components/Navbar/Navbar";
-import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
 import ManagerView from "./ManagerView";
 import ManagerEditForm from "./ManagerEditForm";
@@ -9,7 +7,6 @@ import ManagerEditForm from "./ManagerEditForm";
 const ManagerDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [manager, setManager] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,14 +67,6 @@ const ManagerDetailPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 flex-1 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         {!isEditing ? (
           <ManagerView
             manager={manager}
@@ -94,7 +83,6 @@ const ManagerDetailPage = () => {
             refreshManager={fetchManager}
           />
         )}
-      </main>
     </>
   );
 };

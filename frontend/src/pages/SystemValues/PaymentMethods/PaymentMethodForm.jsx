@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import FormSelect from "../../../components/Form/FormSelect";
 import CheckboxField from "../../../components/Form/CheckboxField";
-import ConfirmModal from "../../../components/Modals/ConfirmModal";
 import PaymentMethodFields from "./PaymentMethodFields";
 import FormTextarea from "../../../components/Form/TextArea";
 
@@ -37,7 +36,6 @@ const INITIAL_STATE = {
 const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
   const [formData, setFormData] = useState(INITIAL_STATE);
   const [error, setError] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (methodToEdit) {
@@ -49,9 +47,7 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
       ) {
         detailsToFlatten = methodToEdit.bank_transfer_detail;
       } else if (
-        ["paypal", "payoneer", "skrill"].includes(
-          methodToEdit.payment_method
-        ) &&
+        ["paypal", "payoneer", "skrill"].includes(methodToEdit.payment_method) &&
         methodToEdit.email_payment_detail
       ) {
         detailsToFlatten = methodToEdit.email_payment_detail;
@@ -84,6 +80,7 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+
     if (!formData.payment_method) {
       setError("Please select a Payment Method.");
       return;
@@ -103,11 +100,9 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
       setError("Payment Method Name is required for 'Other' method.");
       return;
     }
-    setError("");
-    setIsModalOpen(true);
-  };
 
-  const handleConfirmSave = () => {
+    setError("");
+
     const payload = {
       payment_method: formData.payment_method,
       note: formData.note,
@@ -141,7 +136,6 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
     }
 
     onSave(payload);
-    setIsModalOpen(false);
   };
 
   return (
@@ -208,11 +202,10 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
                 checked={formData.active_flag}
                 onChange={handleChange}
                 hint={
-          <span className="text-gray-500 text-sm mt-1">
-            Fields marked with <span className="text-red-600">*</span> are
-            mandatory.
-          </span>
-        }
+                  <span className="text-gray-500 text-sm mt-1">
+                    Fields marked with <span className="text-red-600">*</span> are mandatory.
+                  </span>
+                }
               />
             </div>
           </div>
@@ -235,18 +228,6 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
             </button>
           </div>
         </form>
-
-        {isModalOpen && (
-          <ConfirmModal
-            title="Confirm Save"
-            message="Do you want to save these changes?"
-            onCancel={() => setIsModalOpen(false)}
-            onConfirm={handleConfirmSave}
-            confirmText="Save"
-            confirmColor="bg-green-600"
-            confirmHoverColor="hover:bg-green-700"
-          />
-        )}
       </div>
     </div>
   );

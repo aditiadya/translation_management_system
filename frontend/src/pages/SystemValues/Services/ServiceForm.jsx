@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import FormInput from "../../../components/Form/FormInput";
 import CheckboxField from "../../../components/Form/CheckboxField";
-import ConfirmModal from "../../../components/Modals/ConfirmModal";
 
 const ServiceForm = ({ serviceToEdit, onSave, onCancel }) => {
   const [formData, setFormData] = useState({ name: "", active_flag: true });
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (serviceToEdit) {
@@ -31,12 +29,7 @@ const ServiceForm = ({ serviceToEdit, onSave, onCancel }) => {
     if (!formData.name.trim()) {
       return alert("Service name is required");
     }
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmSave = () => {
     onSave(formData);
-    setIsModalOpen(false);
   };
 
   return (
@@ -48,7 +41,7 @@ const ServiceForm = ({ serviceToEdit, onSave, onCancel }) => {
 
         <form onSubmit={handleFormSubmit} className="space-y-5">
           <FormInput
-            label="Service Name"
+            label="Name"
             name="name"
             value={formData.name}
             onChange={handleChange}
@@ -61,6 +54,12 @@ const ServiceForm = ({ serviceToEdit, onSave, onCancel }) => {
             name="active_flag"
             checked={formData.active_flag}
             onChange={handleChange}
+            hint={
+              <span className="text-gray-500 text-sm mt-1">
+                Fields marked with <span className="text-red-600">*</span> are
+                mandatory.
+              </span>
+            }
           />
 
           <div className="flex justify-end space-x-4 mt-6">
@@ -79,18 +78,6 @@ const ServiceForm = ({ serviceToEdit, onSave, onCancel }) => {
             </button>
           </div>
         </form>
-
-        {isModalOpen && (
-          <ConfirmModal
-            title="Confirm Save"
-            message="Do you want to save these changes?"
-            onCancel={() => setIsModalOpen(false)}
-            onConfirm={handleConfirmSave}
-            confirmText="Save"
-            confirmColor="bg-green-600"
-            confirmHoverColor="hover:bg-green-700"
-          />
-        )}
       </div>
     </div>
   );

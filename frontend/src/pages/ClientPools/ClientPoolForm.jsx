@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosInstance";
 import Button from "../../components/Button/Button";
 import FormInput from "../../components/Form/FormInput";
-import Navbar from "../../components/Navbar/Navbar";
-import Sidebar from "../../components/Sidebar/Sidebar";
 import FormTextarea from "../../components/Form/TextArea";
 import BackButton from "../../components/Button/BackButton";
 
@@ -20,7 +18,6 @@ const AddClientPoolPage = () => {
   const [clients, setClients] = useState([]);
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,13 +67,6 @@ const AddClientPoolPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-6 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         <div className="bg-white rounded-xl shadow-md p-8 mb-8">
           <div className="flex items-center gap-4 mb-8">
             <BackButton to="/client-pools" className={"mt-1"} />
@@ -210,7 +200,6 @@ const AddClientPoolPage = () => {
             </div>
           </form>
         </div>
-      </main>
     </>
   );
 };

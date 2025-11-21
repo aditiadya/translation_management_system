@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "../../../components/Navbar/Navbar";
-import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
 import ClientView from "./GeneralInfo/ClientView";
 import GeneralInfoEditForm from "./GeneralInfo/GeneralInfoEditForm";
@@ -23,7 +21,6 @@ const tabs = [
 const ClientDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -83,14 +80,6 @@ const ClientDetailPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 flex-1 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         <div className="border-b mb-6 flex space-x-6">
           {tabs.map((tab) => (
             <button
@@ -152,8 +141,6 @@ const ClientDetailPage = () => {
         {/* {activeTab === "Taxes" && <TaxesPage clientId={id} />} */}
 
         {activeTab === "Documents" && <DocumentsPage clientId={id} />}
-
-      </main>
     </>
   );
 };

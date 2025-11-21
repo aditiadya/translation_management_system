@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../utils/axiosInstance";
-import Navbar from "../../components/Navbar/Navbar";
-import Sidebar from "../../components/Sidebar/Sidebar";
 
 const ClientPoolsPage = () => {
   const navigate = useNavigate();
   const [pools, setPools] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fetchPools = async () => {
     try {
@@ -30,14 +27,6 @@ const ClientPoolsPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Client Pools</h1>
           <button
@@ -100,7 +89,6 @@ const ClientPoolsPage = () => {
             </table>
           </div>
         )}
-      </main>
     </>
   );
 };

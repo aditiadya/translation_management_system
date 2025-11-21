@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import Navbar from "../../../components/Navbar/Navbar";
-import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
 
 import UnitForm from "./UnitForm";
 import UnitList from "./UnitList";
 
 const UnitPage = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,19 +67,11 @@ const UnitPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 flex-1 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Units</h1>
           <button
             onClick={handleAddNew}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded shadow"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
           >
             + New Unit
           </button>
@@ -101,7 +90,6 @@ const UnitPage = () => {
         ) : (
           <UnitList units={units} onEdit={handleEdit} onDelete={handleDelete} />
         )}
-      </main>
     </>
   );
 };

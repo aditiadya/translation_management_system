@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../../../components/Navbar/Navbar";
-import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
 
 const ManagersPage = () => {
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,14 +26,6 @@ const ManagersPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 flex-1 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         <div className="flex justify-between items-center gap-3 mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Managers</h2>
           <button
@@ -126,7 +115,6 @@ const ManagersPage = () => {
             </table>
           </div>
         )}
-      </main>
     </>
   );
 };

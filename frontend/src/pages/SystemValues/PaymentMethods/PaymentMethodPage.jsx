@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import Navbar from "../../../components/Navbar/Navbar";
-import Sidebar from "../../../components/Sidebar/Sidebar";
 import api from "../../../utils/axiosInstance";
 import PaymentMethodForm from "./PaymentMethodForm";
 import PaymentMethodList from "./PaymentMethodList";
@@ -8,7 +6,6 @@ import ConfirmModal from "../../../components/Modals/ConfirmModal";
 import BackButton from "../../../components/Button/BackButton";
 
 const PaymentMethodPage = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -66,14 +63,6 @@ const PaymentMethodPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 flex-1 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <BackButton to="/system-values" />
@@ -88,7 +77,7 @@ const PaymentMethodPage = () => {
                 setActiveMethod("new");
                 setIsFormVisible(true);
               }}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded shadow"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
             >
               + New Method
             </button>
@@ -116,7 +105,6 @@ const PaymentMethodPage = () => {
             onDelete={(id) => setMethodToDelete(id)}
           />
         )}
-      </main>
 
       {methodToDelete && (
         <ConfirmModal

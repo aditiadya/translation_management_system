@@ -1,25 +1,21 @@
 import { useState, useEffect } from "react";
 import FormInput from "../../../components/Form/FormInput";
 import CheckboxField from "../../../components/Form/CheckboxField";
-import ConfirmModal from "../../../components/Modals/ConfirmModal";
 
 const UnitForm = ({ unitToEdit, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: "",
     active_flag: true,
-    is_word: true,
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (unitToEdit) {
       setFormData({
         name: unitToEdit.name,
         active_flag: unitToEdit.active_flag,
-        is_word: unitToEdit.is_word,
       });
     } else {
-      setFormData({ name: "", active_flag: true, is_word: true });
+      setFormData({ name: "", active_flag: true });
     }
   }, [unitToEdit]);
 
@@ -33,13 +29,10 @@ const UnitForm = ({ unitToEdit, onSave, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) return alert("Unit name is required");
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmSave = () => {
+    if (!formData.name.trim()) {
+      return alert("Unit name is required");
+    }
     onSave(formData);
-    setIsModalOpen(false);
   };
 
   return (
@@ -50,32 +43,33 @@ const UnitForm = ({ unitToEdit, onSave, onCancel }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormInput
-          label="Unit Name"
+          label="Name"
           name="name"
           value={formData.name}
           onChange={handleChange}
           required
         />
+
         <CheckboxField
           label="Active"
           name="active_flag"
           checked={formData.active_flag}
           onChange={handleChange}
-        />
-        <CheckboxField
-          label="Is Word"
-          name="is_word"
-          checked={formData.is_word}
-          onChange={handleChange}
+          hint={
+            <span className="text-gray-500 text-sm mt-1">
+              Fields marked with <span className="text-red-600">*</span> are mandatory.
+            </span>
+          }
         />
 
-        <div className="flex justify-center gap-4 mt-4">
+        <div className="flex justify-end gap-4 mt-4">
           <button
             type="submit"
             className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
           >
             Save
           </button>
+
           <button
             type="button"
             onClick={onCancel}
@@ -85,18 +79,6 @@ const UnitForm = ({ unitToEdit, onSave, onCancel }) => {
           </button>
         </div>
       </form>
-
-      {isModalOpen && (
-        <ConfirmModal
-          title="Confirm Save"
-          message="Do you want to save these changes?"
-          onCancel={() => setIsModalOpen(false)}
-          onConfirm={handleConfirmSave}
-          confirmText="Save"
-          confirmColor="bg-green-600"
-          confirmHoverColor="hover:bg-green-700"
-        />
-      )}
     </div>
   );
 };

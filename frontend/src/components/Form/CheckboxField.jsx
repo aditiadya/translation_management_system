@@ -3,7 +3,7 @@ const CheckboxField = ({
   name, 
   checked, 
   onChange, 
-  hint = "If checked, the system will send an invitation email." 
+  hint = "" 
 }) => (
   <div>
     <label className="flex items-center text-sm font-medium text-gray-700">

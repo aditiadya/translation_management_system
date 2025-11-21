@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/Navbar/Navbar";
-import Sidebar from "../../components/Sidebar/Sidebar";
 
 const systemOptions = [
   { name: "Services", path: "/system-values/services" },
@@ -13,7 +11,6 @@ const systemOptions = [
 ];
 
 const SystemValuesPage = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleNavigate = (path) => {
@@ -22,14 +19,6 @@ const SystemValuesPage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8 flex-1 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-20"
-        }`}
-      >
         <h1 className="text-3xl font-bold text-gray-800 mb-8">System Values</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,7 +37,6 @@ const SystemValuesPage = () => {
             </div>
           ))}
         </div>
-      </main>
     </>
   );
 };

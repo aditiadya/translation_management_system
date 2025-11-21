@@ -30,18 +30,19 @@ import SystemValuesPage from "./pages/SystemValues/SystemValuesPage";
 import CreateVendorPage from "./pages/Vendors/CreateVendor/CreateVendorPage";
 import VendorsPage from "./pages/Vendors/VendorList/VendorsPage";
 import VendorDetailPage from "./pages/Vendors/VendorDetails/VendorDetailPage";
+import MainLayout from "./components/Sidebar/MainLayout";
 
 
 const App = () => (
   <AuthProvider>
     <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
+      <Routes>  
         <Route path="/create-account" element={<AdminRegisteration />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/account-activation/:token" element={<AccountActivation />} />
         <Route path="/request-reset" element={<RequestReset />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route element={<MainLayout />}>
         <Route
           path="/dashboard"
           element={
@@ -50,6 +51,9 @@ const App = () => (
             </ProtectedRoute>
           }
         />
+        <Route path="/" element={<ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>} />
         <Route
           path="/setup"
           element={
@@ -226,6 +230,7 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          </Route>
       </Routes>
     </Router>
   </AuthProvider>

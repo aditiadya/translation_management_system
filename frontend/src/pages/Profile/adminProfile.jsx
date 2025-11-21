@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../../utils/axiosInstance";
-import Navbar from "../../components/Navbar/Navbar";
-import Sidebar from "../../components/Sidebar/Sidebar";
 import ProfileInfoCard from "./ProfileInfoCard";
 import ChangePasswordSection from "./ChangePasswordSection";
 
@@ -9,7 +7,6 @@ const ProfilePage = () => {
   const [admin, setAdmin] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -88,12 +85,6 @@ const ProfilePage = () => {
 
   return (
     <>
-      <Navbar />
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-      <main
-        className={`transition-all duration-300 bg-gray-50 min-h-screen p-8
-          ${isSidebarOpen ? "ml-64" : "ml-20"}`}
-      >
         <ProfileInfoCard
           admin={admin}
           isEditing={isEditing}
@@ -104,7 +95,6 @@ const ProfilePage = () => {
           handleSave={handleSave}
         />
         <ChangePasswordSection />
-      </main>
     </>
   );
 };

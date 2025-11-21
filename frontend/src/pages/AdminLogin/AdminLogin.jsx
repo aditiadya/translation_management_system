@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import Button from "../../components/Button/Button";
 import { useNavigate } from "react-router-dom";
@@ -57,7 +57,7 @@ const AdminLogin = () => {
       setUser(meRes.data);
 
       if (meRes.data.setup_completed) {
-        navigate("/dashboard");
+        navigate("/");
       } else {
         navigate("/setup");
       }

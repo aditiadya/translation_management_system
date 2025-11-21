@@ -38,7 +38,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     >
       {/* Toggle Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          const newState = !isOpen;
+          setIsOpen(newState);
+          localStorage.setItem("sidebar-open", newState);
+        }}
         className="absolute -right-3 top-9 z-10 p-1.5 bg-white border rounded-full shadow-md hover:bg-gray-100 transition-transform duration-300"
       >
         <FiChevronLeft
