@@ -32,7 +32,7 @@ const ProjectDetails = sequelize.define(
 
     client_contact_person_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "client_contact_persons",
         key: "id",
@@ -111,7 +111,7 @@ const ProjectDetails = sequelize.define(
     },
 
     status: {
-      type: DataTypes.ENUM("Pending", "In Progress", "Completed", "Rejected"),
+      type: DataTypes.ENUM("Offered by Client", "Offer Accepted", "Offer Rejected", "Draft", "In Progress", "Hold", "Submitted", "Submission Accepted",  "Submission Rejected", "Cancelled"),
       allowNull: false,
       defaultValue: "In Progress",
     },
@@ -136,7 +136,7 @@ ProjectDetails.associate = (models) => {
   });
 
   ProjectDetails.belongsTo(models.ClientContactPersons, {
-    foreignKey: "contact_person_id",
+    foreignKey: "client_contact_person_id",
     as: "contactPerson",
     onDelete: "CASCADE",
   });
@@ -147,7 +147,7 @@ ProjectDetails.associate = (models) => {
     onDelete: "CASCADE",
   });
 
-  ProjectDetails.belongsTo(models.VendorSpecialization, {
+  ProjectDetails.belongsTo(models.AdminSpecialization, {
     foreignKey: "specialization_id",
     as: "specialization",
     onDelete: "CASCADE",
@@ -155,15 +155,21 @@ ProjectDetails.associate = (models) => {
 
   ProjectDetails.belongsTo(models.ManagerDetails, {
     foreignKey: "primary_manager_id",
-    as: "primaryManagers",
+    as: "primaryManager",
     onDelete: "CASCADE",
   });
 
   ProjectDetails.belongsTo(models.ManagerDetails, {
     foreignKey: "secondary_manager_id",
-    as: "secondaryManagers",
+    as: "secondaryManager",
     onDelete: "CASCADE",
   });
+
+  ProjectDetails.hasMany(models.ProjectStatusHistory, {
+  foreignKey: "project_id",
+  as: "statusHistory",
+  onDelete: "CASCADE",
+});
 };
 
 export default ProjectDetails;

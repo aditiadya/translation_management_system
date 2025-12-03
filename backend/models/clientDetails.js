@@ -110,6 +110,12 @@ ClientDetails.associate = (models) => {
     as: "primary_user",
     onDelete: "CASCADE",
   });
+
+  ClientDetails.hasMany(models.ClientContactPersons, {
+  foreignKey: "client_id",
+  as: "contactPersons",
+  onDelete: "CASCADE"
+});
 };
 
 export default ClientDetails;

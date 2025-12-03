@@ -18,6 +18,7 @@ import languageRoutes from "./routes/languageRoutes.js";
 import currencyRoutes from "./routes/currencyRoutes.js";
 
 import managerDetailsRoutes from "./routes/managerDetailsRoutes.js"
+import managerRolesRoutes from "./routes/managerRolesRoutes.js";
 
 import clientDetailsRoutes from "./routes/clientDetailsRoutes.js"
 import clientPoolRoutes from "./routes/clientPoolRoutes.js"
@@ -35,7 +36,9 @@ import vendorSettingRoutes from "./routes/vendorSettingRoutes.js"
 import vendorPaymentMethodRoutes from "./routes/vendorPaymentMethodRoutes.js"
 import vendorPriceListRoutes from "./routes/vendorPriceListRoutes.js"
 
-import managerRolesRoutes from "./routes/managerRolesRoutes.js";
+import projectDetailsRoutes from "./routes/projectDetailsRoutes.js"
+import projectStatusHistoryRoutes from "./routes/projectStatusHistoryRoutes.js"
+
 
 const app = express();
 
@@ -69,6 +72,7 @@ app.use("/api/languages", languageRoutes);
 app.use("/api/currencies", currencyRoutes);
 
 app.use("/api/managers", managerDetailsRoutes);
+app.use("/api/manager-roles", managerRolesRoutes);
 
 app.use("/api/clients", clientDetailsRoutes);
 app.use("/api/client-pools", clientPoolRoutes);
@@ -86,7 +90,9 @@ app.use("/api/vendor-settings", vendorSettingRoutes);
 app.use("/api/vendor-payment-methods", vendorPaymentMethodRoutes);
 app.use("/api/vendor-price-list", vendorPriceListRoutes);
 
-app.use("/api/manager-roles", managerRolesRoutes);
+app.use("/api/projects", projectDetailsRoutes);
+app.use("/api/project-status-history", projectStatusHistoryRoutes);
+
 
 
 export default app;

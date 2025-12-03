@@ -1,129 +1,121 @@
+import { DataTypes } from "sequelize";
+
 export default {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterface) {
     await queryInterface.createTable("project_details", {
       id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
 
       admin_id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "admin_auth",
-          key: "id",
-        },
+        references: { model: "admin_auth", key: "id" },
         onDelete: "CASCADE",
       },
 
       client_id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "client_details",
-          key: "id",
-        },
+        references: { model: "client_details", key: "id" },
         onDelete: "CASCADE",
       },
 
       client_contact_person_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "client_contact_persons",
-          key: "id",
-        },
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: "client_contact_persons", key: "id" },
         onDelete: "CASCADE",
       },
 
       project_name: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
 
       language_pair_id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: true,
-        references: {
-          model: "admin_language_pairs",
-          key: "id",
-        },
+        references: { model: "admin_language_pairs", key: "id" },
         onDelete: "CASCADE",
       },
 
       specialization_id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: true,
-        references: {
-          model: "admin_specializations",
-          key: "id",
-        },
+        references: { model: "admin_specializations", key: "id" },
         onDelete: "CASCADE",
       },
 
       start_at: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
       },
 
       deadline_at: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
       },
 
       instructions: {
-        type: Sequelize.TEXT,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
 
       legal_entity: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: true,
       },
 
       internal_note: {
-        type: Sequelize.TEXT,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
 
       primary_manager_id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "manager_details",
-          key: "id",
-        },
+        references: { model: "manager_details", key: "id" },
         onDelete: "CASCADE",
       },
 
       secondary_manager_id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         allowNull: true,
-        references: {
-          model: "manager_details",
-          key: "id",
-        },
+        references: { model: "manager_details", key: "id" },
         onDelete: "CASCADE",
       },
 
       status: {
-        type: Sequelize.ENUM("Pending", "In Progress", "Completed", "Rejected"),
+        type: DataTypes.ENUM(
+          "Offered by Client",
+          "Offer Accepted",
+          "Offer Rejected",
+          "Draft",
+          "In Progress",
+          "Hold",
+          "Submitted",
+          "Submission Accepted",
+          "Submission Rejected",
+          "Cancelled"
+        ),
         allowNull: false,
         defaultValue: "In Progress",
       },
 
       createdAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        defaultValue: DataTypes.NOW,
       },
 
       updatedAt: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+        defaultValue: DataTypes.NOW,
       },
     });
   },
