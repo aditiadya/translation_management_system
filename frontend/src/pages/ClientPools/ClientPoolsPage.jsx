@@ -27,11 +27,11 @@ const ClientPoolsPage = () => {
 
   return (
     <>
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Client Pools</h1>
+        <div className="flex justify-between items-center gap-3 mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Client Pools</h1>
           <button
             onClick={() => navigate("/add-client-pool")}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
           >
             Add Client Pool
           </button>
@@ -46,10 +46,10 @@ const ClientPoolsPage = () => {
             <table className="min-w-full leading-normal">
               <thead>
                 <tr className="bg-white text-black uppercase text-sm">
-                  <th className="py-3 px-6 text-left">Pool Name</th>
-                  <th className="py-3 px-6 text-left">Number of Clients</th>
-                  <th className="py-3 px-6 text-left">Number of Managers</th>
-                  <th className="py-3 px-6 text-left">Description</th>
+                  <th className="py-3 px-6 text-center">Pool Name</th>
+                  <th className="py-3 px-6 text-center">Number of Clients</th>
+                  <th className="py-3 px-6  text-center">Number of Managers</th>
+                  <th className="py-3 px-6 text-center">Description</th>
                 </tr>
               </thead>
 
@@ -63,7 +63,7 @@ const ClientPoolsPage = () => {
                         : "hover:bg-gray-100"
                     }
                   >
-                    <td className="py-4 px-6 font-medium text-gray-800">
+                    <td className="py-4 px-6 text-sm font-medium text-gray-800 text-center">
                       <Link
                         to={`/client-pools/${pool.id}`}
                         className="text-blue-600 hover:underline"
@@ -72,15 +72,15 @@ const ClientPoolsPage = () => {
                       </Link>
                     </td>
 
-                    <td className="py-4 px-6 text-gray-700 whitespace-nowrap">
+                    <td className="py-4 px-6 text-sm text-gray-700 text-center whitespace-nowrap">
                       {pool.clients?.length || 0}
                     </td>
 
-                    <td className="py-4 px-6 text-gray-700 whitespace-nowrap">
+                    <td className="py-4 px-6 text-sm text-gray-700 text-center whitespace-nowrap">
                       {pool.managers?.length || 0}
                     </td>
 
-                    <td className="py-4 px-6 text-gray-600">
+                    <td className="py-4 px-6 text-sm text-gray-600 text-center">
                       {pool.description || "—"}
                     </td>
                   </tr>

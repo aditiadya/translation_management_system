@@ -116,8 +116,9 @@ export const getAllClientPools = async (req, res) => {
         {
           model: ClientDetails,
           as: "clients",
+          
           include: [
-            { model: ClientPrimaryUserDetails, as: "primary_users" }, // nested include
+            { model: ClientPrimaryUserDetails, as: "primary_user" },
           ],
         },
         { model: ManagerDetails, as: "managers" },
@@ -141,7 +142,7 @@ export const getClientPoolById = async (req, res) => {
           model: ClientDetails,
           as: "clients",
           include: [
-            { model: ClientPrimaryUserDetails, as: "primary_users" }, // nested include
+            { model: ClientPrimaryUserDetails, as: "primary_user" },
           ],
         },
         { model: ManagerDetails, as: "managers" },

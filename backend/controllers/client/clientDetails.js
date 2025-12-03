@@ -57,47 +57,59 @@ export const createClient = async (req, res) => {
   const adminId = req.user.id;
   const data = pickAllowed(req.body, CLIENT_ALLOWED_FIELDS);
 
+  const transaction = await db.sequelize.transaction();
+
   try {
     const activationToken = data.can_login
       ? crypto.randomBytes(32).toString("hex")
       : null;
 
-    const clientAuth = await AdminAuth.create({
-      email: data.email,
-      activation_token: activationToken,
-    });
+    const clientAuth = await AdminAuth.create(
+      {
+        email: data.email,
+        activation_token: activationToken,
+      },
+      { transaction }
+    );
 
-    const clientDetails = await ClientDetails.create({
-      auth_id: clientAuth.id,
-      admin_id: adminId,
-      type: data.type,
-      company_name: data.company_name,
-      legal_entity: data.legal_entity,
-      status: data.status,
-      country: data.country,
-      state_region: data.state_region,
-      city: data.city,
-      postal_code: data.postal_code,
-      address: data.address,
-      pan_tax_number: data.pan_tax_number,
-      gstin_vat_number: data.gstin_vat_number,
-      website: data.website,
-      note: data.note,
-      can_login: data.can_login,
-    });
+    const clientDetails = await ClientDetails.create(
+      {
+        auth_id: clientAuth.id,
+        admin_id: adminId,
+        type: data.type,
+        company_name: data.company_name,
+        legal_entity: data.legal_entity,
+        status: data.status,
+        country: data.country,
+        state_region: data.state_region,
+        city: data.city,
+        postal_code: data.postal_code,
+        address: data.address,
+        pan_tax_number: data.pan_tax_number,
+        gstin_vat_number: data.gstin_vat_number,
+        website: data.website,
+        note: data.note,
+        can_login: data.can_login,
+      },
+      { transaction }
+    );
 
-    await ClientPrimaryUserDetails.create({
-      client_id: clientDetails.id,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      timezone: data.timezone,
-      phone: data.phone,
-      zoom_id: data.zoom_id,
-      teams_id: data.teams_id,
-      gender: data.gender,
-      nationality: data.nationality,
-      can_login: data.can_login,
-    });
+    await ClientPrimaryUserDetails.create(
+      {
+        client_id: clientDetails.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        timezone: data.timezone,
+        phone: data.phone,
+        zoom_id: data.zoom_id,
+        teams_id: data.teams_id,
+        gender: data.gender?.trim() || null,
+        nationality: data.nationality,
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
 
     let activationLink = null;
     if (data.can_login) {
@@ -112,7 +124,9 @@ export const createClient = async (req, res) => {
       activationLink,
     });
   } catch (err) {
+    await transaction.rollback();
     console.error(err);
+
     const errorResponse = toClientError(err);
     return res.status(errorResponse.code).json(errorResponse.body);
   }
@@ -190,13 +204,14 @@ export const updateClient = async (req, res) => {
       "zoom_id",
       "teams_id",
       "gender",
-      "nationality"
+      "nationality",
     ];
 
     if (primaryUser) {
+      const clean = (v) => (v === "" ? null : v);
       primaryUserFields.forEach((field) => {
         if (req.body.hasOwnProperty(field)) {
-          primaryUser[field] = req.body[field];
+          primaryUser[field] = clean(req.body[field]);
         }
       });
 
@@ -218,7 +233,7 @@ export const updateClient = async (req, res) => {
       where: { id: clientId, admin_id: adminId },
       include: [
         { model: AdminAuth, as: "auth", attributes: ["email"] },
-        { model: ClientPrimaryUserDetails, as: "primary_users" },
+        { model: ClientPrimaryUserDetails, as: "primary_user" },
       ],
     });
 
@@ -242,7 +257,7 @@ export const getClientById = async (req, res) => {
       where: { id: clientId, admin_id: adminId },
       include: [
         { model: AdminAuth, as: "auth", attributes: ["email"] },
-        { model: ClientPrimaryUserDetails, as: "primary_users" },
+        { model: ClientPrimaryUserDetails, as: "primary_user" },
       ],
     });
 
@@ -268,7 +283,7 @@ export const getAllClients = async (req, res) => {
       where: { admin_id: adminId },
       include: [
         { model: AdminAuth, as: "auth", attributes: ["email"] },
-        { model: ClientPrimaryUserDetails, as: "primary_users" },
+        { model: ClientPrimaryUserDetails, as: "primary_user" },
       ],
       order: [["id", "ASC"]],
     });

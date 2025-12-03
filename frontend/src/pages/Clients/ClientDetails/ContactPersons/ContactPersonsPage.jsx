@@ -3,12 +3,13 @@ import api from "../../../../utils/axiosInstance";
 import ContactPersonsTable from "./ContactPersonsTable";
 import AddContactPersonForm from "./AddContactPersonForm";
 import EditContactPersonForm from "./EditContactPersonForm";
+import BackButton from "../../../../components/Button/BackButton";
 
 const ContactPersonsPage = ({ clientId }) => {
   const [contactPersons, setContactPersons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [view, setView] = useState("list"); // list | add | edit
   const [editPerson, setEditPerson] = useState(null);
 
   const fetchContacts = async () => {
@@ -34,7 +35,9 @@ const ContactPersonsPage = ({ clientId }) => {
     if (!window.confirm("Are you sure you want to delete this contact person?"))
       return;
     try {
-      await api.delete(`client/contact-persons/${id}`, { withCredentials: true });
+      await api.delete(`client/contact-persons/${id}`, {
+        withCredentials: true,
+      });
       fetchContacts();
     } catch (err) {
       alert("Failed to delete contact person");
@@ -43,8 +46,11 @@ const ContactPersonsPage = ({ clientId }) => {
 
   const handleAdd = async (data) => {
     try {
-      await api.post("client/contact-persons", { ...data, client_id: clientId });
-      setIsAddOpen(false);
+      await api.post("client/contact-persons", {
+        ...data,
+        client_id: clientId,
+      });
+      setView("list");
       fetchContacts();
     } catch (err) {
       alert("Failed to add contact person");
@@ -53,7 +59,10 @@ const ContactPersonsPage = ({ clientId }) => {
 
   const handleUpdate = async (id, data) => {
     try {
-      await api.put(`client/contact-persons/${id}`, data, { withCredentials: true });
+      await api.put(`client/contact-persons/${id}`, data, {
+        withCredentials: true,
+      });
+      setView("list");
       setEditPerson(null);
       fetchContacts();
     } catch (err) {
@@ -68,36 +77,52 @@ const ContactPersonsPage = ({ clientId }) => {
     return <div className="text-center mt-10 text-red-600">{error}</div>;
 
   return (
-    <div className="p-6 ">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-gray-700">
-          Contact Persons
-        </h2>
-        <button
-          onClick={() => setIsAddOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          + Add Contact Person
-        </button>
-      </div>
+    <div className="space-y-5">
+      {/* HEADER changes depending on view */}
+      {view === "list" && (
+        <div className="flex justify-between items-center mb-5">
+          <div className="flex items-center gap-3">
+            <BackButton to="/clients" />
 
-      <ContactPersonsTable
-        persons={contactPersons}
-        onEdit={setEditPerson}
-        onDelete={handleDelete}
-      />
+            <h2 className="text-2xl font-bold text-gray-900">
+              Contact Persons
+            </h2>
+          </div>
 
-      {isAddOpen && (
+          <button
+            onClick={() => setView("add")}
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
+          >
+            Add Contact Person
+          </button>
+        </div>
+      )}
+
+      {view === "list" && (
+        <ContactPersonsTable
+          persons={contactPersons}
+          onEdit={(p) => {
+            setEditPerson(p);
+            setView("edit");
+          }}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {view === "add" && (
         <AddContactPersonForm
-          onClose={() => setIsAddOpen(false)}
+          onClose={() => setView("list")}
           onSave={handleAdd}
         />
       )}
 
-      {editPerson && (
+      {view === "edit" && editPerson && (
         <EditContactPersonForm
           person={editPerson}
-          onClose={() => setEditPerson(null)}
+          onClose={() => {
+            setEditPerson(null);
+            setView("list");
+          }}
           onSave={handleUpdate}
         />
       )}

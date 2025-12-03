@@ -1,3 +1,5 @@
+import { Pencil, Trash2 } from "lucide-react";
+
 const SpecializationList = ({ specializations, onEdit, onDelete }) => {
   return (
     <div className="overflow-x-auto shadow rounded-lg bg-white mt-6">
@@ -26,8 +28,9 @@ const SpecializationList = ({ specializations, onEdit, onDelete }) => {
                     : "hover:bg-gray-100"
                 }
               >
-                <td className="py-4 px-6">{spec.name}</td>
-                <td className="py-4 px-6">
+                <td className="py-3 px-4 text-sm text-gray-500">{spec.name}</td>
+
+                <td className="py-3 px-4 text-sm text-gray-500">
                   <span
                     className={`px-3 py-1 inline-block text-sm rounded-full ${
                       spec.active_flag
@@ -38,19 +41,20 @@ const SpecializationList = ({ specializations, onEdit, onDelete }) => {
                     {spec.active_flag ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="py-4 px-6 space-x-2">
+
+                <td className="py-3 px-4 text-sm flex items-center space-x-3">
+
                   <button
                     onClick={() => onEdit(spec)}
-                    className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
                   >
-                    Edit
+                    <Pencil className="w-5 h-5 text-blue-500 hover:text-blue-600 cursor-pointer" />
                   </button>
+
                   <button
-                    onClick={() => onDelete(spec.id)}
-                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
-                  >
-                    Delete
+                    onClick={() => onDelete(spec.id)}>
+                    <Trash2 className="w-5 h-5 text-red-500 hover:text-red-600 cursor-pointer" />
                   </button>
+
                 </td>
               </tr>
             ))

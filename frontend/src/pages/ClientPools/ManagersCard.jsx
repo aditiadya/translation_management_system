@@ -1,6 +1,5 @@
 import { useState } from "react";
 import api from "../../utils/axiosInstance";
-import ConfirmModal from "../../components/Modals/ConfirmModal";
 
 const ManagersCard = ({
   pool,
@@ -12,7 +11,6 @@ const ManagersCard = ({
   setPool,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleMultiSelect = (field, id) => {
     setFormState((prev) => {
@@ -36,16 +34,18 @@ const ManagersCard = ({
       const res = await api.put(`/client-pools/${pool.id}`, payload);
       if (res.data.success) {
         const updatedManagers = res.data.data.managers;
+
         setFormState((prev) => ({
           ...prev,
           manager_ids: updatedManagers.map((m) => m.id),
         }));
+
         setPool((prev) => ({
           ...prev,
           managers: updatedManagers,
         }));
+
         setIsEditing(false);
-        setShowConfirm(false);
       }
     } catch (error) {
       console.error(error);
@@ -59,7 +59,7 @@ const ManagersCard = ({
     <div className="bg-white shadow-md rounded-2xl p-6 flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-xl font-semibold text-gray-800">Managers</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Managers</h3>
           <span className="text-sm text-gray-500">
             ({pool.managers?.length || 0})
           </span>
@@ -68,7 +68,7 @@ const ManagersCard = ({
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded shadow"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow"
           >
             Update Managers
           </button>
@@ -77,7 +77,7 @@ const ManagersCard = ({
         )}
       </div>
 
-      <div className="border rounded-lg overflow-y-auto max-h-64">
+      <div className="border rounded-lg overflow-y-auto max-h-48">
         {isEditing ? (
           <table className="w-full text-sm text-left border-collapse">
             <thead className="bg-gray-100 sticky top-0 z-10 text-gray-700">
@@ -91,6 +91,7 @@ const ManagersCard = ({
               {allManagers.map((m) => {
                 const isChecked = formState.manager_ids.includes(m.id);
                 const contact = m.email || m.phone || m.teams_id || "—";
+
                 return (
                   <tr
                     key={m.id}
@@ -129,7 +130,7 @@ const ManagersCard = ({
                   className="p-3 flex items-center gap-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
                 >
                   <div className="flex-1">
-                    <div className="font-medium text-gray-700">
+                    <div className="text-md text-gray-700">
                       {manager.first_name} {manager.last_name}
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
@@ -148,12 +149,13 @@ const ManagersCard = ({
       {isEditing && (
         <div className="flex gap-3 mt-4">
           <button
-            onClick={() => setShowConfirm(true)}
+            onClick={handleSave}
             disabled={loading}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
           >
-            Save
+            {loading ? "Saving..." : "Save"}
           </button>
+
           <button
             onClick={() => setIsEditing(false)}
             className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow"
@@ -161,18 +163,6 @@ const ManagersCard = ({
             Cancel
           </button>
         </div>
-      )}
-
-      {showConfirm && (
-        <ConfirmModal
-          title="Confirm Update"
-          message="Are you sure you want to update and save the selected managers?"
-          onCancel={() => setShowConfirm(false)}
-          onConfirm={handleSave}
-          confirmText={loading ? "Saving..." : "Save"}
-          confirmColor="bg-green-600"
-          confirmHoverColor="hover:bg-green-700"
-        />
       )}
     </div>
   );

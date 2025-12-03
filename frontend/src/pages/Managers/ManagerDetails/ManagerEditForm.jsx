@@ -8,7 +8,6 @@ import BackButton from "../../../components/Button/BackButton";
 const ManagerEditForm = ({
   manager,
   id,
-  navigate,
   setIsEditing,
   refreshManager,
 }) => {

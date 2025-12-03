@@ -26,26 +26,26 @@ const VendorsPage = () => {
 
   return (
     <>
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Vendors</h1>
+        <div className="flex justify-between items-center gap-3 mb-8">
+          <h1 className="ttext-2xl font-bold text-gray-900">Vendors</h1>
           <div>
             <button
               onClick={() => navigate("/vendors/create-vendor")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
             >
               New Vendor
             </button>
 
             <button
               onClick={() => navigate("/vendors")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
             >
               Import from Excel
             </button>
 
             <button
               onClick={() => navigate("/vendors")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 ml-4 rounded shadow"
             >
               Export to Excel
             </button>
@@ -61,19 +61,19 @@ const VendorsPage = () => {
             <table className="min-w-full leading-normal">
               <thead>
                 <tr className="bg-white text-black uppercase text-sm">
-                  <th className="py-3 px-6 text-left">Name</th>
-                  <th className="py-3 px-6 text-left">Type</th>
-                  <th className="py-3 px-6 text-left">Services</th>
-                  <th className="py-3 px-6 text-left">Language Pairs</th>
-                  <th className="py-3 px-6 text-left">Specializations</th>
-                  <th className="py-3 px-6 text-left">Primary User</th>
-                  <th className="py-3 px-6 text-left">Country</th>
-                  <th className="py-3 px-6 text-left">Assignable</th>
-                  <th className="py-3 px-6 text-left">Tags</th>
-                  <th className="py-3 px-6 text-left">Created At</th>
-                  <th className="py-3 px-6 text-left">Invited At</th>
-                  <th className="py-3 px-6 text-left">Registered At</th>
-                  <th className="py-3 px-6 text-left">Last Activity At</th>
+                  <th className="py-3 px-6 text-center">Name</th>
+                  <th className="py-3 px-6 text-center">Type</th>
+                  <th className="py-3 px-6 text-center">Services</th>
+                  <th className="py-3 px-6 text-center">Language Pairs</th>
+                  <th className="py-3 px-6 text-center">Specializations</th>
+                  <th className="py-3 px-6 text-center">Primary User</th>
+                  <th className="py-3 px-6 text-center">Country</th>
+                  <th className="py-3 px-6 text-center">Assignable</th>
+                  <th className="py-3 px-6 text-center">Tags</th>
+                  <th className="py-3 px-6 text-center">Created At</th>
+                  <th className="py-3 px-6 text-center">Invited At</th>
+                  <th className="py-3 px-6 text-center">Registered At</th>
+                  <th className="py-3 px-6 text-center">Last Activity At</th>
                 </tr>
               </thead>
 
@@ -89,31 +89,31 @@ const VendorsPage = () => {
                           : "hover:bg-gray-100"
                       }
                     >
-                      <td className="py-4 px-6 text-gray-700">
+                      <td className="py-4 px-6 text-sm text-gray-700 text-center">
                         {vendor.company_name || "—"}
                       </td>
-                      <td className="py-4 px-6 text-gray-700">
+                      <td className="py-4 px-6 text-sm text-gray-700 text-center">
                         {vendor.type || "—"}
                       </td>
                       <td></td>
                       <td></td>
                       <td></td>
-                      <td className="py-4 px-6 text-blue-600 underline hover:text-indigo-600 whitespace-nowrap">
+                      <td className="py-4 px-6 text-sm text-blue-600 underline hover:text-indigo-600 whitespace-nowrap text-center">
                         <Link to={`/vendors/${vendor.id}`}>
                           {primaryUser.first_name || ""}{" "}
                           {primaryUser.last_name || ""}
                         </Link>
                       </td>
 
-                      <td className="py-4 px-6 text-gray-700">
+                      <td className="py-4 px-6 text-sm text-gray-700 text-center">
                         {vendor.country || "—"}
                       </td>
 
-                      <td className="py-4 px-6 text-gray-700">
+                      <td className="py-4 px-6 text-sm text-gray-700 text-center">
                         {vendor.assignable_to_jobs ? "Yes" : "No"}
                       </td>
                       <td></td>
-                      <td className="py-4 px-6 text-gray-500">
+                      <td className="py-4 px-6 text-sm text-gray-500 text-center">
                         {vendor.createdAt
                           ? new Date(vendor.createdAt).toLocaleDateString()
                           : "—"}

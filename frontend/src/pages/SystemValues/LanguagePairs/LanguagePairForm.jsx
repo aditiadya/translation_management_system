@@ -129,10 +129,9 @@ const LanguagePairForm = ({ itemToEdit, onSave, onCancel, languages }) => {
             >
               Cancel
             </button>
-
             <button
               type="submit"
-              className="px-5 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition shadow"
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow"
             >
               Save
             </button>

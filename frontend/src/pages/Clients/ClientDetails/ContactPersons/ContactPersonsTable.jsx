@@ -1,4 +1,4 @@
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { Pencil, Trash2 } from "lucide-react";
 
 const ContactPersonsTable = ({ persons = [], onEdit, onDelete }) => {
   if (!persons || persons.length === 0) {
@@ -24,14 +24,14 @@ const ContactPersonsTable = ({ persons = [], onEdit, onDelete }) => {
       <table className="min-w-full leading-normal">
         <thead>
           <tr className="bg-white text-black uppercase text-sm">
-            <th className="py-3 px-6 text-left">Contact Name</th>
-            <th className="py-3 px-6 text-left">Gender</th>
-            <th className="py-3 px-6 text-left">Email</th>
-            <th className="py-3 px-6 text-left">Phone</th>
-            <th className="py-3 px-6 text-left">Teams ID</th>
-            <th className="py-3 px-6 text-left">Position</th>
-            <th className="py-3 px-6 text-left">Active</th>
-            <th className="py-3 px-6 text-left">Invoicing</th>
+            <th className="py-3 px-6 text-center">Contact Name</th>
+            <th className="py-3 px-6 text-center">Gender</th>
+            <th className="py-3 px-6 text-center">Email</th>
+            <th className="py-3 px-6 text-center">Phone</th>
+            <th className="py-3 px-6 text-center">Teams ID</th>
+            <th className="py-3 px-6 text-center">Position</th>
+            <th className="py-3 px-6 text-center">Active</th>
+            <th className="py-3 px-6 text-center">Invoicing</th>
             <th className="py-3 px-6 text-center">Actions</th>
           </tr>
         </thead>
@@ -46,13 +46,13 @@ const ContactPersonsTable = ({ persons = [], onEdit, onDelete }) => {
                   : "hover:bg-gray-100"
               }
             >
-              <td className="py-4 px-6 text-gray-900 whitespace-nowrap">
+              <td className="py-4 px-6 text-sm text-gray-900 whitespace-nowrap">
                 {`${contact.first_name} ${contact.last_name}`}
               </td>
-              <td className="py-4 px-6 text-gray-700 capitalize">
+              <td className="py-4 px-6 text-sm text-gray-700 text-center capitalize">
                 {contact.gender}
               </td>
-              <td className="py-4 px-6">
+              <td className="py-4 px-6 text-sm text-center">
                 <a
                   href={`mailto:${contact.email}`}
                   className="text-blue-600 underline hover:text-indigo-600"
@@ -60,33 +60,28 @@ const ContactPersonsTable = ({ persons = [], onEdit, onDelete }) => {
                   {contact.email}
                 </a>
               </td>
-              <td className="py-4 px-6 text-gray-700">{contact.phone}</td>
-              <td className="py-4 px-6 text-gray-700">
+              <td className="py-4 px-6 text-sm text-gray-700 text-center">
+                {contact.phone}
+              </td>
+              <td className="py-4 px-6 text-sm text-gray-700 text-center">
                 {contact.teams_id || "-"}
               </td>
-              <td className="py-4 px-6 text-gray-700">
+              <td className="py-4 px-6 text-sm text-gray-700 text-center">
                 {contact.position || "-"}
               </td>
-              <td className="py-4 px-6">
+              <td className="py-4 px-6 text-sm text-gray-700 text-center">
                 <Badge active={contact.is_active} />
               </td>
-              <td className="py-4 px-6">
+              <td className="py-4 px-6 text-sm text-gray-700 text-center">
                 <Badge active={contact.is_invoicing} />
               </td>
-              <td className="py-4 px-6 text-center whitespace-nowrap">
-                <button
-                  onClick={() => onEdit(contact)}
-                  className="text-blue-600 hover:text-indigo-700 mx-2 transition"
-                  title="Edit"
-                >
-                  <FaEdit />
+              <td className="py-3 px-4 space-x-5 text-sm flex items-center">
+                <button onClick={() => onEdit(contact)}>
+                  <Pencil className="w-5 h-5 text-blue-500 hover:text-blue-600 cursor-pointer" />
                 </button>
-                <button
-                  onClick={() => onDelete(contact.id)}
-                  className="text-red-600 hover:text-red-700 mx-2 transition"
-                  title="Delete"
-                >
-                  <FaTrash />
+
+                <button onClick={() => onDelete(contact.id)}>
+                  <Trash2 className="w-5 h-5 text-red-500 hover:text-red-600 cursor-pointer" />
                 </button>
               </td>
             </tr>

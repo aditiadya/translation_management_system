@@ -3,6 +3,7 @@ import api from "../../../utils/axiosInstance";
 import ServiceList from "./ServiceList";
 import ServiceForm from "./ServiceForm";
 import ConfirmModal from "../../../components/Modals/ConfirmModal";
+import BackButton from "../../../components/Button/BackButton";
 
 const ServicesPage = () => {
   const [services, setServices] = useState([]);
@@ -83,14 +84,17 @@ const ServicesPage = () => {
 
   return (
     <>
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Services</h1>
+        <div className="flex justify-between items-center gap-3 mb-8">
+          <div className="flex items-center gap-3">
+            <BackButton to="/system-values" />
+          <h1 className="text-2xl font-bold text-gray-900">Services</h1>
+          </div>
           {!isFormVisible && (
             <button
               onClick={handleAddNewClick}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
             >
-              + New Service
+              Add Service
             </button>
           )}
         </div>

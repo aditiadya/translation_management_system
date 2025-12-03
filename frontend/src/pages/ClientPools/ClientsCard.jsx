@@ -1,6 +1,4 @@
-import { useState } from "react";
 import api from "../../utils/axiosInstance";
-import ConfirmModal from "../../components/Modals/ConfirmModal";
 
 const ClientsCard = ({
   pool,
@@ -11,7 +9,6 @@ const ClientsCard = ({
   handleMultiSelect,
   setPool,
 }) => {
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSave = async () => {
     try {
@@ -20,9 +17,13 @@ const ClientsCard = ({
       });
 
       if (res.data.success) {
-        setPool(res.data.data);
-        setIsEditing(false);
-        setShowConfirm(false);
+        const updated = await api.get(`/client-pools/${pool.id}`);
+
+if (updated.data.success) {
+  setPool(updated.data.data);
+}
+
+setIsEditing(false);
       }
     } catch (err) {
       console.error("Failed to update clients:", err);
@@ -34,7 +35,7 @@ const ClientsCard = ({
     <div className="bg-white shadow-md rounded-2xl p-6 flex flex-col mb-8">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <h3 className="text-xl font-semibold text-gray-800">Clients</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Clients</h3>
           <span className="text-sm text-gray-500">
             ({pool.clients?.length || 0})
           </span>
@@ -43,7 +44,7 @@ const ClientsCard = ({
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded shadow"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow"
           >
             Update Clients
           </button>
@@ -52,7 +53,7 @@ const ClientsCard = ({
         )}
       </div>
 
-      <div className="border rounded-lg overflow-y-auto max-h-64">
+      <div className="border rounded-lg overflow-y-auto max-h-48">
         {isEditing ? (
           <table className="w-full text-sm text-left border-collapse">
             <thead className="bg-gray-100 sticky top-0 z-10 text-gray-700">
@@ -89,8 +90,8 @@ const ClientsCard = ({
                     <td className="p-2 font-medium text-gray-800">
                       {c.company_name
                         ? c.company_name
-                        : `${c.primary_users?.first_name || ""} ${
-                            c.primary_users?.last_name || ""
+                        : `${c.primary_user?.first_name || ""} ${
+                            c.primary_user?.last_name || ""
                           }`.trim()}
                     </td>
                     <td className="p-2 text-gray-600">{c.type || "—"}</td>
@@ -110,11 +111,11 @@ const ClientsCard = ({
                   className="p-3 flex items-center gap-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
                 >
                   <div className="flex-1">
-                    <div className="font-medium text-gray-700">
+                    <div className="text-md text-gray-700">
                       {client.company_name
                         ? client.company_name
-                        : `${client.primary_users?.first_name || ""} ${
-                            client.primary_users?.last_name || ""
+                        : `${client.primary_user?.first_name || ""} ${
+                            client.primary_user?.last_name || ""
                           }`.trim()}
                     </div>
                     <div className="text-sm text-gray-500 mt-1">
@@ -135,7 +136,7 @@ const ClientsCard = ({
         <div className="flex gap-3 mt-4">
           <button
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
-            onClick={() => setShowConfirm(true)}
+            onClick={handleSave}
           >
             Save
           </button>
@@ -146,18 +147,6 @@ const ClientsCard = ({
             Cancel
           </button>
         </div>
-      )}
-
-      {showConfirm && (
-        <ConfirmModal
-          title="Confirm Update"
-          message="Are you sure you want to update and save the selected clients?"
-          onCancel={() => setShowConfirm(false)}
-          onConfirm={handleSave}
-          confirmText="Save"
-          confirmColor="bg-green-600"
-          confirmHoverColor="hover:bg-green-700"
-        />
       )}
     </div>
   );

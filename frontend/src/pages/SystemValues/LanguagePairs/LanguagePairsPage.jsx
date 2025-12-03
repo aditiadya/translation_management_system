@@ -3,6 +3,7 @@ import api from "../../../utils/axiosInstance";
 import LanguagePairList from "./LanguagePairList";
 import LanguagePairForm from "./LanguagePairForm";
 import ConfirmModal from "../../../components/Modals/ConfirmModal";
+import BackButton from "../../../components/Button/BackButton";
 
 const LanguagePairsPage = () => {
   const [pairs, setPairs] = useState([]);
@@ -34,26 +35,24 @@ const LanguagePairsPage = () => {
   }, []);
 
   const handleSave = async (formData) => {
-    try {
-      if (activePair === "new") {
-        const res = await api.post("/admin-language-pairs", formData);
-        setPairs([...pairs, res.data.data]);
-      } else {
-        const res = await api.put(
-          `/admin-language-pairs/${activePair.id}`,
-          formData
-        );
-        setPairs(
-          pairs.map((p) => (p.id === activePair.id ? res.data.data : p))
-        );
-      }
-      setIsFormVisible(false);
-      setActivePair(null);
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.error || "Failed to save language pair");
+  try {
+    if (activePair === "new") {
+      await api.post("/admin-language-pairs", formData);
+    } else {
+      await api.put(`/admin-language-pairs/${activePair.id}`, formData);
     }
-  };
+
+    const res = await api.get("/admin-language-pairs");
+    setPairs(res.data.data);
+
+    setIsFormVisible(false);
+    setActivePair(null);
+
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.error || "Failed to save language pair");
+  }
+};
 
   const handleDelete = async () => {
     if (!pairToDelete) return;
@@ -87,13 +86,16 @@ const LanguagePairsPage = () => {
   return (
     <>
         <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-3">
+            <BackButton to="/system-values" />
           <h1 className="text-3xl font-bold text-gray-800">Language Pairs</h1>
+          </div>
           {!isFormVisible && (
             <button
               onClick={handleAddNewClick}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
             >
-              + New Language Pair
+              Add Language Pair
             </button>
           )}
         </div>

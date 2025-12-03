@@ -1,8 +1,24 @@
 import { useState } from "react";
 import FormInput from "../../../../components/Form/FormInput";
 import FormSelect from "../../../../components/Form/FormSelect";
-import Button from "../../../../components/Button/Button";
 import BackButton from "../../../../components/Button/BackButton";
+import FormTextarea from "../../../../components/Form/TextArea";
+
+const statuses = ["Active", "Inactive", "Pending"];
+const legalEntities = [
+  "Private Limited",
+  "LLP",
+  "Sole Proprietorship",
+  "Partnership",
+];
+const countries = [
+  "India",
+  "United States",
+  "United Kingdom",
+  "Germany",
+  "Australia",
+];
+const clientTypes = ["Company", "Individual"];
 
 const GeneralInfoEditForm = ({ client, onCancel, onSave }) => {
   const [form, setForm] = useState({
@@ -23,6 +39,18 @@ const GeneralInfoEditForm = ({ client, onCancel, onSave }) => {
 
   const [errors, setErrors] = useState({});
 
+  const validate = () => {
+    const currentErrors = {};
+    if (form.type === "Company" && !form.company_name)
+      currentErrors.company_name = "Company name is required.";
+    if (!form.legal_entity)
+      currentErrors.legal_entity = "Legal Entity is required.";
+    if (!form.status) currentErrors.status = "Status is required.";
+    if (!form.country) currentErrors.country = "Country is required.";
+    setErrors(currentErrors);
+    return Object.keys(currentErrors).length === 0;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -37,177 +65,190 @@ const GeneralInfoEditForm = ({ client, onCancel, onSave }) => {
     });
   };
 
+  const requiredFields = ["type", "legal_entity", "status", "country"];
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    let error = "";
+    let errorMsg = "";
 
-    if (name === "company_name" && form.type === "Company" && !value.trim()) {
-      error = "Company Name is required";
+    if (
+      (name === "company_name" && form.type === "Company" && !value) ||
+      (requiredFields.includes(name) && !value)
+    ) {
+      errorMsg =
+        name === "email"
+          ? "Email is required."
+          : `${name
+              .replace("_", " ")
+              .replace(/\b\w/g, (c) => c.toUpperCase())} is required.`;
     }
 
-    if (name === "type" && !value.trim()) {
-      error = "Client Type is required";
-    }
-
-    setErrors((prev) => ({ ...prev, [name]: error }));
+    setErrors((prev) => ({ ...prev, [name]: errorMsg }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newErrors = {};
-    if (form.type === "Company" && !form.company_name.trim()) {
-      newErrors.company_name = "Company Name is required";
-    }
-    if (!form.type.trim()) newErrors.type = "Client Type is required";
-
-    if (Object.keys(newErrors).length) {
-      setErrors(newErrors);
-      return;
-    }
+    if (!validate()) return;
     onSave(form);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6 bg-white p-6 rounded-lg shadow"
-    >
-      <div className="flex items-center gap-4">
+    <div>
+      <div className="flex items-center gap-3 mb-5">
         <BackButton onClick={onCancel} />
-      <h2 className="text-lg font-semibold text-gray-700">Edit General Info</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Edit General Info</h2>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormSelect
-          label="Type"
-          name="type"
-          value={form.type}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          options={[
-            { value: "Company", label: "Company" },
-            { value: "Individual", label: "Individual" },
-          ]}
-          required
-        />
-
-        {form.type === "Company" ? (
-          <FormInput
-            label="Company Name"
-            name="company_name"
-            value={form.company_name}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow rounded-lg p-8 space-y-5"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1">
+          <FormSelect
+            label="Client Type"
+            name="type"
+            value={form.type}
             onChange={handleChange}
             onBlur={handleBlur}
+            options={clientTypes}
+            error={errors.type}
             required
           />
-        ) : (
-          <div />
-        )}
 
-        <FormInput
-          label="Legal Entity"
-          name="legal_entity"
-          value={form.legal_entity}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          required
-        />
+          {form.type === "Company" ? (
+            <FormInput
+              label="Company Name"
+              name="company_name"
+              value={form.company_name}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.company_name}
+              required
+            />
+          ) : (
+            <div />
+          )}
 
-        <FormSelect
-          label="Status"
-          name="status"
-          value={form.status}
-          onChange={handleChange}
-          options={[
-            { value: "active", label: "Active" },
-            { value: "inactive", label: "Inactive" },
-          ]}
-          onBlur={handleBlur}
-          required
-        />
+          <FormSelect
+            label="Legal Entity"
+            name="legal_entity"
+            value={form.legal_entity}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            options={legalEntities}
+            error={errors.legal_entity}
+            required
+          />
 
-        <FormInput
-          label="Country"
-          name="country"
-          value={form.country}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          required
-        />
+          <FormSelect
+            label="Status"
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            options={statuses}
+            onBlur={handleBlur}
+            error={errors.status}
+            required
+          />
 
-        <FormInput
-          label="State / Region"
-          name="state_region"
-          value={form.state_region}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
+          <FormSelect
+            label="Country"
+            name="country"
+            value={form.country}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            options={countries}
+            error={errors.country}
+            required
+          />
 
-        <FormInput
-          label="City"
-          name="city"
-          value={form.city}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
+          <FormInput
+            label="State / Region"
+            name="state_region"
+            value={form.state_region}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
 
-        <FormInput
-          label="Address"
-          name="address"
-          value={form.address}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
+          <FormInput
+            label="City"
+            name="city"
+            value={form.city}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
 
-        <FormInput
-          label="Postal Code"
-          name="postal_code"
-          value={form.postal_code}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
+          <FormInput
+            label="Address"
+            name="address"
+            value={form.address}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
 
-        <FormInput
-          label="PAN / Tax Number"
-          name="pan_tax_number"
-          value={form.pan_tax_number}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
+          <FormInput
+            label="Postal Code"
+            name="postal_code"
+            value={form.postal_code}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
 
-        <FormInput
-          label="GSTIN / VAT Number"
-          name="gstin_vat_number"
-          value={form.gstin_vat_number}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
+          <FormInput
+            label="PAN / Tax Number"
+            name="pan_tax_number"
+            value={form.pan_tax_number}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
 
-        <FormInput
-          label="Website"
-          name="website"
-          value={form.website}
-          onChange={handleChange}
-          onBlur={handleBlur}
-        />
+          <FormInput
+            label="GSTIN / VAT Number"
+            name="gstin_vat_number"
+            value={form.gstin_vat_number}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
 
-        <FormInput
-          label="Note"
-          name="note"
-          value={form.note}
-          onChange={handleChange}
-          type="textarea"
-          onBlur={handleBlur}
-        />
-      </div>
+          <FormInput
+            label="Website"
+            name="website"
+            value={form.website}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          />
 
-      <div className="flex gap-4">
-        <Button type="submit">Save</Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+          <FormTextarea
+            label="Note"
+            name="note"
+            value={form.note}
+            onChange={handleChange}
+            rows={3}
+            error={errors.note}
+            required={false}
+          />
+        </div>
+
+        <span className="text-gray-500 text-sm mt-1">
+          Fields marked with <span className="text-red-600">*</span> are
+          mandatory.
+        </span>
+
+        <div className="mt-4 space-x-4">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

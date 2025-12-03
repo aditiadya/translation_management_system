@@ -36,14 +36,12 @@ const PaymentMethodFields = ({ formData, handleChange }) => {
             name="account_number"
             value={formData.account_number}
             onChange={handleChange}
-            required
           />
           <FormInput
             label="IFSC Code"
             name="ifsc_code"
             value={formData.ifsc_code}
             onChange={handleChange}
-            required
           />
           <FormInput
             label="SWIFT"
@@ -68,7 +66,6 @@ const PaymentMethodFields = ({ formData, handleChange }) => {
             name="bank_address"
             value={formData.bank_address}
             onChange={handleChange}
-            required
           />
           <FormInput
             label="Country"

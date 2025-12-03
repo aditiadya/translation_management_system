@@ -80,67 +80,66 @@ const ClientDetailPage = () => {
 
   return (
     <>
-        <div className="border-b mb-6 flex space-x-6">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              className={`pb-2 font-medium text-gray-600 border-b-2 transition ${
-                activeTab === tab
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent hover:text-gray-900 hover:border-gray-300"
-              }`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+      <div className="border-b mb-6 flex space-x-5">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            className={`pb-2 text-sm text-gray-600 border-b-2 transition ${
+              activeTab === tab
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent hover:text-gray-900 hover:border-gray-300"
+            }`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
 
-        {/* Tab Content */}
-        {activeTab === "General Info" && (
-          <>
-            {!editingSection ? (
-              <ClientView
-                client={client}
-                onEditGeneral={() => setEditingSection("general")}
-                onEditPrimary={() => setEditingSection("primary")}
-                onEditSettings={() => setEditingSection("settings")}
-                onDelete={handleDelete}
-              />
-            ) : editingSection === "general" ? (
-              <GeneralInfoEditForm
-                client={client}
-                onSave={handleSave}
-                onCancel={() => setEditingSection(null)}
-              />
-            ) : editingSection === "primary" ? (
-              <PrimaryUserEditForm
-                client={client}
-                onSave={handleSave}
-                onCancel={() => setEditingSection(null)}
-              />
-            ) : editingSection === "settings" ? (
-              <SettingsEditForm
-                client={client}
-                onSave={(updated) => {
-                  console.log("Save settings info", updated);
-                  setEditingSection(null);
-                }}
-                onCancel={() => setEditingSection(null)}
-              />
-            ) : null}
-          </>
-        )}
+      {activeTab === "General Info" && (
+        <>
+          {!editingSection ? (
+            <ClientView
+              client={client}
+              onEditGeneral={() => setEditingSection("general")}
+              onEditPrimary={() => setEditingSection("primary")}
+              onEditSettings={() => setEditingSection("settings")}
+              onDelete={handleDelete}
+            />
+          ) : editingSection === "general" ? (
+            <GeneralInfoEditForm
+              client={client}
+              onSave={handleSave}
+              onCancel={() => setEditingSection(null)}
+            />
+          ) : editingSection === "primary" ? (
+            <PrimaryUserEditForm
+              client={client}
+              onSave={handleSave}
+              onCancel={() => setEditingSection(null)}
+            />
+          ) : editingSection === "settings" ? (
+            <SettingsEditForm
+              client={client}
+              onSave={(updated) => {
+                console.log("Save settings info", updated);
+                setEditingSection(null);
+              }}
+              onCancel={() => setEditingSection(null)}
+            />
+          ) : null}
+        </>
+      )}
 
-        {activeTab === "Contact Persons" && <ContactPersonsPage clientId={id} />}
+      {activeTab === "Contact Persons" && <ContactPersonsPage clientId={id} />}
 
-        {/* {activeTab === "CRM" && <CRMPage clientId={id} />} */}
+      {/* {activeTab === "CRM" && <CRMPage clientId={id} />} */}
 
-        {activeTab === "Price List" && <PriceListPage clientId={id} />}
+      {activeTab === "Price List" && <PriceListPage clientId={id} />}
 
-        {/* {activeTab === "Taxes" && <TaxesPage clientId={id} />} */}
+      {/* {activeTab === "Taxes" && <TaxesPage clientId={id} />} */}
 
-        {activeTab === "Documents" && <DocumentsPage clientId={id} />}
+      {activeTab === "Documents" && <DocumentsPage clientId={id} />}
     </>
   );
 };

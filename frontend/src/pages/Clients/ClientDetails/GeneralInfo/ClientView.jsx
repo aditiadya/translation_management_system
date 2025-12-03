@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ConfirmModal from "../../../../components/Modals/ConfirmModal";
+import BackButton from "../../../../components/Button/BackButton";
 
 const ClientView = ({
   client,
@@ -15,13 +16,16 @@ const ClientView = ({
     onDelete();
   };
 
-  const primaryUser = client.primary_users || {};
+  const primaryUser = client.primary_user || {};
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-5">
       <section>
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-bold text-gray-800">General Info</h3>
+        <div className="flex justify-between items-center mb-5">
+          <div className="flex items-center gap-3">
+            <BackButton to="/clients" />
+            <h2 className="text-2xl font-bold text-gray-900">General Info</h2>
+          </div>
 
           <div className="space-x-3 flex">
             <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">
@@ -37,7 +41,7 @@ const ClientView = ({
             </div>
             <button
               onClick={onEditGeneral}
-              className="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700"
+              className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
             >
               Update
             </button>
@@ -51,7 +55,7 @@ const ClientView = ({
         </div>
 
         <div className="bg-white shadow rounded-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
+          <div className="space-y-4 text-sm">
             <Field label="Name" value={client.company_name} />
             <Field label="Type" value={client.type} />
             <Field label="Legal Entity" value={client.legal_entity} />
@@ -76,33 +80,33 @@ const ClientView = ({
               }
             />
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 text-sm">
             <Field label="Country" value={client.country} />
             <Field label="State / Region" value={client.state_region} />
             <Field label="City" value={client.city} />
             <Field label="Address" value={client.address} />
             <Field label="Postal Code" value={client.postal_code} />
-            
+
             <Field label="Note" value={client.note} />
           </div>
         </div>
       </section>
 
       <section>
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-bold text-gray-800">
+        <div className="flex justify-between items-center mb-5 ml-5">
+          <h3 className="text-2xl font-bold text-gray-900">
             Primary User Details
           </h3>
           <button
             onClick={onEditPrimary}
-            className="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
           >
             Update
           </button>
         </div>
 
         <div className="bg-white shadow rounded-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
+          <div className="space-y-4 text-sm">
             <Field
               label="Name"
               value={`${primaryUser.first_name || ""} ${
@@ -115,8 +119,7 @@ const ClientView = ({
             <Field label="Zoom ID" value={primaryUser.zoom_id} />
             <Field label="Teams ID" value={primaryUser.teams_id} />
           </div>
-          <div className="space-y-4">
-            
+          <div className="space-y-4 text-sm">
             <Field label="Gender" value={primaryUser.gender} />
             <Field label="Nationality" value={primaryUser.nationality} />
             <Field
@@ -154,24 +157,24 @@ const ClientView = ({
       </section>
 
       <section>
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-5 ml-5">
           <h3 className="text-2xl font-bold text-gray-800">Settings</h3>
           <button
             onClick={onEditSettings}
-            className="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
           >
             Update
           </button>
         </div>
 
         <div className="bg-white shadow rounded-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
+          <div className="space-y-4 text-sm">
             <Field label="Client Manager" value="—" />
             <Field label="Default Legal Entity" value="—" />
             <Field label="Default Currency" value="—" />
             <Field label="Default Payment Method" value="—" />
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 text-sm">
             <Field label="Default Payment Terms" value="—" />
             <Field label="Default CAT Log Conversion Scheme" value="—" />
             <Field label="Default Invoice PDF Template" value="—" />

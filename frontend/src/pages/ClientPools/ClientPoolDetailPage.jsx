@@ -4,6 +4,7 @@ import api from "../../utils/axiosInstance";
 import PoolInfoCard from "./PoolInfoCard";
 import ClientsCard from "./ClientsCard";
 import ManagersCard from "./ManagersCard";
+import BackButton from "../../components/Button/BackButton";
 
 const ClientPoolDetailsPage = () => {
   const { id } = useParams();
@@ -94,8 +95,9 @@ const ClientPoolDetailsPage = () => {
 
   return (
     <>
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Client Pool</h1>
+        <div className="flex items-center gap-3 mb-5">
+          <BackButton to="/client-pools"/>
+          <h1 className="text-2xl font-bold text-gray-900">Client Pool</h1>
         </div>
 
         <PoolInfoCard

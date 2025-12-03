@@ -58,58 +58,70 @@ export const createVendor = async (req, res) => {
   const adminId = req.user.id;
   const data = pickAllowed(req.body, VENDOR_ALLOWED_FIELDS);
 
+  const transaction = await db.sequelize.transaction();
+
   try {
     const activationToken = data.can_login
       ? crypto.randomBytes(32).toString("hex")
       : null;
 
-    console.log("REQ.BODY:", req.body);
-    console.log("DATA AFTER pickAllowed:", data);
-    console.log("EMAIL PASSED TO ADMINAUTH:", data.email);
+    const vendorAuth = await AdminAuth.create(
+      {
+        email: data.email,
+        activation_token: activationToken,
+      },
+      { transaction }
+    );
 
-    const vendorAuth = await AdminAuth.create({
-      email: data.email,
-      activation_token: activationToken,
-    });
+    const vendorDetails = await VendorDetails.create(
+      {
+        auth_id: vendorAuth.id,
+        admin_id: adminId,
+        type: data.type,
+        company_name: data.company_name,
+        legal_entity: data.legal_entity,
+        country: data.country,
+        state_region: data.state_region,
+        city: data.city,
+        postal_code: data.postal_code,
+        address: data.address,
+        pan_tax_number: data.pan_tax_number,
+        gstin_vat_number: data.gstin_vat_number,
+        website: data.website,
+        note: data.note,
+        can_login: data.can_login,
+        assignable_to_jobs: data.assignable_to_jobs,
+        finances_visible: data.finances_visible,
+      },
+      { transaction }
+    );
 
-    const vendorDetails = await VendorDetails.create({
-      auth_id: vendorAuth.id,
-      admin_id: adminId,
-      type: data.type,
-      company_name: data.company_name,
-      legal_entity: data.legal_entity,
-      country: data.country,
-      state_region: data.state_region,
-      city: data.city,
-      postal_code: data.postal_code,
-      address: data.address,
-      pan_tax_number: data.pan_tax_number,
-      gstin_vat_number: data.gstin_vat_number,
-      website: data.website,
-      note: data.note,
-      can_login: data.can_login,
-      assignable_to_jobs: data.assignable_to_jobs,
-      finances_visible: data.finances_visible,
-    });
+    await VendorPrimaryUserDetails.create(
+      {
+        vendor_id: vendorDetails.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        timezone: data.timezone,
+        phone: data.phone,
+        zoom_id: data.zoom_id,
+        teams_id: data.teams_id,
+        gender: data.gender?.trim() || null,
+        nationality: data.nationality,
+      },
+      { transaction }
+    );
 
-    await VendorPrimaryUserDetails.create({
-      vendor_id: vendorDetails.id,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      timezone: data.timezone,
-      phone: data.phone,
-      zoom_id: data.zoom_id,
-      teams_id: data.teams_id,
-      gender: data.gender,
-      nationality: data.nationality,
-    });
+    await VendorSettings.create(
+      {
+        vendor_id: vendorDetails.id,
+        works_with_all_services: true,
+        works_with_all_language_pairs: true,
+        works_with_all_specializations: true,
+      },
+      { transaction }
+    );
 
-    await VendorSettings.create({
-      vendor_id: vendorDetails.id,
-      works_with_all_services: true,
-      works_with_all_language_pairs: true,
-      works_with_all_specializations: true,
-    });
+    await transaction.commit();
 
     let activationLink = null;
     if (data.can_login) {
@@ -123,8 +135,11 @@ export const createVendor = async (req, res) => {
       message: "Vendor created successfully",
       activationLink,
     });
+
   } catch (err) {
+    await transaction.rollback();
     console.error(err);
+
     const errorResponse = toClientError(err);
     return res.status(errorResponse.code).json(errorResponse.body);
   }
@@ -197,9 +212,10 @@ export const updateVendor = async (req, res) => {
     ];
 
     if (primaryUser) {
+      const clean = (v) => (v === "" ? null : v);
       primaryUserFields.forEach((field) => {
         if (req.body.hasOwnProperty(field)) {
-          primaryUser[field] = req.body[field];
+          primaryUser[field] = clean(req.body[field]);
         }
       });
 

@@ -107,7 +107,7 @@ ClientDetails.associate = (models) => {
 
   ClientDetails.hasOne(models.ClientPrimaryUserDetails, {
     foreignKey: "client_id",
-    as: "primary_users",
+    as: "primary_user",
     onDelete: "CASCADE",
   });
 };

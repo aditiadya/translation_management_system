@@ -42,6 +42,7 @@ const toClientError = (error) => {
 export const addContactPerson = async (req, res) => {
   try {
     const data = pickAllowed(req.body, ALLOWED_FIELDS);
+    data.gender = data.gender?.trim() || null;
 
     const vendor = await VendorDetails.findByPk(data.vendor_id);
     if (!vendor) {

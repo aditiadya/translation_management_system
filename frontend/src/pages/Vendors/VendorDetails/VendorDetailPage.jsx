@@ -88,12 +88,11 @@ const VendorDetailPage = () => {
 
   return (
     <>
-        {/* Tabs */}
-        <div className="border-b mb-6 flex space-x-6">
+        <div className="border-b mb-6 flex space-x-5">
           {tabs.map((tab) => (
             <button
               key={tab}
-              className={`pb-2 font-medium text-gray-600 border-b-2 transition ${
+              className={`pb-2 text-sm text-gray-600 border-b-2 transition ${
                 activeTab === tab
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent hover:text-gray-900 hover:border-gray-300"

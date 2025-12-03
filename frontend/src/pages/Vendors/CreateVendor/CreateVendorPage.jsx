@@ -1,16 +1,18 @@
-import { useState } from "react";
 import CreateVendorForm from "./CreateVendorForm";
+import BackButton from "../../../components/Button/BackButton";
 
 const CreateVendorPage = () => {
-
   return (
     <>
-        <div className="bg-white rounded-xl shadow-md p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+      <div>
+        <div className="flex items-center gap-3 mb-5">
+          <BackButton to="/vendors" />
+          <h1 className="text-2xl font-bold text-gray-900">
             Create New Vendor
-          </h2>
-          <CreateVendorForm />
+          </h1>
         </div>
+        <CreateVendorForm />
+      </div>
     </>
   );
 };

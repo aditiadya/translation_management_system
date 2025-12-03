@@ -1,3 +1,5 @@
+import { Pencil, Trash2 } from "lucide-react";
+
 const CurrencyList = ({ userCurrencies, onEdit, onDelete }) => {
   return (
     <div className="overflow-x-auto shadow rounded-lg bg-white mt-6">
@@ -26,10 +28,10 @@ const CurrencyList = ({ userCurrencies, onEdit, onDelete }) => {
                     : "hover:bg-gray-100"
                 }
               >
-                <td className="py-4 px-6">
+                <td className="py-3 px-4 text-sm text-gray-500">
                   {item.currency?.code} - {item.currency?.name}
                 </td>
-                <td className="py-4 px-6">
+                <td className="py-3 px-4 text-sm text-gray-500">
                   <span
                     className={`px-3 py-1 inline-block text-sm rounded-full ${
                       item.active_flag
@@ -40,18 +42,16 @@ const CurrencyList = ({ userCurrencies, onEdit, onDelete }) => {
                     {item.active_flag ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="py-4 px-6 space-x-2">
-                  <button
-                    onClick={() => onEdit(item)}
-                    className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
-                  >
-                    Edit
+                <td className="py-3 px-4 space-x-5 text-sm flex items-center">
+                  <button onClick={() => onEdit(item)}>
+                    <Pencil className="w-5 h-5 text-blue-500 hover:text-blue-600 cursor-pointer" />
                   </button>
+
                   <button
                     onClick={() => onDelete(item.id)}
-                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+                    className="w-5 h-5 text-red-500 hover:text-red-600 cursor-pointer"
                   >
-                    Delete
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </td>
               </tr>

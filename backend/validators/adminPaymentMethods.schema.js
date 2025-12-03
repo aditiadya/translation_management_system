@@ -14,23 +14,23 @@ const bankTransferDetailsSchema = Joi.object({
   payment_method_name: Joi.string().trim().max(100).required().messages({
     "any.required": "Payment method name is required",
   }),
-  beneficiary_name: Joi.string().trim().max(100).optional(),
-  beneficiary_address: Joi.string().trim().optional(),
+  beneficiary_name: Joi.string().trim().max(100).allow("").optional(),
+  beneficiary_address: Joi.string().trim().allow("").optional(),
   bank_name: Joi.string().trim().max(100).required().messages({
     "any.required": "Bank name is required",
   }),
-  account_number: Joi.string().trim().max(100).optional(),
-  ifsc_code: Joi.string().trim().max(50).optional(),
-  swift: Joi.string().trim().max(50).optional(),
-  iban: Joi.string().trim().max(100).optional(),
-  sort_code: Joi.string().trim().max(50).optional(),
-  bank_address: Joi.string().trim().optional(),
+  account_number: Joi.string().trim().max(100).allow("").optional(),
+  ifsc_code: Joi.string().trim().max(50).allow("").optional(),
+  swift: Joi.string().trim().max(50).allow("").optional(),
+  iban: Joi.string().trim().max(100).allow("").optional(),
+  sort_code: Joi.string().trim().max(50).allow("").optional(),
+  bank_address: Joi.string().trim().allow("").optional(),
   country: Joi.string().trim().max(100).required().messages({
     "any.required": "Country is required",
   }),
-  state_region: Joi.string().trim().max(100).optional(),
-  city: Joi.string().trim().max(100).optional(),
-  postal_code: Joi.string().trim().max(50).optional(),
+  state_region: Joi.string().trim().max(100).allow("").optional(),
+  city: Joi.string().trim().max(100).allow("").optional(),
+  postal_code: Joi.string().trim().max(50).allow("").optional(),
 });
 
 // PayPal / Payoneer / Skrill
@@ -48,10 +48,10 @@ const otherPaymentDetailsSchema = Joi.object({
   }),
 });
 
-// ---------------------- CREATE SCHEMA ----------------------
+// Add
 export const createPaymentMethodSchema = Joi.object({
   payment_method: paymentMethodEnum,
-  note: Joi.string().trim().optional(),
+  note: Joi.string().trim().allow("").optional(),
   active_flag: Joi.boolean().optional(),
   details: Joi.alternatives()
     .conditional("payment_method", [
@@ -65,14 +65,14 @@ export const createPaymentMethodSchema = Joi.object({
     .optional(),
 });
 
-// ---------------------- UPDATE SCHEMA ----------------------
+// Update
 export const updatePaymentMethodSchema = Joi.object({
   note: Joi.string().trim().optional(),
   active_flag: Joi.boolean().optional(),
   details: Joi.object().optional(),
 });
 
-// ---------------------- GET SCHEMA ----------------------
+// Get
 export const getPaymentMethodSchema = Joi.object({
   id: Joi.number().integer().positive().required().messages({
     "any.required": "Payment method ID is required",
@@ -82,7 +82,7 @@ export const getPaymentMethodSchema = Joi.object({
   }),
 });
 
-// ---------------------- DELETE SCHEMA ----------------------
+// Delete
 export const deletePaymentMethodSchema = Joi.object({
   id: Joi.number().integer().positive().required().messages({
     "any.required": "Payment method ID is required",

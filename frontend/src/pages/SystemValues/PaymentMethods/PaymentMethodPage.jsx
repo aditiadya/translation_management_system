@@ -33,12 +33,14 @@ const PaymentMethodPage = () => {
   const handleSave = async (formData) => {
     try {
       if (activeMethod === "new") {
-        const res = await api.post("/admin-payment-methods", formData);
-        setMethods([...methods, res.data.data]);
+        await api.post("/admin-payment-methods", formData);
       } else {
         await api.put(`/admin-payment-methods/${activeMethod.id}`, formData);
-        fetchMethods();
       }
+
+      const res = await api.get("/admin-payment-methods");
+      setMethods(res.data.data);
+
       setIsFormVisible(false);
       setActiveMethod(null);
     } catch (err) {
@@ -79,7 +81,7 @@ const PaymentMethodPage = () => {
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
             >
-              + New Method
+              Add Payment Method
             </button>
           )}
         </div>

@@ -36,7 +36,7 @@ const ServiceForm = ({ serviceToEdit, onSave, onCancel }) => {
     <div className="flex justify-center items-start min-h-screen bg-gray-50 px-4 pt-12">
       <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg relative">
         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-          {serviceToEdit ? "Edit Service" : "Create Service"}
+          {serviceToEdit ? "Edit Service" : "Add Service"}
         </h2>
 
         <form onSubmit={handleFormSubmit} className="space-y-5">
@@ -72,7 +72,7 @@ const ServiceForm = ({ serviceToEdit, onSave, onCancel }) => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition shadow"
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow"
             >
               Save
             </button>

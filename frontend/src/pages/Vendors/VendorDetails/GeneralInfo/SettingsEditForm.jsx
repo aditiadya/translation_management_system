@@ -1,6 +1,5 @@
 import { useState } from "react";
 import CheckboxField from "../../../../components/Form/CheckboxField";
-import Button from "../../../../components/Button/Button";
 import BackButton from "../../../../components/Button/BackButton";
 
 const SettingsEditForm = ({ vendor, onCancel, onSave }) => {
@@ -20,14 +19,17 @@ const SettingsEditForm = ({ vendor, onCancel, onSave }) => {
   };
 
   return (
+    <div>
+      <div className="flex items-center gap-3 mb-5">
+        <BackButton onClick={onCancel} />
+        <h2 className="text-2xl font-bold text-gray-900">
+          Edit Settings
+        </h2>
+      </div>
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 bg-white p-6 rounded-lg shadow"
+      className="bg-white shadow rounded-lg p-8 space-y-5"
     >
-      <div className="flex items-center gap-4">
-        <BackButton to="/vendor" />
-        <h2 className="text-lg font-semibold text-gray-700">Edit Settings</h2>
-      </div>
       <CheckboxField
         label="Active"
         name="is_active"
@@ -42,13 +44,28 @@ const SettingsEditForm = ({ vendor, onCancel, onSave }) => {
         onChange={handleChange}
       />
 
-      <div className="flex gap-4">
-        <Button type="submit">Save</Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
+      <span className="text-gray-500 text-sm mt-1">
+                Fields marked with <span className="text-red-600">*</span> are
+                mandatory.
+              </span>
+
+      <div className="mt-4 space-x-4">
+        <button
+            type="submit"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+          >
+            Cancel
+          </button>
       </div>
     </form>
+    </div>
   );
 };
 

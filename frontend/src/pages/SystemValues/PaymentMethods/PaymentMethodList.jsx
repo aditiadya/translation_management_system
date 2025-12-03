@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { Pencil, Trash2 } from "lucide-react";
 
 const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
   const renderBankInfo = (method) => {
@@ -86,25 +87,25 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
                   index % 2 === 0 ? "bg-gray-50" : "bg-white"
                 } hover:bg-gray-100`}
               >
-                <td className="py-4 px-4 capitalize">
+                <td className="py-3 px-4 text-sm text-gray-500 capitalize">
                   {method.payment_method.replace("_", " ")}
                 </td>
 
-                <td className="py-4 px-4 font-medium text-gray-800">
+                <td className="py-3 px-4 text-sm text-gray-500 font-medium text-gray-800">
                   {renderPaymentMethodName(method)}
                 </td>
 
-                <td className="py-4 px-4 align-top">
+                <td className="py-3 px-4 text-sm text-gray-500 align-center">
                   {renderBankInfo(method)}
                 </td>
 
-                <td className="py-4 px-4">
+                <td className="py-3 px-4 text-sm text-gray-500">
                   <div className="text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto pr-1">
                     {method.note || "-"}
                   </div>
                 </td>
 
-                <td className="py-4 px-4">
+                <td className="py-3 px-4 text-sm text-gray-500">
                   <span
                     className={`px-3 py-1 inline-block text-sm rounded-full ${
                       method.active_flag
@@ -116,22 +117,20 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
                   </span>
                 </td>
 
-                <td className="py-4 px-4 text-gray-600">
+                <td className="py-3 px-4 text-sm text-gray-500">
                   {formatDate(method.createdAt)}
                 </td>
 
-                <td className="py-4 px-4 space-x-2 text-nowrap">
-                  <button
-                    onClick={() => onEdit(method)}
-                    className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
-                  >
-                    Edit
+                <td className="py-3 px-4 space-x-5 text-sm flex items-center text-nowrap">
+                  <button onClick={() => onEdit(method)}>
+                    <Pencil className="w-5 h-5 text-blue-500 hover:text-blue-600 cursor-pointer" />
                   </button>
+
                   <button
                     onClick={() => onDelete(method.id)}
-                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+                    className="w-5 h-5 text-red-500 hover:text-red-600 cursor-pointer"
                   >
-                    Delete
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </td>
               </tr>

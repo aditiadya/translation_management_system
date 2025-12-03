@@ -216,13 +216,13 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 transition"
+              className="px-5 py-2 rounded-lg bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition shadow-md"
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow"
             >
               Save
             </button>

@@ -43,6 +43,7 @@ const toClientError = (error) => {
 export const addContactPerson = async (req, res) => {
   try {
     const data = pickAllowed(req.body, ALLOWED_FIELDS);
+    data.gender = data.gender?.trim() || null;
 
     const client = await ClientDetails.findByPk(data.client_id);
     if (!client) {

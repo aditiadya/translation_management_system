@@ -5,7 +5,6 @@ import FormInput from "../../../components/Form/FormInput";
 import FormSelect from "../../../components/Form/FormSelect";
 import FormTextarea from "../../../components/Form/TextArea";
 import CheckboxField from "../../../components/Form/CheckboxField";
-import Button from "../../../components/Button/Button";
 
 const staticTimezones = ["UTC−12:00", "UTC−11:00", "UTC−10:00", "UTC−09:00"];
 const vendorTypes = ["Company", "Freelance", "In-House"];
@@ -63,21 +62,39 @@ const CreateVendorForm = () => {
     const currentErrors = {};
     if (form.type === "Company" && !form.company_name)
       currentErrors.company_name = "Company name is required.";
+    if (!form.legal_entity) currentErrors.legal_entity = "Legal Entity is required."; 
+     if (!form.country) currentErrors.country = "Country is required.";
     if (!form.email) currentErrors.email = "Email is required.";
     if (!form.first_name) currentErrors.first_name = "First name is required.";
     if (!form.last_name) currentErrors.last_name = "Last name is required.";
+    if (!form.nationality) currentErrors.nationality = "Nationality is required.";
+     if (!form.timezone) currentErrors.timezone = "Timezone is required.";
     setErrors(currentErrors);
     return Object.keys(currentErrors).length === 0;
   };
+
+    const requiredFields = [
+  "type",
+  "legal_entity",
+  "country",
+  "first_name",
+  "last_name",
+  "email",
+  "timezone",
+  "nationality",
+];
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
     let errorMsg = "";
     if (
       (name === "company_name" && form.type === "Company" && !value) ||
-      (["email", "first_name", "last_name"].includes(name) && !value)
+      (requiredFields.includes(name) && !value)
     ) {
-      errorMsg = `${name.replace("_", " ")} is required.`;
+      errorMsg =
+      name === "email"
+        ? "Email is required."
+        : `${name.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())} is required.`;
     }
     setErrors((prev) => ({ ...prev, [name]: errorMsg }));
   };
@@ -115,10 +132,10 @@ const CreateVendorForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="bg-white shadow rounded-lg p-8 space-y-5">
       {/* Company Info */}
       <h3 className="text-lg font-semibold text-gray-700">Vendor Details</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1">
         <FormSelect
           label="Vendor Type"
           name="type"
@@ -149,6 +166,7 @@ const CreateVendorForm = () => {
           name="legal_entity"
           value={form.legal_entity}
           onChange={handleChange}
+          onBlur={handleBlur}
           options={legalEntities}
           error={errors.legal_entity}
           required
@@ -159,6 +177,7 @@ const CreateVendorForm = () => {
           name="country"
           value={form.country}
           onChange={handleChange}
+          onBlur={handleBlur}
           options={countries}
           error={errors.country}
           required
@@ -177,18 +196,21 @@ const CreateVendorForm = () => {
           value={form.city}
           onChange={handleChange}
         />
-        <FormInput
-          label="Postal Code"
-          name="postal_code"
-          value={form.postal_code}
-          onChange={handleChange}
-        />
+        
         <FormInput
           label="Address"
           name="address"
           value={form.address}
           onChange={handleChange}
         />
+
+        <FormInput
+          label="Postal Code"
+          name="postal_code"
+          value={form.postal_code}
+          onChange={handleChange}
+        />
+        
         <FormInput
           label="PAN/Tax Number"
           name="pan_tax_number"
@@ -213,7 +235,7 @@ const CreateVendorForm = () => {
           name="note"
           value={form.note}
           onChange={handleChange}
-          rows={3}
+          rows={1}
           error={errors.note}
           required={false}
         />
@@ -241,7 +263,7 @@ const CreateVendorForm = () => {
       <h3 className="text-lg font-semibold text-gray-700">
         Primary User Details
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-1">
         <FormInput
           label="First Name"
           name="first_name"
@@ -278,6 +300,7 @@ const CreateVendorForm = () => {
           name="timezone"
           value={form.timezone}
           onChange={handleChange}
+          onBlur={handleBlur}
           options={staticTimezones}
           error={errors.timezone}
           required
@@ -316,6 +339,9 @@ const CreateVendorForm = () => {
           name="nationality"
           value={form.nationality}
           onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.nationality}
+          required
         />
       </div>
 
@@ -325,6 +351,12 @@ const CreateVendorForm = () => {
         name="can_login"
         checked={form.can_login}
         onChange={handleChange}
+        hint={
+          <span className="text-gray-500 text-sm mt-1">
+            Fields marked with <span className="text-red-600">*</span> are
+            mandatory.
+          </span>
+        }
       />
 
       {serverError && (
@@ -338,8 +370,20 @@ const CreateVendorForm = () => {
         </div>
       )}
 
-      <div className="flex justify-center">
-        <Button type="submit">Create Vendor</Button>
+      <div className="mt-4 space-x-4">
+        <button
+          type="submit"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+        >
+          Submit
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/vendors")}
+          className="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+        >
+          Cancel
+        </button>
       </div>
     </form>
   );

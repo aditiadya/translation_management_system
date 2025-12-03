@@ -36,18 +36,20 @@ const UnitForm = ({ unitToEdit, onSave, onCancel }) => {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-8 w-full max-w-md mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-6 text-center">
-        {unitToEdit ? "Edit Unit" : "Add Unit"}
-      </h2>
+    <div className="flex justify-center items-start min-h-screen bg-gray-50 px-4 pt-12">
+      <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg relative">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          {unitToEdit ? "Edit Unit" : "Add Unit"}
+        </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <FormInput
           label="Name"
           name="name"
           value={formData.name}
           onChange={handleChange}
           required
+          className="focus:ring-green-500 focus:border-green-500"
         />
 
         <CheckboxField
@@ -62,23 +64,23 @@ const UnitForm = ({ unitToEdit, onSave, onCancel }) => {
           }
         />
 
-        <div className="flex justify-end gap-4 mt-4">
+        <div className="flex justify-end space-x-4 mt-6">
           <button
-            type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700"
-          >
-            Save
-          </button>
-
-          <button
-            type="button"
-            onClick={onCancel}
-            className="bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700"
-          >
-            Cancel
-          </button>
+              type="button"
+              onClick={onCancel}
+              className="px-5 py-2 rounded-lg bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow"
+            >
+              Save
+            </button>
         </div>
       </form>
+    </div>
     </div>
   );
 };

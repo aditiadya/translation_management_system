@@ -32,7 +32,7 @@ const ManagersPage = () => {
             onClick={() => navigate("/managers/create-manager")}
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
           >
-            + New Manager
+            Add Manager
           </button>
         </div>
 
@@ -45,16 +45,16 @@ const ManagersPage = () => {
             <table className="min-w-full leading-normal">
               <thead>
                 <tr className="bg-white text-black uppercase text-sm">
-                  <th className="py-3 px-6 text-left">Name</th>
-                  <th className="py-3 px-6 text-left">Role</th>
-                  <th className="py-3 px-6 text-left">Client Pool</th>
-                  <th className="py-3 px-6 text-left">Gender</th>
-                  <th className="py-3 px-6 text-left">Email</th>
-                  <th className="py-3 px-6 text-left">Teams ID</th>
-                  <th className="py-3 px-6 text-left">Zoom ID</th>
-                  <th className="py-3 px-6 text-left">Phone</th>
-                  <th className="py-3 px-6 text-left">Status</th>
-                  <th className="py-3 px-6 text-left">Last Login</th>
+                  <th className="py-3 px-6 text-center">Name</th>
+                  <th className="py-3 px-6 text-center">Role</th>
+                  <th className="py-3 px-6 text-center">Client Pool</th>
+                  <th className="py-3 px-6 text-center">Gender</th>
+                  <th className="py-3 px-6 text-center">Email</th>
+                  <th className="py-3 px-6 text-center">Teams ID</th>
+                  <th className="py-3 px-6 text-center">Zoom ID</th>
+                  <th className="py-3 px-6 text-center">Phone</th>
+                  <th className="py-3 px-6 text-center">Status</th>
+                  <th className="py-3 px-6 text-center">Last Login</th>
                 </tr>
               </thead>
 
@@ -68,21 +68,21 @@ const ManagersPage = () => {
                         : "hover:bg-gray-100"
                     }
                   >
-                    <td className="py-4 px-6 text-sm text-blue-600 underline hover:text-indigo-600 whitespace-nowrap">
+                    <td className="py-4 px-6 text-sm text-blue-600 text-center underline hover:text-indigo-600 whitespace-nowrap">
                       <Link to={`/managers/${manager.id}`}>
                         {manager.first_name} {manager.last_name}
                       </Link>
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700">
+                    <td className="py-4 px-6 text-sm text-gray-700 text-center">
                       {manager.role.role_details?.name}
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700">
+                    <td className="py-4 px-6 text-sm text-gray-700 text-center">
                       {manager.client_pool?.name || "-"}
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700 capitalize">
+                    <td className="py-4 px-6 text-sm text-gray-700 text-center capitalize">
                       {manager.gender}
                     </td>
-                    <td className="py-4 px-6 text-sm text-blue-600">
+                    <td className="py-4 px-6 text-sm text-blue-600 text-center">
                       <a
                         href={`mailto:${manager.auth.email}`}
                         className="underline hover:text-indigo-600"
@@ -90,16 +90,16 @@ const ManagersPage = () => {
                         {manager.auth.email}
                       </a>
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700">
+                    <td className="py-4 px-6 text-sm text-gray-700 text-center">
                       {manager.teams_id}
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700">
+                    <td className="py-4 px-6 text-sm text-gray-700 text-center">
                       {manager.zoom_id}
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-700">{manager.phone}</td>
+                    <td className="py-4 px-6 text-sm text-gray-700 text-center">{manager.phone}</td>
                     <td className="py-4 px-6">
                       <span
-                        className={`px-3 py-1 inline-block text-sm rounded-full ${
+                        className={`px-3 py-1 inline-block text-sm text-center rounded-full ${
                           manager.can_login
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-200 text-gray-700"
@@ -108,7 +108,7 @@ const ManagersPage = () => {
                         {manager.can_login ? "Enabled" : "Disabled"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-sm text-gray-500">—</td>
+                    <td className="py-4 px-6 text-sm text-gray-500 text-center">—</td>
                   </tr>
                 ))}
               </tbody>

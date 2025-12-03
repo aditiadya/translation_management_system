@@ -6,7 +6,7 @@ export const createClientSchema = Joi.object({
     "any.only": "Type must be either 'Company' or 'Individual'",
   }),
 
-  company_name: Joi.string().trim().optional().allow(null, "").messages({
+  company_name: Joi.string().trim().optional().allow("").messages({
     "string.base": "Company name must be a string",
   }),
 
@@ -25,35 +25,35 @@ export const createClientSchema = Joi.object({
     "string.base": "Country must be a string",
   }),
 
-  state_region: Joi.string().trim().optional().allow(null, "").messages({
+  state_region: Joi.string().trim().optional().allow("").messages({
     "string.base": "State / Region must be a string",
   }),
 
-  city: Joi.string().trim().optional().allow(null, "").messages({
+  city: Joi.string().trim().optional().allow("").messages({
     "string.base": "City must be a string",
   }),
 
-  postal_code: Joi.string().trim().optional().allow(null, "").messages({
+  postal_code: Joi.string().trim().optional().allow("").messages({
     "string.base": "Postal code must be a string",
   }),
 
-  address: Joi.string().trim().optional().allow(null, "").messages({
+  address: Joi.string().trim().optional().allow("").messages({
     "string.base": "Address must be a string",
   }),
 
-  pan_tax_number: Joi.string().trim().optional().allow(null, "").messages({
+  pan_tax_number: Joi.string().trim().optional().allow("").messages({
     "string.base": "PAN / Tax number must be a string",
   }),
 
-  gstin_vat_number: Joi.string().trim().optional().allow(null, "").messages({
+  gstin_vat_number: Joi.string().trim().optional().allow("").messages({
     "string.base": "GSTIN / VAT number must be a string",
   }),
 
-  website: Joi.string().trim().optional().allow(null, "").messages({
+  website: Joi.string().trim().optional().allow("").messages({
     "string.base": "Website must be a string",
   }),
 
-  note: Joi.string().trim().optional().allow(null, "").messages({
+  note: Joi.string().trim().optional().allow("").messages({
     "string.base": "Note must be a string",
   }),
 
@@ -82,23 +82,23 @@ export const createClientSchema = Joi.object({
     "string.base": "Timezone must be a string",
   }),
 
-  phone: Joi.string().pattern(/^[0-9]{7,15}$/).optional().allow(null, "").messages({
+  phone: Joi.string().pattern(/^[0-9]{7,15}$/).optional().allow("").messages({
     "string.pattern.base": "Phone must be between 7 and 15 digits",
   }),
 
-  zoom_id: Joi.string().trim().optional().allow(null, "").messages({
+  zoom_id: Joi.string().trim().optional().allow("").messages({
     "string.base": "Zoom ID must be a string",
   }),
 
-  teams_id: Joi.string().trim().optional().allow(null, "").messages({
+  teams_id: Joi.string().trim().optional().allow("").messages({
     "string.base": "Teams ID must be a string",
   }),
 
-  gender: Joi.string().valid("Male", "Female", "Other").optional().allow(null, "").messages({
+  gender: Joi.string().valid("Male", "Female", "Other").optional().allow("").messages({
     "any.only": "Gender must be Male, Female, or Other",
   }),
 
-  nationality: Joi.string().trim().optional().allow(null, "").messages({
+  nationality: Joi.string().trim().optional().allow("").messages({
     "string.base": "Nationality must be a string",
   }),
 });
@@ -107,56 +107,56 @@ export const createClientSchema = Joi.object({
 export const updateClientSchema = Joi.object({
   type: Joi.string()
     .valid("Company", "Individual")
-    .optional()
+    .optional().allow("")
     .messages({
       "any.only": "Type must be either 'Company' or 'Individual'",
     }),
 
-  company_name: Joi.string().trim().optional().allow(null, "").messages({
+  company_name: Joi.string().trim().optional().allow("").messages({
     "string.base": "Company name must be a string",
   }),
 
-  legal_entity: Joi.string().trim().optional().messages({
+  legal_entity: Joi.string().trim().optional().allow("").messages({
     "string.base": "Legal entity must be a string",
   }),
 
-  status: Joi.string().trim().optional().messages({
+  status: Joi.string().trim().optional().allow("").messages({
     "string.base": "Status must be a string",
   }),
 
-  country: Joi.string().trim().optional().messages({
+  country: Joi.string().trim().optional().allow("").messages({
     "string.base": "Country must be a string",
   }),
 
-  state_region: Joi.string().trim().optional().allow(null, "").messages({
+  state_region: Joi.string().trim().optional().allow("").messages({
     "string.base": "State / Region must be a string",
   }),
 
-  city: Joi.string().trim().optional().allow(null, "").messages({
+  city: Joi.string().trim().optional().allow("").messages({
     "string.base": "City must be a string",
   }),
 
-  postal_code: Joi.string().trim().optional().allow(null, "").messages({
+  postal_code: Joi.string().trim().optional().allow("").messages({
     "string.base": "Postal code must be a string",
   }),
 
-  address: Joi.string().trim().optional().allow(null, "").messages({
+  address: Joi.string().trim().optional().allow("").messages({
     "string.base": "Address must be a string",
   }),
 
-  pan_tax_number: Joi.string().trim().optional().allow(null, "").messages({
+  pan_tax_number: Joi.string().trim().optional().allow("").messages({
     "string.base": "PAN / Tax number must be a string",
   }),
 
-  gstin_vat_number: Joi.string().trim().optional().allow(null, "").messages({
+  gstin_vat_number: Joi.string().trim().optional().allow("").messages({
     "string.base": "GSTIN / VAT number must be a string",
   }),
 
-  website: Joi.string().trim().optional().allow(null, "").messages({
+  website: Joi.string().trim().optional().allow("").messages({
     "string.base": "Website must be a string",
   }),
 
-  note: Joi.string().trim().optional().allow(null, "").messages({
+  note: Joi.string().trim().optional().allow("").messages({
     "string.base": "Note must be a string",
   }),
 
@@ -164,47 +164,47 @@ export const updateClientSchema = Joi.object({
     "boolean.base": "Can login must be true or false",
   }),
 
-  first_name: Joi.string().trim().optional().messages({
+  first_name: Joi.string().trim().optional().allow("").messages({
     "string.base": "Primary user's first name must be a string",
   }),
 
-  last_name: Joi.string().trim().optional().messages({
+  last_name: Joi.string().trim().optional().allow("").messages({
     "string.base": "Primary user's last name must be a string",
   }),
 
-  email: Joi.string().email().optional().messages({
+  email: Joi.string().email().optional().allow("").messages({
     "string.email": "Email must be a valid email address",
   }),
 
-  timezone: Joi.string().trim().optional().messages({
+  timezone: Joi.string().trim().optional().allow("").messages({
     "string.base": "Timezone must be a string",
   }),
 
   phone: Joi.string()
     .pattern(/^[0-9]{7,15}$/)
     .optional()
-    .allow(null, "")
+    .allow("")
     .messages({
       "string.pattern.base": "Phone must be between 7 and 15 digits",
     }),
 
-  zoom_id: Joi.string().trim().optional().allow(null, "").messages({
+  zoom_id: Joi.string().trim().optional().allow("").messages({
     "string.base": "Zoom ID must be a string",
   }),
 
-  teams_id: Joi.string().trim().optional().allow(null, "").messages({
+  teams_id: Joi.string().trim().optional().allow("").messages({
     "string.base": "Teams ID must be a string",
   }),
 
   gender: Joi.string()
-    .valid("Male", "Female", "Other")
+    .valid("Male", "Female", "Other", null)
     .optional()
-    .allow(null, "")
+    .allow("")
     .messages({
       "any.only": "Gender must be Male, Female, or Other",
     }),
 
-    nationality: Joi.string().trim().optional().allow(null, "").messages({
+    nationality: Joi.string().trim().optional().allow("").messages({
     "string.base": "Nationality must be a string",
   }),
 });

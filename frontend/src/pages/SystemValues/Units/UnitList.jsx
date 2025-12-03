@@ -1,3 +1,5 @@
+import { Pencil, Trash2 } from "lucide-react";
+
 const UnitList = ({ units, onEdit, onDelete }) => {
   return (
     <div className="overflow-x-auto shadow rounded-lg bg-white mt-6">
@@ -26,8 +28,8 @@ const UnitList = ({ units, onEdit, onDelete }) => {
                     : "hover:bg-gray-100"
                 }
               >
-                <td className="py-4 px-6">{unit.name}</td>
-                <td className="py-4 px-6">
+                <td className="py-3 px-4 text-sm text-gray-500">{unit.name}</td>
+                <td className="py-3 px-4 text-sm text-gray-500">
                   <span
                     className={`px-3 py-1 inline-block text-sm rounded-full ${
                       unit.active_flag
@@ -38,18 +40,16 @@ const UnitList = ({ units, onEdit, onDelete }) => {
                     {unit.active_flag ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="py-4 px-6 space-x-2">
-                  <button
-                    onClick={() => onEdit(unit)}
-                    className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
-                  >
-                    Edit
+                <td className="py-3 px-4 space-x-5 text-sm flex items-center">
+                  <button onClick={() => onEdit(unit)}>
+                    <Pencil className="w-5 h-5 text-blue-500 hover:text-blue-600 cursor-pointer" />
                   </button>
+
                   <button
                     onClick={() => onDelete(unit.id)}
-                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
+                    className="w-5 h-5 text-red-500 hover:text-red-600 cursor-pointer"
                   >
-                    Delete
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </td>
               </tr>
