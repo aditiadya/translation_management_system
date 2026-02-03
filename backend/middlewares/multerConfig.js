@@ -34,7 +34,9 @@ export const createUploader = (folderName, maxFileSizeMB = 10) => {
 
   const limits = { fileSize: maxFileSizeMB * 1024 * 1024 };
 
-  const upload = multer({ storage, fileFilter, limits }).single("file");
+  const upload = multer({ storage, fileFilter, limits }).fields([
+  { name: "file", maxCount: 1 }
+]);
 
   return (req, res, next) => {
     req.maxFileSizeMB = maxFileSizeMB;

@@ -21,7 +21,7 @@ const router = express.Router();
 router.use(authenticateToken);
 
 router.post("/", validate(createContactPersonSchema), addContactPerson);
-router.get("/", validate(getAllContactPersonsSchema), getAllContactPersons);
+router.get("/:id", validate(getAllContactPersonsSchema), getAllContactPersons);
 router.get("/:id", validate(getContactPersonSchema), getContactPersonById);
 router.put("/:id", validate(updateContactPersonSchema), updateContactPerson);
 router.delete("/:id", validate(deleteContactPersonSchema), deleteContactPerson);

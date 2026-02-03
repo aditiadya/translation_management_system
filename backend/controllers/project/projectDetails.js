@@ -37,7 +37,12 @@ const createProjectSchema = Joi.object({
   language_pair_id: Joi.number().integer().optional().allow(null),
   specialization_id: Joi.number().integer().optional().allow(null),
   start_at: Joi.date().required(),
-  deadline_at: Joi.date().required(),
+  deadline_at: Joi.date()
+  .greater(Joi.ref("start_at"))
+  .required()
+  .messages({
+    "date.greater": "Deadline must be later than start time.",
+  }),
   instructions: Joi.string().optional().allow(null, ""),
   internal_note: Joi.string().optional().allow(null, ""),
   primary_manager_id: Joi.number().integer().required(),
@@ -54,7 +59,12 @@ const updateProjectSchema = Joi.object({
   language_pair_id: Joi.number().integer().optional().allow(null),
   specialization_id: Joi.number().integer().optional().allow(null),
   start_at: Joi.date().optional(),
-  deadline_at: Joi.date().optional(),
+  deadline_at: Joi.date()
+  .greater(Joi.ref("start_at"))
+  .optional()
+  .messages({
+    "date.greater": "Deadline must be later than start time.",
+  }),
   instructions: Joi.string().optional().allow(null, ""),
   internal_note: Joi.string().optional().allow(null, ""),
   primary_manager_id: Joi.number().integer().optional(),

@@ -68,13 +68,17 @@ export const addContactPerson = async (req, res) => {
 // Get All
 export const getAllContactPersons = async (req, res) => {
   try {
-    const { client_id } = req.query;
-    const where = {};
+    const { id } = req.params;
 
-    if (client_id) where.client_id = client_id;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "id is required",
+      });
+    }
 
     const persons = await ClientContactPersons.findAll({
-      where,
+      where: { client_id: id },
       include: [
         {
           model: ClientDetails,
@@ -91,6 +95,7 @@ export const getAllContactPersons = async (req, res) => {
     return res.status(err.code).json(err.body);
   }
 };
+
 
 // Get
 export const getContactPersonById = async (req, res) => {

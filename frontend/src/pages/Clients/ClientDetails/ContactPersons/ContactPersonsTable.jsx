@@ -46,7 +46,7 @@ const ContactPersonsTable = ({ persons = [], onEdit, onDelete }) => {
                   : "hover:bg-gray-100"
               }
             >
-              <td className="py-4 px-6 text-sm text-gray-900 whitespace-nowrap">
+              <td className="py-4 px-6 text-sm text-center text-gray-900 whitespace-nowrap">
                 {`${contact.first_name} ${contact.last_name}`}
               </td>
               <td className="py-4 px-6 text-sm text-gray-700 text-center capitalize">

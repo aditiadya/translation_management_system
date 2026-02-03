@@ -14,12 +14,14 @@ import ChangePassword from "./pages/Profile/ChangePasswordPage";
 import CreateManager from "./pages/Managers/CreateManager/CreateManagerPage";
 import ManagersPage from "./pages/Managers/ManagerList/ManagersPage";
 import ManagerDetailPage from "./pages/Managers/ManagerDetails/ManagerDetailPage";
+
 import CreateClientPage from "./pages/Clients/CreateClient/CreateClientPage";
 import ClientsPage from "./pages/Clients/ClientList/ClientsPage";
 import ClientDetailPage from "./pages/Clients/ClientDetails/ClientDetailPage";
 import ClientPoolsPage from "./pages/ClientPools/ClientPoolsPage";
 import AddClientPoolPage from "./pages/ClientPools/ClientPoolForm";
 import ClientPoolDetailsPage from "./pages/ClientPools/ClientPoolDetailPage";
+
 import ServicesPage from "./pages/SystemValues/Services/ServicePage";
 import LanguagePairsPage from "./pages/SystemValues/LanguagePairs/LanguagePairsPage";
 import SpecializationPage from "./pages/SystemValues/Specialization/SpecializationPage";
@@ -27,11 +29,21 @@ import UnitPage from "./pages/SystemValues/Units/UnitPage";
 import CurrencyPage from "./pages/SystemValues/Currency/CurrencyPage";
 import PaymentMethodPage from "./pages/SystemValues/PaymentMethods/PaymentMethodPage";
 import SystemValuesPage from "./pages/SystemValues/SystemValuesPage";
+
 import CreateVendorPage from "./pages/Vendors/CreateVendor/CreateVendorPage";
 import VendorsPage from "./pages/Vendors/VendorList/VendorsPage";
 import VendorDetailPage from "./pages/Vendors/VendorDetails/VendorDetailPage";
+
 import MainLayout from "./components/Sidebar/MainLayout";
 
+import ProjectsPage  from "./pages/Projects/ProjectList/ProjectsPage";
+import CreateProjectPage from "./pages/Projects/CreateProject/CreateProjectPage";
+import ProjectDetailPage from "./pages/Projects/ProjectDetails/ProjectDetailPage";
+import CreateFlatRateReceivablePage from "./pages/Projects/ProjectDetails/Finances/CreateFlatRateReceivablePage"
+import CreateUnitBasedReceivablePage from "./pages/Projects/ProjectDetails/Finances/UniBasedReceivablePage"
+import CreateJobsPage from "./pages/Projects/ProjectDetails/Jobs/CreateJobsPage";
+import JobsPage from "./pages/Jobs/JobsPage";
+import JobDetailPage from "./pages/Projects/ProjectDetails/Jobs/JobDetails/JobDetailPage"
 
 const App = () => (
   <AuthProvider>
@@ -230,6 +242,55 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute>
+                <ProjectsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects/create-project"
+            element={
+              <ProtectedRoute>
+                <CreateProjectPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/project/:id"
+            element={
+              <ProtectedRoute>
+                <ProjectDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route path="/project/:id/new-flat-rate-receivable" element={<CreateFlatRateReceivablePage />} />
+          <Route path="/project/:id/new-unit-based-receivable" element={<CreateUnitBasedReceivablePage />} />
+          {/* <Route path="/project/:id/new-cat-log" element={<CreateCATLogPage />} /> */}
+
+          <Route path="/project/:id/create-job" element={<CreateJobsPage />} />
+
+           <Route
+            path="/jobs"
+            element={
+              <ProtectedRoute>
+                <JobsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/project/:id/job/:jobId"
+            element={
+              <ProtectedRoute>
+                <JobDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
           </Route>
       </Routes>
     </Router>

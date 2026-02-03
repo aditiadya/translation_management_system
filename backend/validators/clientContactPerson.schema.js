@@ -34,7 +34,6 @@ export const updateContactPersonSchema = Joi.object({
       "number.base": "ID must be a number",
     }),
   }),
-  // Validate the actual request body directly
   first_name: Joi.string().trim().optional(),
   last_name: Joi.string().trim().optional().allow(null, ""),
   email: Joi.string().email().optional(),
@@ -73,8 +72,7 @@ export const deleteContactPersonSchema = Joi.object({
 
 // Get All Contact Persons
 export const getAllContactPersonsSchema = Joi.object({
-  query: Joi.object({
-    client_id: Joi.number().integer().positive().optional(),
-    is_active: Joi.boolean().optional(),
+  params: Joi.object({
+    id: Joi.number().integer().positive().required(),
   }),
 });

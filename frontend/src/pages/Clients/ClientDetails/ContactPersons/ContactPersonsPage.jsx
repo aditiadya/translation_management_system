@@ -9,13 +9,13 @@ const ContactPersonsPage = ({ clientId }) => {
   const [contactPersons, setContactPersons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [view, setView] = useState("list"); // list | add | edit
+  const [view, setView] = useState("list");
   const [editPerson, setEditPerson] = useState(null);
 
-  const fetchContacts = async () => {
+  const fetchContacts = async (id) => {
     try {
       setLoading(true);
-      const res = await api.get(`/client/contact-persons`, {
+      const res = await api.get(`/client/contact-persons/${id}`, {
         withCredentials: true,
       });
       setContactPersons(res.data.data);
@@ -28,17 +28,19 @@ const ContactPersonsPage = ({ clientId }) => {
   };
 
   useEffect(() => {
-    fetchContacts();
+    if (clientId) {
+    fetchContacts(clientId);
+  }
   }, [clientId]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this contact person?"))
       return;
     try {
-      await api.delete(`client/contact-persons/${id}`, {
+      await api.delete(`/client/contact-persons/${id}`, {
         withCredentials: true,
       });
-      fetchContacts();
+      fetchContacts(clientId);
     } catch (err) {
       alert("Failed to delete contact person");
     }
@@ -46,12 +48,12 @@ const ContactPersonsPage = ({ clientId }) => {
 
   const handleAdd = async (data) => {
     try {
-      await api.post("client/contact-persons", {
+      await api.post("/client/contact-persons", {
         ...data,
         client_id: clientId,
       });
       setView("list");
-      fetchContacts();
+      fetchContacts(clientId);
     } catch (err) {
       alert("Failed to add contact person");
     }
@@ -59,12 +61,12 @@ const ContactPersonsPage = ({ clientId }) => {
 
   const handleUpdate = async (id, data) => {
     try {
-      await api.put(`client/contact-persons/${id}`, data, {
+      await api.put(`/client/contact-persons/${id}`, data, {
         withCredentials: true,
       });
       setView("list");
       setEditPerson(null);
-      fetchContacts();
+      fetchContacts(clientId);
     } catch (err) {
       alert("Failed to update contact person");
     }

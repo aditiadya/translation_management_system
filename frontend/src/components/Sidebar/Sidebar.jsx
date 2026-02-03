@@ -5,7 +5,6 @@ import {
   FiSettings,
   FiChevronLeft,
   FiGrid,
-  FiCircle,
   FiUsers,
 } from "react-icons/fi";
 
@@ -18,6 +17,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { to: "/client-pools", icon: FiUsers, label: "Client Pools" },
     { to: "/system-values", icon: FiUsers, label: "System Values" },
     { to: "/vendors", icon: FiUsers, label: "Vendors" },
+    { to: "/projects", icon: FiUsers, label: "Projects" },
+    { to: "/jobs", icon: FiUsers, label: "Jobs" },
   ];
 
   const linkClasses = ({ isActive }) =>

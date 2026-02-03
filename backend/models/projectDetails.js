@@ -45,6 +45,16 @@ const ProjectDetails = sequelize.define(
       allowNull: false,
     },
 
+    service_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "admin_services",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+
     language_pair_id: {
       type: DataTypes.INTEGER,
       allowNull: true,

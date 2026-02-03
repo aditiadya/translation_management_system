@@ -38,7 +38,7 @@ import vendorPriceListRoutes from "./routes/vendorPriceListRoutes.js"
 
 import projectDetailsRoutes from "./routes/projectDetailsRoutes.js"
 import projectStatusHistoryRoutes from "./routes/projectStatusHistoryRoutes.js"
-
+import projectFileRoutes from "./routes/projectFileRoutes.js";
 
 const app = express();
 
@@ -92,7 +92,6 @@ app.use("/api/vendor-price-list", vendorPriceListRoutes);
 
 app.use("/api/projects", projectDetailsRoutes);
 app.use("/api/project-status-history", projectStatusHistoryRoutes);
-
-
+app.use("/api", projectFileRoutes);
 
 export default app;
