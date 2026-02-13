@@ -55,15 +55,6 @@ const ProjectDetails = sequelize.define(
       onDelete: "CASCADE",
     },
 
-    language_pair_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "admin_language_pairs",
-        key: "id",
-      },
-      onDelete: "CASCADE",
-    },
 
     specialization_id: {
       type: DataTypes.INTEGER,
@@ -121,7 +112,18 @@ const ProjectDetails = sequelize.define(
     },
 
     status: {
-      type: DataTypes.ENUM("Offered by Client", "Offer Accepted", "Offer Rejected", "Draft", "In Progress", "Hold", "Submitted", "Submission Accepted",  "Submission Rejected", "Cancelled"),
+      type: DataTypes.ENUM(
+        "Offered by Client",
+        "Offer Accepted",
+        "Offer Rejected",
+        "Draft",
+        "In Progress",
+        "Hold",
+        "Submitted",
+        "Submission Accepted",
+        "Submission Rejected",
+        "Cancelled"
+      ),
       allowNull: false,
       defaultValue: "In Progress",
     },
@@ -151,10 +153,23 @@ ProjectDetails.associate = (models) => {
     onDelete: "CASCADE",
   });
 
-  ProjectDetails.belongsTo(models.AdminLanguagePair, {
-    foreignKey: "language_pair_id",
-    as: "languagePair",
+  ProjectDetails.belongsTo(models.AdminService, {
+    foreignKey: "service_id",
+    as: "service",
     onDelete: "CASCADE",
+  });
+
+  // CHANGED: Many-to-many relationship with AdminLanguagePair
+  ProjectDetails.belongsToMany(models.AdminLanguagePair, {
+    through: models.ProjectLanguagePair,
+    foreignKey: "project_id",
+    otherKey: "language_pair_id",
+    as: "languagePairs", // Changed from "languagePair" to "languagePairs"
+  });
+
+  ProjectDetails.hasMany(models.ProjectLanguagePair, {
+    foreignKey: "project_id",
+    as: "projectLanguagePairs",
   });
 
   ProjectDetails.belongsTo(models.AdminSpecialization, {
@@ -176,10 +191,10 @@ ProjectDetails.associate = (models) => {
   });
 
   ProjectDetails.hasMany(models.ProjectStatusHistory, {
-  foreignKey: "project_id",
-  as: "statusHistory",
-  onDelete: "CASCADE",
-});
+    foreignKey: "project_id",
+    as: "statusHistory",
+    onDelete: "CASCADE",
+  });
 };
 
 export default ProjectDetails;

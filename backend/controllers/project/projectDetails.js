@@ -9,17 +9,20 @@ const {
   ClientDetails,
   ClientPrimaryUserDetails,
   ClientContactPersons,
+  AdminService,
   AdminLanguagePair,
   AdminSpecialization,
   ManagerDetails,
-  Language
+  ProjectLanguagePair,
+  Language,
 } = db;
 
 const ALLOWED_FIELDS = [
   "client_id",
   "client_contact_person_id",
   "project_name",
-  "language_pair_id",
+  "service_id",
+  "language_pair_ids", // Changed from language_pair_id
   "specialization_id",
   "start_at",
   "deadline_at",
@@ -34,43 +37,76 @@ const createProjectSchema = Joi.object({
   client_id: Joi.number().integer().required(),
   client_contact_person_id: Joi.number().integer().optional().allow(null),
   project_name: Joi.string().required(),
-  language_pair_id: Joi.number().integer().optional().allow(null),
+  service_id: Joi.number().integer().optional().allow(null),
+  language_pair_ids: Joi.array()
+    .items(Joi.number().integer())
+    .min(1)
+    .required()
+    .messages({
+      "array.min": "At least one language pair is required",
+    }),
   specialization_id: Joi.number().integer().optional().allow(null),
   start_at: Joi.date().required(),
   deadline_at: Joi.date()
-  .greater(Joi.ref("start_at"))
-  .required()
-  .messages({
-    "date.greater": "Deadline must be later than start time.",
-  }),
+    .greater(Joi.ref("start_at"))
+    .required()
+    .messages({
+      "date.greater": "Deadline must be later than start time.",
+    }),
   instructions: Joi.string().optional().allow(null, ""),
   internal_note: Joi.string().optional().allow(null, ""),
   primary_manager_id: Joi.number().integer().required(),
   secondary_manager_id: Joi.number().integer().optional().allow(null),
   status: Joi.string()
-    .valid("Offered by Client", "Offer Accepted", "Offer Rejected", "Draft", "In Progress", "Hold", "Submitted", "Submission Accepted",  "Submission Rejected", "Cancelled")
+    .valid(
+      "Offered by Client",
+      "Offer Accepted",
+      "Offer Rejected",
+      "Draft",
+      "In Progress",
+      "Hold",
+      "Submitted",
+      "Submission Accepted",
+      "Submission Rejected",
+      "Cancelled"
+    )
     .optional(),
 });
 
 const updateProjectSchema = Joi.object({
   client_id: Joi.number().integer().optional(),
-  client_contact_person_id: Joi.number().integer().optional(),
+  client_contact_person_id: Joi.number().integer().optional().allow(null),
   project_name: Joi.string().optional(),
-  language_pair_id: Joi.number().integer().optional().allow(null),
+  service_id: Joi.number().integer().optional().allow(null),
+  language_pair_ids: Joi.array()
+    .items(Joi.number().integer())
+    .min(1)
+    .optional(),
   specialization_id: Joi.number().integer().optional().allow(null),
   start_at: Joi.date().optional(),
   deadline_at: Joi.date()
-  .greater(Joi.ref("start_at"))
-  .optional()
-  .messages({
-    "date.greater": "Deadline must be later than start time.",
-  }),
+    .greater(Joi.ref("start_at"))
+    .optional()
+    .messages({
+      "date.greater": "Deadline must be later than start time.",
+    }),
   instructions: Joi.string().optional().allow(null, ""),
   internal_note: Joi.string().optional().allow(null, ""),
   primary_manager_id: Joi.number().integer().optional(),
   secondary_manager_id: Joi.number().integer().optional().allow(null),
   status: Joi.string()
-    .valid("Offered by Client", "Offer Accepted", "Offer Rejected", "Draft", "In Progress", "Hold", "Submitted", "Submission Accepted",  "Submission Rejected", "Cancelled")
+    .valid(
+      "Offered by Client",
+      "Offer Accepted",
+      "Offer Rejected",
+      "Draft",
+      "In Progress",
+      "Hold",
+      "Submitted",
+      "Submission Accepted",
+      "Submission Rejected",
+      "Cancelled"
+    )
     .optional(),
 });
 
@@ -94,15 +130,85 @@ const toClientError = (error) => {
   return { code: 500, body: { success: false, message: "Server error" } };
 };
 
-// Add
+// Helper function to get project with all associations
+const getProjectWithAssociations = (transaction = null) => {
+  return {
+    include: [
+      {
+        model: ClientDetails,
+        as: "client",
+        attributes: ["id", "company_name"],
+        include: [
+          {
+            model: ClientPrimaryUserDetails,
+            as: "primary_user",
+            attributes: ["id", "first_name", "last_name"],
+          },
+          {
+            model: ClientContactPersons,
+            as: "contactPersons",
+            attributes: ["id", "first_name", "last_name"],
+          },
+        ],
+      },
+      {
+        model: ClientContactPersons,
+        as: "contactPerson",
+        attributes: ["id", "first_name", "last_name"],
+      },
+      {
+        model: AdminService,
+        as: "service",
+        attributes: ["id", "name"],
+      },
+      {
+        model: AdminLanguagePair,
+        as: "languagePairs",
+        through: { attributes: [] },
+        attributes: ["id"],
+        include: [
+          {
+            model: Language,
+            as: "sourceLanguage",
+            attributes: ["id", "name"],
+          },
+          {
+            model: Language,
+            as: "targetLanguage",
+            attributes: ["id", "name"],
+          },
+        ],
+      },
+      {
+        model: AdminSpecialization,
+        as: "specialization",
+        attributes: ["id", "name"],
+      },
+      {
+        model: ManagerDetails,
+        as: "primaryManager",
+        attributes: ["id", "first_name", "last_name"],
+      },
+      {
+        model: ManagerDetails,
+        as: "secondaryManager",
+        attributes: ["id", "first_name", "last_name"],
+      },
+    ],
+    ...(transaction && { transaction }),
+  };
+};
+
+// Create Project
 export const createProject = async (req, res) => {
   const adminId = req.user.id;
 
   const payload = pickAllowed(req.body, ALLOWED_FIELDS);
 
+  // Handle empty strings
   [
     "client_contact_person_id",
-    "language_pair_id",
+    "service_id",
     "specialization_id",
     "secondary_manager_id",
     "instructions",
@@ -118,6 +224,7 @@ export const createProject = async (req, res) => {
       .json({ success: false, message: error.details[0].message });
 
   try {
+    // Validate client
     const client = await ClientDetails.findOne({
       where: { id: payload.client_id, admin_id: adminId },
     });
@@ -127,6 +234,7 @@ export const createProject = async (req, res) => {
         message: "Client does not belong to this admin",
       });
 
+    // Validate contact person
     if (payload.client_contact_person_id) {
       const contactPerson = await ClientContactPersons.findOne({
         where: {
@@ -145,6 +253,7 @@ export const createProject = async (req, res) => {
       payload.client_contact_person_id = null;
     }
 
+    // Validate primary manager
     const primaryManager = await ManagerDetails.findOne({
       where: { id: payload.primary_manager_id, admin_id: adminId },
     });
@@ -154,6 +263,7 @@ export const createProject = async (req, res) => {
         message: "Primary manager not found or not owned by this admin",
       });
 
+    // Validate secondary manager
     if (payload.secondary_manager_id) {
       const secondaryManager = await ManagerDetails.findOne({
         where: { id: payload.secondary_manager_id, admin_id: adminId },
@@ -165,16 +275,34 @@ export const createProject = async (req, res) => {
         });
     }
 
-    if (payload.language_pair_id) {
-      const lang = await AdminLanguagePair.findOne({
-        where: { id: payload.language_pair_id, admin_id: adminId },
+    // Validate service
+    if (payload.service_id) {
+      const service = await AdminService.findOne({
+        where: { id: payload.service_id, admin_id: adminId },
       });
-      if (!lang)
+      if (!service)
         return res
           .status(400)
-          .json({ success: false, message: "Language pair invalid" });
+          .json({ success: false, message: "Service invalid" });
     }
 
+    // Validate all language pairs
+    const languagePairIds = payload.language_pair_ids;
+    const validLanguagePairs = await AdminLanguagePair.findAll({
+      where: {
+        id: languagePairIds,
+        admin_id: adminId,
+      },
+    });
+
+    if (validLanguagePairs.length !== languagePairIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: "One or more language pairs are invalid",
+      });
+    }
+
+    // Validate specialization
     if (payload.specialization_id) {
       const spec = await AdminSpecialization.findOne({
         where: { id: payload.specialization_id, admin_id: adminId },
@@ -185,9 +313,13 @@ export const createProject = async (req, res) => {
           .json({ success: false, message: "Specialization invalid" });
     }
 
+    // Create project with language pairs in transaction
     const project = await ProjectDetails.sequelize.transaction(async (t) => {
+      // Remove language_pair_ids from payload before creating project
+      const { language_pair_ids, ...projectData } = payload;
+
       const dataToCreate = {
-        ...payload,
+        ...projectData,
         admin_id: adminId,
       };
 
@@ -195,6 +327,17 @@ export const createProject = async (req, res) => {
         transaction: t,
       });
 
+      // Create project language pair associations
+      const languagePairAssociations = language_pair_ids.map((lpId) => ({
+        project_id: created.id,
+        language_pair_id: lpId,
+      }));
+
+      await ProjectLanguagePair.bulkCreate(languagePairAssociations, {
+        transaction: t,
+      });
+
+      // Create status history
       await ProjectStatusHistory.create(
         {
           project_id: created.id,
@@ -209,10 +352,16 @@ export const createProject = async (req, res) => {
       return created;
     });
 
+    // Fetch the created project with all associations
+    const projectWithDetails = await ProjectDetails.findByPk(
+      project.id,
+      getProjectWithAssociations()
+    );
+
     return res.status(201).json({
       success: true,
       message: "Project created successfully",
-      data: project,
+      data: projectWithDetails,
     });
   } catch (err) {
     console.error("createProject err:", err);
@@ -221,14 +370,15 @@ export const createProject = async (req, res) => {
   }
 };
 
-// Update
+// Update Project
 export const updateProject = async (req, res) => {
   const adminId = req.user.id;
   const projectId = req.params.id;
   const payload = pickAllowed(req.body, ALLOWED_FIELDS);
 
+  // Handle empty strings
   [
-    "language_pair_id",
+    "service_id",
     "specialization_id",
     "secondary_manager_id",
     "instructions",
@@ -254,6 +404,7 @@ export const updateProject = async (req, res) => {
       const isStatusChanged =
         payload.status && payload.status !== existing.status;
 
+      // Validate new client if changed
       if (payload.client_id && payload.client_id !== existing.client_id) {
         const newClient = await ClientDetails.findOne({
           where: { id: payload.client_id, admin_id: adminId },
@@ -266,6 +417,7 @@ export const updateProject = async (req, res) => {
           };
       }
 
+      // Validate contact person
       if (payload.client_contact_person_id) {
         const targetClientId = payload.client_id || existing.client_id;
         const cp = await ClientContactPersons.findOne({
@@ -282,6 +434,7 @@ export const updateProject = async (req, res) => {
           };
       }
 
+      // Validate primary manager
       if (payload.primary_manager_id) {
         const primary = await ManagerDetails.findOne({
           where: { id: payload.primary_manager_id, admin_id: adminId },
@@ -291,6 +444,7 @@ export const updateProject = async (req, res) => {
           throw { name: "BadRequest", message: "Primary manager invalid" };
       }
 
+      // Validate secondary manager
       if (
         payload.secondary_manager_id !== undefined &&
         payload.secondary_manager_id !== null
@@ -303,18 +457,34 @@ export const updateProject = async (req, res) => {
           throw { name: "BadRequest", message: "Secondary manager invalid" };
       }
 
-      if (
-        payload.language_pair_id !== undefined &&
-        payload.language_pair_id !== null
-      ) {
-        const lang = await AdminLanguagePair.findOne({
-          where: { id: payload.language_pair_id, admin_id: adminId },
+      // Validate service
+      if (payload.service_id !== undefined && payload.service_id !== null) {
+        const service = await AdminService.findOne({
+          where: { id: payload.service_id, admin_id: adminId },
           transaction: t,
         });
-        if (!lang)
-          throw { name: "BadRequest", message: "Language pair invalid" };
+        if (!service) throw { name: "BadRequest", message: "Service invalid" };
       }
 
+      // Validate language pairs if provided
+      if (payload.language_pair_ids && payload.language_pair_ids.length > 0) {
+        const validLanguagePairs = await AdminLanguagePair.findAll({
+          where: {
+            id: payload.language_pair_ids,
+            admin_id: adminId,
+          },
+          transaction: t,
+        });
+
+        if (validLanguagePairs.length !== payload.language_pair_ids.length) {
+          throw {
+            name: "BadRequest",
+            message: "One or more language pairs are invalid",
+          };
+        }
+      }
+
+      // Validate specialization
       if (
         payload.specialization_id !== undefined &&
         payload.specialization_id !== null
@@ -327,6 +497,35 @@ export const updateProject = async (req, res) => {
           throw { name: "BadRequest", message: "Specialization invalid" };
       }
 
+      // Extract language_pair_ids before updating project
+      const { language_pair_ids, ...projectData } = payload;
+
+      // Update project details
+      await ProjectDetails.update(projectData, {
+        where: { id: projectId, admin_id: adminId },
+        transaction: t,
+      });
+
+      // Update language pairs if provided
+      if (language_pair_ids && language_pair_ids.length > 0) {
+        // Remove existing associations
+        await ProjectLanguagePair.destroy({
+          where: { project_id: projectId },
+          transaction: t,
+        });
+
+        // Create new associations
+        const languagePairAssociations = language_pair_ids.map((lpId) => ({
+          project_id: projectId,
+          language_pair_id: lpId,
+        }));
+
+        await ProjectLanguagePair.bulkCreate(languagePairAssociations, {
+          transaction: t,
+        });
+      }
+
+      // Log status change if status was updated
       if (isStatusChanged) {
         await ProjectStatusHistory.create(
           {
@@ -340,23 +539,10 @@ export const updateProject = async (req, res) => {
         );
       }
 
-      await ProjectDetails.update(payload, {
-        where: { id: projectId, admin_id: adminId },
-        transaction: t,
-      });
-
+      // Fetch updated project with all associations
       const updatedProject = await ProjectDetails.findOne({
         where: { id: projectId, admin_id: adminId },
-        include: [
-          { model: AdminAuth, as: "admin", attributes: ["id", "email"] },
-          { model: ClientDetails, as: "client" },
-          { model: ClientContactPersons, as: "contactPerson" },
-          { model: AdminLanguagePair, as: "languagePair" },
-          { model: AdminSpecialization, as: "specialization" },
-          { model: ManagerDetails, as: "primaryManager" },
-          { model: ManagerDetails, as: "secondaryManager" },
-        ],
-        transaction: t,
+        ...getProjectWithAssociations(t),
       });
 
       return updatedProject;
@@ -388,61 +574,7 @@ export const getProjectById = async (req, res) => {
   try {
     const project = await ProjectDetails.findOne({
       where: { id: projectId, admin_id: adminId },
-      include: [
-        {
-          model: ClientDetails,
-          as: "client",
-          attributes: ["id", "company_name"],
-          include: [
-            {
-              model: ClientPrimaryUserDetails,
-              as: "primary_user",
-              attributes: ["id", "first_name", "last_name"],
-            },
-            {
-              model: ClientContactPersons,
-              as: "contactPersons",
-              attributes: ["id", "first_name", "last_name"],
-            },
-          ],
-        },
-
-        {
-          model: AdminLanguagePair,
-          as: "languagePair",
-          attributes: ["id"],
-          include: [
-            {
-              model: Language,
-              as: "sourceLanguage",
-              attributes: ["id", "name"],
-            },
-            {
-              model: Language,
-              as: "targetLanguage",
-              attributes: ["id", "name"],
-            },
-          ],
-        },
-
-        {
-          model: AdminSpecialization,
-          as: "specialization",
-          attributes: ["id", "name"],
-        },
-
-        {
-          model: ManagerDetails,
-          as: "primaryManager",
-          attributes: ["id", "first_name", "last_name"],
-        },
-
-        {
-          model: ManagerDetails,
-          as: "secondaryManager",
-          attributes: ["id", "first_name", "last_name"],
-        },
-      ],
+      ...getProjectWithAssociations(),
     });
 
     if (!project)
@@ -458,7 +590,7 @@ export const getProjectById = async (req, res) => {
   }
 };
 
-// Get all
+// Get all projects
 export const getAllProjects = async (req, res) => {
   const adminId = req.user.id;
   const {
@@ -469,6 +601,7 @@ export const getAllProjects = async (req, res) => {
     manager_id,
     start_from,
     start_to,
+    language_pair_id, // New filter for language pair
   } = req.query;
 
   const where = { admin_id: adminId };
@@ -493,66 +626,82 @@ export const getAllProjects = async (req, res) => {
   try {
     const offset = (Math.max(1, parseInt(page, 10)) - 1) * parseInt(limit, 10);
 
+    // Build include array with optional language pair filter
+    const includeArray = [
+      {
+        model: ClientDetails,
+        as: "client",
+        attributes: ["id", "company_name"],
+        include: [
+          {
+            model: ClientPrimaryUserDetails,
+            as: "primary_user",
+            attributes: ["id", "first_name", "last_name"],
+          },
+          {
+            model: ClientContactPersons,
+            as: "contactPersons",
+            attributes: ["id", "first_name", "last_name"],
+          },
+        ],
+      },
+      {
+        model: ClientContactPersons,
+        as: "contactPerson",
+        attributes: ["id", "first_name", "last_name"],
+      },
+      {
+        model: AdminService,
+        as: "service",
+        attributes: ["id", "name"],
+      },
+      {
+        model: AdminLanguagePair,
+        as: "languagePairs",
+        through: { attributes: [] },
+        attributes: ["id"],
+        include: [
+          {
+            model: Language,
+            as: "sourceLanguage",
+            attributes: ["id", "name"],
+          },
+          {
+            model: Language,
+            as: "targetLanguage",
+            attributes: ["id", "name"],
+          },
+        ],
+        // Add where clause if filtering by language pair
+        ...(language_pair_id && {
+          where: { id: language_pair_id },
+          required: true,
+        }),
+      },
+      {
+        model: AdminSpecialization,
+        as: "specialization",
+        attributes: ["id", "name"],
+      },
+      {
+        model: ManagerDetails,
+        as: "primaryManager",
+        attributes: ["id", "first_name", "last_name"],
+      },
+      {
+        model: ManagerDetails,
+        as: "secondaryManager",
+        attributes: ["id", "first_name", "last_name"],
+      },
+    ];
+
     const projects = await ProjectDetails.findAndCountAll({
       where,
-      include: [
-        {
-          model: ClientDetails,
-          as: "client",
-          attributes: ["id", "company_name"],
-          include: [
-            {
-              model: ClientPrimaryUserDetails,
-              as: "primary_user",
-              attributes: ["id", "first_name", "last_name"],
-            },
-            {
-              model: ClientContactPersons,
-              as: "contactPersons",
-              attributes: ["id", "first_name", "last_name"],
-            },
-          ],
-        },
-
-        {
-          model: AdminLanguagePair,
-          as: "languagePair",
-          attributes: ["id"],
-          include: [
-            {
-              model: Language,
-              as: "sourceLanguage",
-              attributes: ["id", "name"],
-            },
-            {
-              model: Language,
-              as: "targetLanguage",
-              attributes: ["id", "name"],
-            },
-          ],
-        },
-
-        {
-          model: AdminSpecialization,
-          as: "specialization",
-          attributes: ["id", "name"],
-        },
-
-        {
-          model: ManagerDetails,
-          as: "primaryManager",
-          attributes: ["id", "first_name", "last_name"],
-        },
-
-        {
-          model: ManagerDetails,
-          as: "secondaryManager",
-          attributes: ["id", "first_name", "last_name"],
-        },
-      ],
+      include: includeArray,
       order: [["id", "DESC"]],
       offset,
       limit: parseInt(limit, 10),
+      distinct: true, // Important for accurate count with joins
     });
 
     return res.status(200).json({
@@ -570,7 +719,7 @@ export const getAllProjects = async (req, res) => {
   }
 };
 
-// Delete
+// Delete project
 export const deleteProject = async (req, res) => {
   const adminId = req.user.id;
   const projectId = req.params.id;
@@ -584,7 +733,25 @@ export const deleteProject = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Project not found" });
 
-    await ProjectDetails.destroy({ where: { id: projectId } });
+    await ProjectDetails.sequelize.transaction(async (t) => {
+      // Delete language pair associations first
+      await ProjectLanguagePair.destroy({
+        where: { project_id: projectId },
+        transaction: t,
+      });
+
+      // Delete status history
+      await ProjectStatusHistory.destroy({
+        where: { project_id: projectId },
+        transaction: t,
+      });
+
+      // Delete the project
+      await ProjectDetails.destroy({
+        where: { id: projectId },
+        transaction: t,
+      });
+    });
 
     return res
       .status(200)

@@ -8,7 +8,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
     language_pair_id: "",
     specialization_id: "",
     currency_id: "",
-    unit: "",
+    unit: "", // This will now store the 'name' from admin_units
     price_per_unit: "",
     note: "",
   });
@@ -17,6 +17,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
   const [languagePairs, setLanguagePairs] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [currencies, setCurrencies] = useState([]);
+  const [units, setUnits] = useState([]); // New state for units dropdown
 
   useEffect(() => {
     fetchDropdowns();
@@ -35,23 +36,24 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
   }, [editingItem, vendorId]);
 
   const fetchDropdowns = async () => {
-  try {
-    const [svc, lp, spec, cur] = await Promise.all([
-      api.get(`/vendor-services/${vendorId}/services`),
-      api.get(`/vendor-language-pairs/${vendorId}/language-pairs`),
-      api.get(`/vendor-specializations/${vendorId}/specializations`),
-      api.get(`/admin-currencies`),
-    ]);
+    try {
+      const [svc, lp, spec, cur, unt] = await Promise.all([
+        api.get(`/vendor-services/${vendorId}/services`),
+        api.get(`/vendor-language-pairs/${vendorId}/language-pairs`),
+        api.get(`/vendor-specializations/${vendorId}/specializations`),
+        api.get(`/admin-currencies`),
+        api.get(`/admin-units`), // Adjust this URL to match your backend route for getAllUnits
+      ]);
 
-    setServices(Array.isArray(svc.data.data?.services) ? svc.data.data.services : []);
-    setLanguagePairs(Array.isArray(lp.data.data?.languagePairs) ? lp.data.data.languagePairs : []);
-    setSpecializations(Array.isArray(spec.data.data?.specializations) ? spec.data.data.specializations : []);
-    setCurrencies(Array.isArray(cur.data.data) ? cur.data.data : []);
-  } catch (err) {
-    console.error("Failed to load dropdowns", err);
-  }
-};
-
+      setServices(Array.isArray(svc.data.data?.services) ? svc.data.data.services : []);
+      setLanguagePairs(Array.isArray(lp.data.data?.languagePairs) ? lp.data.data.languagePairs : []);
+      setSpecializations(Array.isArray(spec.data.data?.specializations) ? spec.data.data.specializations : []);
+      setCurrencies(Array.isArray(cur.data.data) ? cur.data.data : []);
+      setUnits(Array.isArray(unt.data.data) ? unt.data.data : []); // Set the units state
+    } catch (err) {
+      console.error("Failed to load dropdowns", err);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -68,8 +70,8 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
         {editingItem ? "Edit Price" : "Add New Price"}
       </h2>
 
-      {/* Dropdowns */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Service Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Service</label>
           <select
@@ -88,6 +90,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
           </select>
         </div>
 
+        {/* Language Pair Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Language Pair</label>
           <select
@@ -100,12 +103,13 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
             <option value="">Select language pair</option>
             {languagePairs.map((lp) => (
               <option key={lp.id} value={lp.id}>
-                {lp.source_language_id} → {lp.target_language_id}
+                {lp.source_language_code} → {lp.target_language_code}
               </option>
             ))}
           </select>
         </div>
 
+        {/* Specialization Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Specialization</label>
           <select
@@ -124,6 +128,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
           </select>
         </div>
 
+        {/* Currency Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Currency</label>
           <select
@@ -142,16 +147,23 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
           </select>
         </div>
 
+        {/* Unit Dropdown (Updated from Text Input) */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Unit</label>
-          <input
-            type="text"
+          <select
             name="unit"
             value={formData.unit}
             onChange={handleChange}
             required
-            className="w-full border rounded px-3 py-2"
-          />
+            className="w-full border rounded px-3 py-2 bg-white"
+          >
+            <option value="">Select unit</option>
+            {units.map((u) => (
+              <option key={u.id} value={u.name}>
+                {u.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

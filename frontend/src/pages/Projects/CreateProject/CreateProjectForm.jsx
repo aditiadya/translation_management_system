@@ -10,10 +10,8 @@ const CreateProjectForm = () => {
 
   const getLocalDateTime = () => {
     const now = new Date();
-
     const offset = now.getTimezoneOffset() * 60000;
     const localTime = new Date(now.getTime() - offset);
-
     return localTime.toISOString().slice(0, 16);
   };
 
@@ -21,6 +19,7 @@ const CreateProjectForm = () => {
     client_id: "",
     client_contact_person_id: "",
     project_name: "",
+    service_id: "",
     language_pair_ids: [],
     specialization_id: "",
     start_at: getLocalDateTime(),
@@ -34,8 +33,10 @@ const CreateProjectForm = () => {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [clients, setClients] = useState([]);
   const [contactPersons, setContactPersons] = useState([]);
+  const [services, setServices] = useState([]);
   const [languagePairs, setLanguagePairs] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [managers, setManagers] = useState([]);
@@ -51,6 +52,26 @@ const CreateProjectForm = () => {
     };
 
     fetchClients();
+  }, []);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await api.get("/admin-services", {
+          withCredentials: true,
+        });
+
+        const activeServices = (res.data.data || []).filter(
+          (s) => s.active_flag === true
+        );
+
+        setServices(activeServices);
+      } catch (err) {
+        console.error("Failed to fetch services:", err.response || err);
+      }
+    };
+
+    fetchServices();
   }, []);
 
   useEffect(() => {
@@ -151,11 +172,20 @@ const CreateProjectForm = () => {
   const validate = () => {
     const err = {};
     if (!form.client_id) err.client_id = "Client is required.";
-    if (!form.project_name) err.project_name = "Project name is required.";
-    if (!form.start_at) err.start_at = "Start date required.";
-    if (!form.deadline_at) err.deadline_at = "Deadline required.";
-    if (!form.primary_manager_id)
-      err.primary_manager_id = "Primary manager required.";
+    if (!form.project_name?.trim()) err.project_name = "Project name is required.";
+    if (!form.start_at) err.start_at = "Start date is required.";
+    if (!form.deadline_at) err.deadline_at = "Deadline is required.";
+    if (!form.primary_manager_id) err.primary_manager_id = "Primary manager is required.";
+    
+    // Add validation for language pairs
+    if (!form.language_pair_ids || form.language_pair_ids.length === 0) {
+      err.language_pair_ids = "At least one language pair is required.";
+    }
+
+    // Validate deadline is after start date
+    if (form.start_at && form.deadline_at && form.deadline_at <= form.start_at) {
+      err.deadline_at = "Deadline must be after start date.";
+    }
 
     setErrors(err);
     return Object.keys(err).length === 0;
@@ -165,14 +195,39 @@ const CreateProjectForm = () => {
     e.preventDefault();
     if (!validate()) return;
 
+    setIsSubmitting(true);
+    setServerError("");
+
     try {
-      await api.post("/projects", form, { withCredentials: true });
-      setSuccess("Project created successfully.");
-      navigate("/projects");
+      // Prepare the payload
+      const payload = {
+        ...form,
+        // Convert empty strings to null for optional fields
+        client_contact_person_id: form.client_contact_person_id || null,
+        service_id: form.service_id || null,
+        specialization_id: form.specialization_id || null,
+        secondary_manager_id: form.secondary_manager_id || null,
+        instructions: form.instructions || null,
+        internal_note: form.internal_note || null,
+      };
+
+      const response = await api.post("/projects", payload, { 
+        withCredentials: true 
+      });
+
+      setSuccess("Project created successfully!");
+      
+      // Redirect after a short delay to show success message
+      setTimeout(() => {
+        navigate("/projects");
+      }, 1500);
     } catch (err) {
+      console.error("Create project error:", err);
       setServerError(
         err.response?.data?.message || "Failed to create project."
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -221,26 +276,50 @@ const CreateProjectForm = () => {
           required
         />
 
-        <div>
+        <FormSelect
+          label="Service"
+          name="service_id"
+          value={form.service_id}
+          onChange={handleChange}
+          options={services.map((s) => ({
+            value: s.id,
+            label: s.name,
+          }))}
+        />
+
+        {/* Language Pair Selection with Tags */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold mb-2">
+            Language Pairs <span className="text-red-600">*</span>
+          </label>
+          
           <FormSelect
-            label="Language Pair"
+            label=""
             name="language_pair_select"
             value=""
             onChange={(e) => {
               const selectedId = Number(e.target.value);
 
-              if (!form.language_pair_ids.includes(selectedId)) {
+              if (selectedId && !form.language_pair_ids.includes(selectedId)) {
                 setForm((prev) => ({
                   ...prev,
                   language_pair_ids: [...prev.language_pair_ids, selectedId],
                 }));
+                setErrors((prev) => ({ ...prev, language_pair_ids: "" }));
               }
             }}
-            options={languagePairs.map((lp) => ({
-              value: lp.id,
-              label: `${lp.sourceLanguage?.name} → ${lp.targetLanguage?.name}`,
-            }))}
+            options={languagePairs
+              .filter((lp) => !form.language_pair_ids.includes(lp.id))
+              .map((lp) => ({
+                value: lp.id,
+                label: `${lp.sourceLanguage?.name} → ${lp.targetLanguage?.name}`,
+              }))}
+            placeholder="Select a language pair to add"
           />
+
+          {errors.language_pair_ids && (
+            <p className="text-red-500 text-sm mt-1">{errors.language_pair_ids}</p>
+          )}
 
           {form.language_pair_ids.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
@@ -251,7 +330,7 @@ const CreateProjectForm = () => {
                 return (
                   <span
                     key={id}
-                    className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                    className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium"
                   >
                     {pair.sourceLanguage?.name} → {pair.targetLanguage?.name}
                     <button
@@ -264,7 +343,8 @@ const CreateProjectForm = () => {
                           ),
                         }))
                       }
-                      className="text-red-500 hover:text-red-700 font-bold"
+                      className="text-red-500 hover:text-red-700 font-bold text-lg leading-none"
+                      aria-label="Remove language pair"
                     >
                       ×
                     </button>
@@ -272,6 +352,12 @@ const CreateProjectForm = () => {
                 );
               })}
             </div>
+          )}
+
+          {form.language_pair_ids.length > 0 && (
+            <p className="text-sm text-gray-500 mt-2">
+              {form.language_pair_ids.length} language pair{form.language_pair_ids.length > 1 ? 's' : ''} selected
+            </p>
           )}
         </div>
 
@@ -378,15 +464,17 @@ const CreateProjectForm = () => {
       <div className="flex gap-4 pt-4">
         <button
           type="submit"
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+          disabled={isSubmitting}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-blue-300 disabled:cursor-not-allowed"
         >
-          Submit
+          {isSubmitting ? "Creating..." : "Submit"}
         </button>
 
         <button
           type="button"
           onClick={() => navigate("/projects")}
-          className="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+          disabled={isSubmitting}
+          className="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           Cancel
         </button>

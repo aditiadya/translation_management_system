@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../../utils/axiosInstance";
 import ProjectDetailsCard from "./ProjectDetailsCard";
-// import ManagerStatusCard from "./ManagerStatusCard";
+import ManagerStatusCard from "./ManagerStatusCard";
+import MessageCard from "./MessageCard";
 
 const DetailsPage = () => {
   const { id } = useParams();
@@ -50,30 +51,35 @@ const DetailsPage = () => {
 
   if (error) {
     return (
-      <div className="text-center mt-10 text-red-600 font-medium">
-        {error}
-      </div>
+      <div className="text-center mt-10 text-red-600 font-medium">{error}</div>
     );
   }
 
   if (!project) {
     return (
-      <div className="text-center mt-10 text-gray-500">
-        Project not found.
-      </div>
+      <div className="text-center mt-10 text-gray-500">Project not found.</div>
     );
   }
 
   return (
-    <>
-      <ProjectDetailsCard
-        project={project}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+    <div>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1">
+          <ProjectDetailsCard
+            project={project}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
 
-      {/* <ManagerStatusCard project={project} /> */}
-    </>
+        <div className="lg:w-[500px]">
+          <ManagerStatusCard project={project} />
+        </div>
+      </div>
+      <div className="mt-5">
+      <MessageCard/>
+      </div>
+    </div>
   );
 };
 

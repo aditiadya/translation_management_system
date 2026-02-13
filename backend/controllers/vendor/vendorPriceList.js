@@ -5,6 +5,7 @@ const {
   VendorPriceList,
   VendorDetails,
   VendorService,
+  VendorSettings,
   VendorLanguagePair,
   VendorSpecialization,
   AdminCurrency,
@@ -48,151 +49,93 @@ const toClientError = (error) => {
   };
 };
 
-// Add
 export const createVendorPrice = async (req, res) => {
   try {
     const adminId = req.user.id;
     const data = pickAllowed(req.body, VENDOR_PRICE_ALLOWED_FIELDS);
 
+    console.log("--- Starting createVendorPrice with Settings Check ---");
+
     const requiredFields = [
-      "vendor_id",
-      "service_id",
-      "language_pair_id",
-      "specialization_id",
-      "unit",
-      "price_per_unit",
-      "currency_id",
+      "vendor_id", "service_id", "language_pair_id", 
+      "specialization_id", "unit", "price_per_unit", "currency_id"
     ];
 
     for (const field of requiredFields) {
       if (!data[field]) {
-        return res.status(400).json({
-          success: false,
-          message: `Missing required field: ${field}`,
-        });
+        return res.status(400).json({ success: false, message: `Missing field: ${field}` });
       }
     }
 
-    // Validate vendor + admin ownership
-    const vendor = await VendorDetails.findByPk(data.vendor_id);
-    if (!vendor)
-      return res.status(404).json({ success: false, message: "Vendor not found" });
+    // 1. Fetch Vendor and their Settings
+    const vendor = await VendorDetails.findOne({
+      where: { id: data.vendor_id, admin_id: adminId },
+      include: [{ model: VendorSettings, as: 'settings' }]
+    });
 
-    if (vendor.admin_id !== adminId)
-      return res.status(403).json({
-        success: false,
-        message: "Vendor does not belong to your admin account",
-      });
+    if (!vendor) {
+      return res.status(403).json({ success: false, message: "Vendor access denied or not found" });
+    }
+
+    const settings = vendor.settings || {};
 
     // --------------------------------------------------------
-    // 1️⃣ Normalize Service ID (accept vendor_service.id or admin_service.id)
+    // 2️⃣ Normalize Service ID (Logic for works_with_all_services)
     // --------------------------------------------------------
-    let vendorService = await VendorService.findByPk(data.service_id);
-
-    if (!vendorService) {
-      // maybe admin-level ID
+    if (settings.works_with_all_services) {
+      // Check admin_services directly
       const adminService = await AdminService.findByPk(data.service_id);
-
       if (!adminService) {
-        return res.status(404).json({
-          success: false,
-          message: "Invalid service_id: no vendor or admin record found",
-        });
+        return res.status(404).json({ success: false, message: "Admin service not found" });
       }
-
-      vendorService = await VendorService.findOne({
-        where: {
-          vendor_id: vendor.id,
-          service_id: adminService.id,
-        },
+      // Note: If you store the admin_service_id in your price list, use it directly. 
+      // If your schema requires a vendor_service_id, you might still need to find/create a link.
+      data.service_id = adminService.id; 
+    } else {
+      // Strict check in vendor_services
+      const vendorService = await VendorService.findOne({
+        where: { vendor_id: vendor.id, [db.Sequelize.Op.or]: [{ id: data.service_id }, { service_id: data.service_id }] }
       });
-
-      if (!vendorService) {
-        return res.status(404).json({
-          success: false,
-          message: "Vendor does not have this service",
-        });
-      }
+      if (!vendorService) return res.status(404).json({ success: false, message: "Service not assigned to vendor" });
+      data.service_id = vendorService.id;
     }
 
-    data.service_id = vendorService.id;
-
     // --------------------------------------------------------
-    // 2️⃣ Normalize Language Pair ID
+    // 3️⃣ Normalize Language Pair ID (Logic for works_with_all_language_pairs)
     // --------------------------------------------------------
-    let vendorLP = await VendorLanguagePair.findByPk(data.language_pair_id);
-
-    if (!vendorLP) {
+    if (settings.works_with_all_language_pairs) {
       const adminLP = await AdminLanguagePair.findByPk(data.language_pair_id);
-      if (!adminLP) {
-        return res.status(404).json({
-          success: false,
-          message: "Invalid language_pair_id: not found",
-        });
-      }
-
-      vendorLP = await VendorLanguagePair.findOne({
-        where: {
-          vendor_id: vendor.id,
-          language_pair_id: adminLP.id,
-        },
+      if (!adminLP) return res.status(404).json({ success: false, message: "Admin language pair not found" });
+      data.language_pair_id = adminLP.id;
+    } else {
+      const vendorLP = await VendorLanguagePair.findOne({
+        where: { vendor_id: vendor.id, [db.Sequelize.Op.or]: [{ id: data.language_pair_id }, { language_pair_id: data.language_pair_id }] }
       });
-
-      if (!vendorLP) {
-        return res.status(404).json({
-          success: false,
-          message: "Vendor does not have this language pair",
-        });
-      }
+      if (!vendorLP) return res.status(404).json({ success: false, message: "Language pair not assigned to vendor" });
+      data.language_pair_id = vendorLP.id;
     }
 
-    data.language_pair_id = vendorLP.id;
-
     // --------------------------------------------------------
-    // 3️⃣ Normalize Specialization ID
+    // 4️⃣ Normalize Specialization ID (Logic for works_with_all_specializations)
     // --------------------------------------------------------
-    let vendorSpec = await VendorSpecialization.findByPk(data.specialization_id);
-
-    if (!vendorSpec) {
+    if (settings.works_with_all_specializations) {
       const adminSpec = await AdminSpecialization.findByPk(data.specialization_id);
-      if (!adminSpec) {
-        return res.status(404).json({
-          success: false,
-          message: "Invalid specialization_id: not found",
-        });
-      }
-
-      vendorSpec = await VendorSpecialization.findOne({
-        where: {
-          vendor_id: vendor.id,
-          specialization_id: adminSpec.id,
-        },
+      if (!adminSpec) return res.status(404).json({ success: false, message: "Admin specialization not found" });
+      data.specialization_id = adminSpec.id;
+    } else {
+      const vendorSpec = await VendorSpecialization.findOne({
+        where: { vendor_id: vendor.id, [db.Sequelize.Op.or]: [{ id: data.specialization_id }, { specialization_id: data.specialization_id }] }
       });
-
-      if (!vendorSpec) {
-        return res.status(404).json({
-          success: false,
-          message: "Vendor does not have this specialization",
-        });
-      }
+      if (!vendorSpec) return res.status(404).json({ success: false, message: "Specialization not assigned to vendor" });
+      data.specialization_id = vendorSpec.id;
     }
 
-    data.specialization_id = vendorSpec.id;
-
     // --------------------------------------------------------
-    // 4️⃣ Validate currency
+    // 5️⃣ Final Checks & Creation
     // --------------------------------------------------------
     const currency = await AdminCurrency.findByPk(data.currency_id);
-    if (!currency) {
-      return res.status(404).json({
-        success: false,
-        message: "Invalid currency_id",
-      });
-    }
+    if (!currency) return res.status(404).json({ success: false, message: "Invalid currency_id" });
 
-    // --------------------------------------------------------
-    // 5️⃣ Prevent duplicate entries
-    // --------------------------------------------------------
     const existing = await VendorPriceList.findOne({
       where: {
         vendor_id: data.vendor_id,
@@ -204,32 +147,17 @@ export const createVendorPrice = async (req, res) => {
       },
     });
 
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "This price list entry already exists",
-      });
-    }
+    if (existing) return res.status(409).json({ success: false, message: "Price entry already exists" });
 
-    // --------------------------------------------------------
-    // 6️⃣ Create
-    // --------------------------------------------------------
     const newEntry = await VendorPriceList.create(data);
-
-    return res.status(201).json({
-      success: true,
-      message: "Vendor price list entry created successfully",
-      data: newEntry,
-    });
+    return res.status(201).json({ success: true, data: newEntry });
 
   } catch (error) {
-    console.error("Error creating vendor price:", error);
-    const err = toClientError(error);
+    console.error("Error:", error);
+    const err = typeof toClientError === 'function' ? toClientError(error) : { code: 500, body: { message: error.message } };
     res.status(err.code).json(err.body);
   }
 };
-
-
 // Get All
 export const getAllVendorPrices = async (req, res) => {
   try {

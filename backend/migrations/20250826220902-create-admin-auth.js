@@ -30,7 +30,7 @@ export async function up(queryInterface, Sequelize) {
       allowNull: true,
       unique: true,
     },
-    token_expiry: {
+    reset_token_expiry: {
       type: Sequelize.DATE,
       allowNull: true,
     },

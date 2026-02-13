@@ -1,7 +1,7 @@
 import db from "../../models/index.js";
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const { VendorLanguagePair, VendorDetails, AdminLanguagePair, VendorSettings } = db;
+const { VendorLanguagePair, VendorDetails, AdminLanguagePair, VendorSettings, Language } = db;
 
 const VENDOR_LANGUAGE_PAIR_ALLOWED_FIELDS = ["vendor_id", "language_pair_id"];
 
@@ -191,10 +191,33 @@ export const getVendorLanguagePairsForVendor = async (req, res) => {
 
     const worksWithAll = vendor.settings?.works_with_all_language_pairs;
 
+    // Inclusion logic: We only fetch "code" now
+    const languageInclude = [
+      {
+        model: Language,
+        as: "sourceLanguage",
+        attributes: ["code"], 
+      },
+      {
+        model: Language,
+        as: "targetLanguage",
+        attributes: ["code"],
+      },
+    ];
+
+    // Helper function to flatten the language objects for a cleaner response
+    const formatPair = (pair) => ({
+      id: pair.id,
+      admin_id: pair.admin_id,
+      source_language_code: pair.sourceLanguage?.code,
+      target_language_code: pair.targetLanguage?.code,
+    });
+
     if (worksWithAll) {
       const adminLanguagePairs = await AdminLanguagePair.findAll({
         where: { admin_id: adminId },
-        attributes: ["id", "source_language_id", "target_language_id", "admin_id"],
+        attributes: ["id", "admin_id"],
+        include: languageInclude,
         order: [["id", "ASC"]],
       });
 
@@ -203,7 +226,7 @@ export const getVendorLanguagePairsForVendor = async (req, res) => {
         message: "Vendor works with all admin language pairs",
         data: {
           vendor,
-          languagePairs: adminLanguagePairs,
+          languagePairs: adminLanguagePairs.map(formatPair),
         },
       });
     }
@@ -214,8 +237,9 @@ export const getVendorLanguagePairsForVendor = async (req, res) => {
         {
           model: AdminLanguagePair,
           as: "languagePair",
-          attributes: ["id", "source_language_id", "target_language_id", "admin_id"],
+          attributes: ["id", "admin_id"],
           where: { admin_id: adminId },
+          include: languageInclude,
         },
       ],
       order: [["id", "ASC"]],
@@ -226,16 +250,16 @@ export const getVendorLanguagePairsForVendor = async (req, res) => {
       message: "Vendor-specific language pairs fetched successfully",
       data: {
         vendor,
-        languagePairs: vendorLanguagePairs.map((v) => v.languagePair),
+        languagePairs: vendorLanguagePairs.map((v) => formatPair(v.languagePair)),
       },
     });
   } catch (error) {
     console.error("Error fetching vendor language pairs:", error);
-    const err = toClientError(error);
-    res.status(err.code).json(err.body);
+    // Standard error handling
+    const status = error.code || 500;
+    res.status(status).json({ success: false, message: error.message });
   }
 };
-
 
 // Update
 export const updateVendorLanguagePair = async (req, res) => {

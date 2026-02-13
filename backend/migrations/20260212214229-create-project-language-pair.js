@@ -1,40 +1,44 @@
 export async function up(queryInterface, Sequelize) {
-  await queryInterface.createTable("client_pools", {
+  await queryInterface.createTable("project_language_pairs", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false,
     },
-    name: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
-    admin_id: {
+    project_id: {
       type: Sequelize.INTEGER,
       allowNull: false,
       references: {
-        model: "admin_auth", 
+        model: "project_details",
         key: "id",
       },
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    createdAt: {
+    language_pair_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: {
+        model: "admin_language_pairs",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+    created_at: {
       type: Sequelize.DATE,
       allowNull: false,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
     },
-    updatedAt: {
+    updated_at: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.literal(
-        "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
-      ),
+      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
     },
   });
 }
 
 export async function down(queryInterface, Sequelize) {
-  await queryInterface.dropTable("client_pools");
+  await queryInterface.dropTable("project_language_pairs");
 }
