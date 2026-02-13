@@ -80,10 +80,21 @@ const JobDetails = sequelize.define(
       allowNull: false,
     },
 
-    free_of_charge: {
-      type: DataTypes.BOOLEAN,
+    status: {
+      type: DataTypes.ENUM(
+        "Draft",
+        "Offered to Vendor",
+        "Offer Accepted",
+        "Offer Rejected",
+        "Started",
+        "Completed",
+        "Hold",
+        "Completion Accepted",
+        "Completion Rejected",
+        "Cancelled"
+      ),
       allowNull: false,
-      defaultValue: false,
+      defaultValue: "Draft",
     },
 
     auto_start_on_vendor_acceptance: {
@@ -92,7 +103,7 @@ const JobDetails = sequelize.define(
       defaultValue: false,
     },
 
-    note_for_vendor: {
+    instructions: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
@@ -152,6 +163,12 @@ JobDetails.associate = (models) => {
   JobDetails.belongsTo(models.AdminLanguagePair, {
     foreignKey: "language_pair_id",
     as: "languagePair",
+    onDelete: "CASCADE",
+  });
+
+  JobDetails.hasMany(models.JobStatusHistory, {
+    foreignKey: "job_id",
+    as: "statusHistory",
     onDelete: "CASCADE",
   });
 };
