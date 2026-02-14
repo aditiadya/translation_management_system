@@ -1,5 +1,4 @@
 const VendorServicesTable = ({ services = [] }) => {
-
   if (!Array.isArray(services) || services.length === 0) {
     return (
       <p className="text-center text-gray-500 italic mt-4">
@@ -24,7 +23,7 @@ const VendorServicesTable = ({ services = [] }) => {
               className="border-t hover:bg-gray-50 transition duration-200"
             >
               <td className="px-6 py-3">{service.name}</td>
-              <td className="px-6 py-3">{service.id}</td>
+              <td className="px-6 py-3">{service.price_count || 0}</td>
             </tr>
           ))}
         </tbody>
@@ -33,4 +32,4 @@ const VendorServicesTable = ({ services = [] }) => {
   );
 };
 
-export default VendorServicesTable; 
+export default VendorServicesTable;

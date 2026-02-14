@@ -8,6 +8,18 @@ const DocumentsTable = ({ documents, onDelete }) => {
       timeStyle: "short",
     });
 
+  const formatAdminName = (uploader) => {
+    if (!uploader) return "Unknown";
+    
+    const { first_name, last_name, username } = uploader;
+    
+    if (first_name && last_name) {
+      return `${first_name} ${last_name}`;
+    }
+    
+    return first_name || username || "Unknown";
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border border-gray-200 text-sm text-gray-700">
@@ -33,12 +45,13 @@ const DocumentsTable = ({ documents, onDelete }) => {
                 {formatDate(doc.uploaded_at)}
               </td>
               <td className="py-3 px-4 border-b text-center">
-                {doc.uploaded_by}
+                {formatAdminName(doc.uploader)}
               </td>
               <td className="py-3 px-4 border-b text-center">
                 <button
-                  onClick={() => onDelete(doc.id)}
-                  className="text-red-600 hover:text-red-800"
+                  onClick={() => onDelete(doc.id, doc.document_name)}
+                  className="text-red-600 hover:text-red-800 transition-colors"
+                  title="Delete document"
                 >
                   <FaTrash />
                 </button>

@@ -22,7 +22,7 @@ const VendorPriceList = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "vendor_services",
+        model: "admin_services", // CHANGED: vendor_services → admin_services
         key: "id",
       },
       onDelete: "CASCADE",
@@ -31,7 +31,7 @@ const VendorPriceList = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "vendor_language_pairs",
+        model: "admin_language_pairs", // CHANGED: vendor_language_pairs → admin_language_pairs
         key: "id",
       },
       onDelete: "CASCADE",
@@ -40,7 +40,7 @@ const VendorPriceList = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "vendor_specializations",
+        model: "admin_specializations", // CHANGED: vendor_specializations → admin_specializations
         key: "id",
       },
       onDelete: "CASCADE",
@@ -74,30 +74,35 @@ const VendorPriceList = sequelize.define(
 );
 
 VendorPriceList.associate = (models) => {
+  // Vendor relationship (unchanged)
   VendorPriceList.belongsTo(models.VendorDetails, {
     foreignKey: "vendor_id",
     as: "vendor",
     onDelete: "CASCADE",
   });
 
-  VendorPriceList.belongsTo(models.VendorService, {
+  // Service relationship - CHANGED to AdminService
+  VendorPriceList.belongsTo(models.AdminService, {
     foreignKey: "service_id",
     as: "service",
     onDelete: "CASCADE",
   });
 
-  VendorPriceList.belongsTo(models.VendorLanguagePair, {
+  // Language Pair relationship - CHANGED to AdminLanguagePair
+  VendorPriceList.belongsTo(models.AdminLanguagePair, {
     foreignKey: "language_pair_id",
     as: "languagePair",
     onDelete: "CASCADE",
   });
 
-  VendorPriceList.belongsTo(models.VendorSpecialization, {
-      foreignKey: "specialization_id",
-      as: "specialization",
-      onDelete: "CASCADE",
-    });
+  // Specialization relationship - CHANGED to AdminSpecialization
+  VendorPriceList.belongsTo(models.AdminSpecialization, {
+    foreignKey: "specialization_id",
+    as: "specialization",
+    onDelete: "CASCADE",
+  });
 
+  // Currency relationship (unchanged)
   VendorPriceList.belongsTo(models.AdminCurrency, {
     foreignKey: "currency_id",
     as: "currency",

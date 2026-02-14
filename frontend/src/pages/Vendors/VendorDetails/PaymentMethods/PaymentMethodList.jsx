@@ -1,8 +1,11 @@
 import dayjs from "dayjs";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
   const renderBankInfo = (method) => {
-    if (method.payment_method !== "bank_transfer") return "N/A";
+    if (method.payment_method !== "bank_transfer") {
+      return <span className="text-gray-500">N/A</span>;
+    }
 
     const bankDetails = method.bank_transfer_detail || method.details || {};
 
@@ -33,23 +36,23 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
         ))}
       </div>
     ) : (
-      "N/A"
+      <span className="text-gray-500">N/A</span>
     );
   };
 
   const renderPaymentMethodName = (method) => {
     const type = method.payment_method;
     if (type === "bank_transfer")
-      return method.bank_transfer_detail?.payment_method_name || "N/A";
+      return method.bank_transfer_detail?.payment_method_name || <span className="text-gray-500">N/A</span>;
     if (["paypal", "payoneer", "skrill"].includes(type))
       return (
         method[`${type}_detail`]?.email ||
         method.email_payment_detail?.email ||
-        "N/A"
+        <span className="text-gray-500">N/A</span>
       );
     if (type === "other")
-      return method.other_payment_detail?.payment_method_name || "N/A";
-    return "N/A";
+      return method.other_payment_detail?.payment_method_name || <span className="text-gray-500">N/A</span>;
+    return <span className="text-gray-500">N/A</span>;
   };
 
   const formatDate = (dateString) => {
@@ -68,7 +71,7 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
             <th className="py-3 px-4 text-left w-1/4">Note</th>
             <th className="py-3 px-4 text-left w-1/12">Is Enabled</th>
             <th className="py-3 px-4 text-left w-1/6">Created At</th>
-            <th className="py-3 px-4 text-left w-1/12">Actions</th>
+            <th className="py-3 px-4 text-center w-1/12">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -101,7 +104,7 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
                   {renderPaymentMethodName(method)}
                 </td>
 
-                <td className="py-4 px-4 align-top">
+                <td className="py-4 px-4">
                   {renderBankInfo(method)}
                 </td>
 
@@ -127,19 +130,23 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
                   {formatDate(method.createdAt)}
                 </td>
 
-                <td className="py-4 px-4 space-x-2 text-nowrap">
-                  <button
-                    onClick={() => onEdit(method)}
-                    className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-white rounded"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => onDelete(method.id)}
-                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded"
-                  >
-                    Delete
-                  </button>
+                <td className="py-4 px-4">
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={() => onEdit(method)}
+                      className="text-blue-500 hover:text-blue-700 transition-colors"
+                      title="Edit"
+                    >
+                      <FaEdit size={18} />
+                    </button>
+                    <button
+                      onClick={() => onDelete(method.id)}
+                      className="text-red-600 hover:text-red-800 transition-colors"
+                      title="Delete"
+                    >
+                      <FaTrash size={16} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))

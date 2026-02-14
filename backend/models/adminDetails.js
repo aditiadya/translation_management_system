@@ -56,10 +56,10 @@ const AdminDetails = sequelize.define('AdminDetails', {
   tableName: 'admin_details',
   timestamps: true,
   indexes: [
-      {
-        fields: ["admin_id"], 
-      },
-    ],
+    {
+      fields: ["admin_id"], 
+    },
+  ],
 });
 
 AdminDetails.associate = (models) => {
@@ -68,6 +68,22 @@ AdminDetails.associate = (models) => {
       foreignKey: "admin_id",
       as: "auth",
       onDelete: "CASCADE",
+    });
+  }
+
+  // Add reverse association with ClientDocuments
+  if (models.ClientDocuments) {
+    AdminDetails.hasMany(models.ClientDocuments, {
+      foreignKey: "uploaded_by",
+      as: "uploadedClientDocuments",
+    });
+  }
+
+  // NEW: Add reverse association with VendorDocuments
+  if (models.VendorDocuments) {
+    AdminDetails.hasMany(models.VendorDocuments, {
+      foreignKey: "uploaded_by",
+      as: "uploadedVendorDocuments",
     });
   }
 };

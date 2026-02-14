@@ -12,46 +12,30 @@ const EditSpecializationsPage = ({ vendorId, onUpdateComplete }) => {
       try {
         setLoading(true);
 
-        const { data: specializationsRes } = await api.get(
-          "/admin-specializations",
-          { withCredentials: true }
-        );
+        // Fetch all admin specializations
+        const { data: allSpecsRes } = await api.get("/admin-specializations", {
+          withCredentials: true,
+        });
 
+        // Fetch vendor specializations with mapping IDs
         const { data: vendorSpecsRes } = await api.get(
           `/vendor-specializations/${vendorId}/specializations`,
           { withCredentials: true }
         );
 
-        const allSpecializations = specializationsRes?.data || [];
+        const allSpecializations = allSpecsRes?.data || [];
+        const vendorData = vendorSpecsRes?.data;
 
-        let vendorSpecsArray = [];
-        const vendorData = vendorSpecsRes?.data?.data;
-
-        if (Array.isArray(vendorData)) {
-          vendorSpecsArray = vendorData;
-        } else if (Array.isArray(vendorData?.specializations)) {
-          vendorSpecsArray = vendorData.specializations;
+        let vendorSpecs = [];
+        if (Array.isArray(vendorData?.specializations)) {
+          vendorSpecs = vendorData.specializations;
         }
 
-        const normalizedVendorSpecs = vendorSpecsArray.map((vs) => ({
-          id: vs.id,
-          specialization_id: Number(
-            vs.specialization_id ||
-              vs.specialization?.id ||
-              vs.specializationId
-          ),
-          specialization_name:
-            vs.specialization?.name ||
-            vs.name ||
-            vs.specialization_name ||
-            "",
-        }));
-
-        console.log("Normalized Vendor Specializations:", normalizedVendorSpecs);
-        console.log("Admin Specializations:", allSpecializations);
+        console.log("All Specializations:", allSpecializations);
+        console.log("Vendor Specializations:", vendorSpecs);
 
         setSpecializations(allSpecializations);
-        setVendorSpecializations(normalizedVendorSpecs);
+        setVendorSpecializations(vendorSpecs);
       } catch (error) {
         console.error("Error fetching specializations:", error);
       } finally {
@@ -63,60 +47,73 @@ const EditSpecializationsPage = ({ vendorId, onUpdateComplete }) => {
   }, [vendorId]);
 
   const isSpecializationSelected = (specId) =>
-    vendorSpecializations.some((vs) => Number(vs.specialization_id) === Number(specId));
+    vendorSpecializations.some((vs) => Number(vs.id) === Number(specId));
 
-  const handleCheckboxChange = async (specialization) => {
-    try {
-      setUpdating(true);
-      const selected = isSpecializationSelected(specialization.id);
+const handleCheckboxChange = async (specialization) => {
+  try {
+    setUpdating(true);
+    const selected = isSpecializationSelected(specialization.id);
 
-      if (!selected) {
-        const alreadyExists = vendorSpecializations.some(
-          (vs) => Number(vs.specialization_id) === Number(specialization.id)
-        );
-        if (alreadyExists) return;
+    if (!selected) {
+      // ADD specialization
+      const res = await api.post(
+        "/vendor-specializations",
+        {
+          vendor_id: vendorId,
+          specialization_id: specialization.id,
+        },
+        { withCredentials: true }
+      );
 
-        const res = await api.post(
-          "/vendor-specializations",
-          {
-            vendor_id: vendorId,
-            specialization_id: specialization.id,
-          },
-          { withCredentials: true }
-        );
+      const addedSpec = res.data.data;
+      setVendorSpecializations((prev) => [
+        ...prev,
+        {
+          id: specialization.id,
+          name: specialization.name,
+          mapping_id: addedSpec.id,
+          price_count: 0,
+        },
+      ]);
+    } else {
+      // REMOVE specialization
+      const vendorSpec = vendorSpecializations.find(
+        (vs) => Number(vs.id) === Number(specialization.id)
+      );
 
-        const addedSpec = res.data.data;
-        setVendorSpecializations((prev) => [
-          ...prev,
-          {
-            id: addedSpec.id,
-            specialization_id: addedSpec.specialization_id,
-            specialization_name: specialization.name,
-          },
-        ]);
-      } else {
-        const vendorSpec = vendorSpecializations.find(
-          (vs) => Number(vs.specialization_id) === Number(specialization.id)
-        );
+      if (vendorSpec) {
+        const priceCount = vendorSpec.price_count || 0;
+        
+        // Show confirmation if there are prices
+        if (priceCount > 0) {
+          const confirmed = window.confirm(
+            `This will delete ${priceCount} price(s) associated with "${specialization.name}". Continue?`
+          );
+          
+          if (!confirmed) {
+            setUpdating(false);
+            return;
+          }
+        }
 
-        if (vendorSpec) {
-          await api.delete(`/vendor-specializations/${vendorSpec.id}`, {
+        if (vendorSpec.mapping_id) {
+          await api.delete(`/vendor-specializations/${vendorSpec.mapping_id}`, {
             withCredentials: true,
           });
 
           setVendorSpecializations((prev) =>
-            prev.filter(
-              (vs) => Number(vs.specialization_id) !== Number(specialization.id)
-            )
+            prev.filter((vs) => Number(vs.id) !== Number(specialization.id))
           );
         }
       }
-    } catch (error) {
-      console.error("Error updating vendor specialization:", error);
-    } finally {
-      setUpdating(false);
     }
-  };
+  } catch (error) {
+    console.error("Error updating vendor specialization:", error);
+    alert(error.response?.data?.message || "Failed to update specialization");
+  } finally {
+    setUpdating(false);
+  }
+};
 
   if (loading) {
     return (
@@ -160,7 +157,7 @@ const EditSpecializationsPage = ({ vendorId, onUpdateComplete }) => {
                       checked={selected}
                       disabled={updating}
                       onChange={() => handleCheckboxChange(spec)}
-                      className="w-5 h-5 accent-blue-600 cursor-pointer"
+                      className="w-5 h-5 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
                     />
                   </td>
                   <td className="px-6 py-3 text-gray-800 font-medium">
@@ -176,7 +173,6 @@ const EditSpecializationsPage = ({ vendorId, onUpdateComplete }) => {
       <div className="flex justify-center mt-5">
         <button
           onClick={() => {
-            alert("Specializations updated successfully!");
             if (typeof onUpdateComplete === "function") onUpdateComplete();
           }}
           disabled={updating}
@@ -186,7 +182,7 @@ const EditSpecializationsPage = ({ vendorId, onUpdateComplete }) => {
               : "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
           }`}
         >
-          {updating ? "Updating..." : "Update Specializations"}
+          {updating ? "Updating..." : "Done"}
         </button>
       </div>
     </div>

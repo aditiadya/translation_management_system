@@ -50,18 +50,21 @@ const PaymentMethodFields = ({ formData, handleChange }) => {
             name="swift"
             value={formData.swift}
             onChange={handleChange}
+            // REMOVED required
           />
           <FormInput
             label="IBAN"
             name="iban"
             value={formData.iban}
             onChange={handleChange}
+            // REMOVED required
           />
           <FormInput
             label="Sort Code"
             name="sort_code"
             value={formData.sort_code}
             onChange={handleChange}
+            // REMOVED required
           />
           <FormInput
             label="Bank Address"

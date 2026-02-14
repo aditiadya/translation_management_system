@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import api from "../../../../utils/axiosInstance";
 import DocumentsTable from "./DocumentsTable";
 import DocumentUpload from "./DocumentUpload";
+import ConfirmModal from "../../../../components/Modals/ConfirmModal";
 import { FaPlus, FaLink } from "react-icons/fa";
 
 const DocumentsPage = ({ clientId }) => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ show: false, docId: null, docName: "" });
 
   const fetchDocuments = async () => {
     try {
@@ -27,16 +29,23 @@ const DocumentsPage = ({ clientId }) => {
     fetchDocuments();
   }, [clientId]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this document?"))
-      return;
+  const handleDeleteClick = (id, name) => {
+    setDeleteModal({ show: true, docId: id, docName: name });
+  };
+
+  const handleDeleteConfirm = async () => {
     try {
-      await api.delete(`/client-documents/${id}`, { withCredentials: true });
-      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+      await api.delete(`/client-documents/${deleteModal.docId}`, { withCredentials: true });
+      setDocuments((prev) => prev.filter((doc) => doc.id !== deleteModal.docId));
+      setDeleteModal({ show: false, docId: null, docName: "" });
     } catch (error) {
       console.error("Delete failed:", error);
       alert("Failed to delete document");
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ show: false, docId: null, docName: "" });
   };
 
   const handleUploadSuccess = () => {
@@ -78,7 +87,7 @@ const DocumentsPage = ({ clientId }) => {
             No documents found.
           </div>
         ) : (
-          <DocumentsTable documents={documents} onDelete={handleDelete} />
+          <DocumentsTable documents={documents} onDelete={handleDeleteClick} />
         )}
       </div>
 
@@ -87,6 +96,18 @@ const DocumentsPage = ({ clientId }) => {
           clientId={clientId}
           onClose={() => setShowUploadModal(false)}
           onSuccess={handleUploadSuccess}
+        />
+      )}
+
+      {deleteModal.show && (
+        <ConfirmModal
+          title="Delete Document"
+          message={`Are you sure you want to delete "${deleteModal.docName}"? This action cannot be undone.`}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          confirmText="Delete"
+          confirmColor="bg-red-600"
+          confirmHoverColor="hover:bg-red-700"
         />
       )}
     </main>

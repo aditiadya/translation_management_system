@@ -12,6 +12,7 @@ const PaymentMethodsPage = ({ vendorId }) => {
   const [activeMethod, setActiveMethod] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [methodToDelete, setMethodToDelete] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     if (vendorId) fetchMethods();
@@ -46,10 +47,23 @@ const PaymentMethodsPage = ({ vendorId }) => {
 
       setIsFormVisible(false);
       setActiveMethod(null);
+      setDeleteError(""); // CLEAR ERROR ON SUCCESSFUL SAVE
     } catch (err) {
       console.error(err);
-      alert("Failed to save vendor payment method");
+      throw err;
     }
+  };
+
+  const handleDeleteClick = (id) => {
+    const methodToRemove = methods.find((m) => m.id === id);
+    
+    if (methodToRemove?.is_default && methods.length > 1) {
+      setDeleteError("Cannot delete default payment method. Please set another payment method as default first.");
+      return;
+    }
+    
+    setMethodToDelete(id);
+    setDeleteError("");
   };
 
   const handleDelete = async () => {
@@ -58,9 +72,11 @@ const PaymentMethodsPage = ({ vendorId }) => {
       await api.delete(`/vendor-payment-methods/${methodToDelete}`);
       setMethods(methods.filter((m) => m.id !== methodToDelete));
       setMethodToDelete(null);
+      setDeleteError("");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete vendor payment method");
+      const errorMsg = err.response?.data?.message || "Failed to delete vendor payment method";
+      setDeleteError(errorMsg);
     }
   };
 
@@ -79,6 +95,7 @@ const PaymentMethodsPage = ({ vendorId }) => {
             onClick={() => {
               setActiveMethod("new");
               setIsFormVisible(true);
+              setDeleteError(""); // CLEAR ERROR WHEN ADDING NEW
             }}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded shadow"
           >
@@ -87,7 +104,18 @@ const PaymentMethodsPage = ({ vendorId }) => {
         )}
       </div>
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {deleteError && !isFormVisible && ( // ONLY SHOW WHEN NOT IN FORM VIEW
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-start justify-between">
+          <span>{deleteError}</span>
+          <button
+            onClick={() => setDeleteError("")}
+            className="text-red-900 hover:text-red-700 ml-4"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {isFormVisible ? (
         <PaymentMethodForm
@@ -96,6 +124,7 @@ const PaymentMethodsPage = ({ vendorId }) => {
           onCancel={() => {
             setIsFormVisible(false);
             setActiveMethod(null);
+            setDeleteError(""); // CLEAR ERROR ON CANCEL
           }}
         />
       ) : (
@@ -104,8 +133,9 @@ const PaymentMethodsPage = ({ vendorId }) => {
           onEdit={(method) => {
             setActiveMethod(method);
             setIsFormVisible(true);
+            setDeleteError(""); // CLEAR ERROR WHEN EDITING
           }}
-          onDelete={(id) => setMethodToDelete(id)}
+          onDelete={handleDeleteClick}
         />
       )}
 
@@ -113,7 +143,10 @@ const PaymentMethodsPage = ({ vendorId }) => {
         <ConfirmModal
           title="Confirm Deletion"
           message="Are you sure you want to delete this vendor payment method?"
-          onCancel={() => setMethodToDelete(null)}
+          onCancel={() => {
+            setMethodToDelete(null);
+            setDeleteError("");
+          }}
           onConfirm={handleDelete}
           confirmText="Delete"
           confirmColor="bg-red-600"

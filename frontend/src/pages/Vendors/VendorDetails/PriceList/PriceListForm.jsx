@@ -8,7 +8,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
     language_pair_id: "",
     specialization_id: "",
     currency_id: "",
-    unit: "", // This will now store the 'name' from admin_units
+    unit: "",
     price_per_unit: "",
     note: "",
   });
@@ -17,7 +17,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
   const [languagePairs, setLanguagePairs] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [currencies, setCurrencies] = useState([]);
-  const [units, setUnits] = useState([]); // New state for units dropdown
+  const [units, setUnits] = useState([]);
 
   useEffect(() => {
     fetchDropdowns();
@@ -42,16 +42,39 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
         api.get(`/vendor-language-pairs/${vendorId}/language-pairs`),
         api.get(`/vendor-specializations/${vendorId}/specializations`),
         api.get(`/admin-currencies`),
-        api.get(`/admin-units`), // Adjust this URL to match your backend route for getAllUnits
+        api.get(`/admin-units`),
       ]);
 
-      setServices(Array.isArray(svc.data.data?.services) ? svc.data.data.services : []);
-      setLanguagePairs(Array.isArray(lp.data.data?.languagePairs) ? lp.data.data.languagePairs : []);
-      setSpecializations(Array.isArray(spec.data.data?.specializations) ? spec.data.data.specializations : []);
-      setCurrencies(Array.isArray(cur.data.data) ? cur.data.data : []);
-      setUnits(Array.isArray(unt.data.data) ? unt.data.data : []); // Set the units state
+      // Debug logs
+      console.log("Services Response:", svc.data);
+      console.log("Language Pairs Response:", lp.data);
+      console.log("Specializations Response:", spec.data);
+      console.log("Currencies Response:", cur.data);
+      console.log("Units Response:", unt.data);
+
+      // Set services
+      const servicesData = svc.data.data?.services || [];
+      setServices(Array.isArray(servicesData) ? servicesData : []);
+
+      // Set language pairs - FIX HERE
+      const languagePairsData = lp.data.data?.languagePairs || [];
+      console.log("Language Pairs Data:", languagePairsData);
+      setLanguagePairs(Array.isArray(languagePairsData) ? languagePairsData : []);
+
+      // Set specializations
+      const specializationsData = spec.data.data?.specializations || [];
+      setSpecializations(Array.isArray(specializationsData) ? specializationsData : []);
+
+      // Set currencies
+      const currenciesData = cur.data.data || [];
+      setCurrencies(Array.isArray(currenciesData) ? currenciesData : []);
+
+      // Set units
+      const unitsData = unt.data.data || [];
+      setUnits(Array.isArray(unitsData) ? unitsData : []);
     } catch (err) {
       console.error("Failed to load dropdowns", err);
+      console.error("Error details:", err.response?.data);
     }
   };
 
@@ -90,7 +113,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
           </select>
         </div>
 
-        {/* Language Pair Dropdown */}
+        {/* Language Pair Dropdown - FIXED */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Language Pair</label>
           <select
@@ -101,11 +124,19 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
             className="w-full border rounded px-3 py-2"
           >
             <option value="">Select language pair</option>
-            {languagePairs.map((lp) => (
-              <option key={lp.id} value={lp.id}>
-                {lp.source_language_code} → {lp.target_language_code}
-              </option>
-            ))}
+            {languagePairs && languagePairs.length > 0 ? (
+              languagePairs.map((lp) => {
+                // Debug each item
+                console.log("Rendering language pair:", lp);
+                return (
+                  <option key={lp.id} value={lp.id}>
+                    {lp.sourceLanguage?.code || "?"} → {lp.targetLanguage?.code || "?"}
+                  </option>
+                );
+              })
+            ) : (
+              <option disabled>No language pairs available</option>
+            )}
           </select>
         </div>
 
@@ -147,7 +178,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
           </select>
         </div>
 
-        {/* Unit Dropdown (Updated from Text Input) */}
+        {/* Unit Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Unit</label>
           <select
@@ -166,6 +197,7 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
           </select>
         </div>
 
+        {/* Price per Unit */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Price per Unit</label>
           <input
@@ -174,32 +206,38 @@ const PriceListForm = ({ vendorId, editingItem, onSave, onCancel }) => {
             value={formData.price_per_unit}
             onChange={handleChange}
             required
+            step="0.01"
+            min="0"
             className="w-full border rounded px-3 py-2"
           />
         </div>
       </div>
 
+      {/* Note */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Note</label>
         <textarea
           name="note"
           value={formData.note}
           onChange={handleChange}
+          rows="3"
           className="w-full border rounded px-3 py-2"
+          placeholder="Optional notes..."
         />
       </div>
 
+      {/* Action Buttons */}
       <div className="flex justify-end space-x-3">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border rounded hover:bg-gray-100"
+          className="px-4 py-2 border rounded hover:bg-gray-100 transition"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
         >
           {editingItem ? "Update" : "Create"}
         </button>

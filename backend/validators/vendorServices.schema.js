@@ -76,3 +76,24 @@ export const getVendorServicesForVendorSchema = Joi.object({
     }),
   }),
 });
+
+// Get admin services for vendor selection (with is_selected flag)
+export const getAdminServicesForVendorSchema = Joi.object({
+  params: Joi.object({
+    id: Joi.number().integer().positive().required().messages({
+      "any.required": "Vendor ID is required in URL params",
+      "number.base": "Vendor ID must be a number",
+      "number.positive": "Vendor ID must be a positive number",
+    }),
+  }),
+});
+
+// Initialize all services for vendor (when toggle is disabled)
+export const initializeVendorServicesSchema = Joi.object({
+  vendor_id: Joi.number().integer().positive().required().messages({
+    "any.required": "Vendor ID is required",
+    "number.base": "Vendor ID must be a number",
+    "number.integer": "Vendor ID must be an integer",
+    "number.positive": "Vendor ID must be a positive number",
+  }),
+});

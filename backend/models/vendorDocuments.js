@@ -41,11 +41,16 @@ const VendorDocuments = sequelize.define(
     uploaded_by: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "admin_details",
+        key: "id",
+      },
+      onDelete: "SET NULL",
     },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
-    }
+    },
   },
   {
     tableName: "vendor_documents",
@@ -60,6 +65,12 @@ VendorDocuments.associate = (models) => {
     foreignKey: "vendor_id",
     as: "vendor",
     onDelete: "CASCADE",
+  });
+
+  // NEW: Add association with AdminDetails
+  VendorDocuments.belongsTo(models.AdminDetails, {
+    foreignKey: "uploaded_by",
+    as: "uploader",
   });
 };
 

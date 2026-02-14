@@ -53,14 +53,25 @@ const VendorSpecializationsPage = ({ vendorId }) => {
   const handleToggle = async () => {
     try {
       const newValue = !worksWithAll;
-      setWorksWithAll(newValue);
+
+      // FIRST: Update settings
       await api.put(`/vendor-settings/${vendorId}`, {
         works_with_all_specializations: newValue,
       });
-      fetchVendorSpecializations();
+
+      // THEN: Initialize if disabled (AFTER settings are updated)
+      if (!newValue) {
+        await api.post("/vendor-specializations/initialize", {
+          vendor_id: parseInt(vendorId),
+        });
+      }
+
+      setWorksWithAll(newValue);
+      await fetchVendorSpecializations();
+      setError("");
     } catch (err) {
-      console.error(err);
-      alert("Failed to update vendor settings");
+      console.error("Error updating vendor settings:", err);
+      setError(err.response?.data?.message || "Failed to update vendor settings");
     }
   };
 

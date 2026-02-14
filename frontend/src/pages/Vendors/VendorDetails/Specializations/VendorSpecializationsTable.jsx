@@ -23,7 +23,7 @@ const VendorSpecializationsTable = ({ specializations = [] }) => {
               className="border-t hover:bg-gray-50 transition duration-200"
             >
               <td className="px-6 py-3">{spec.name}</td>
-              <td className="px-6 py-3">{spec.id}</td>
+              <td className="px-6 py-3">{spec.price_count || 0}</td>
             </tr>
           ))}
         </tbody>

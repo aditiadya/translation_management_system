@@ -14,10 +14,11 @@ const router = express.Router();
 
 router.use(authenticateToken);
 
-router.post("/upload", clientUpload, createClientDocument, validateFileUpload);
+// FIXED: Validator runs BEFORE controller
+router.post("/upload", clientUpload, validateFileUpload, createClientDocument);
 router.get("/", getAllClientDocuments);
 router.get("/:id", getClientDocumentById);
-router.put("/:id", clientUpload, updateClientDocument, validateFileUpload);
+router.put("/:id", clientUpload, validateFileUpload, updateClientDocument);
 router.delete("/:id", deleteClientDocument);
 
 export default router;

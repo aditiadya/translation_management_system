@@ -9,28 +9,40 @@ const paymentMethodEnum = Joi.string()
       "Payment method must be one of bank_transfer, paypal, payoneer, skrill, or other",
   });
 
-// Bank Transfer
+// Bank Transfer - Only required fields are marked
 const bankTransferDetailsSchema = Joi.object({
   payment_method_name: Joi.string().trim().max(100).required().messages({
     "any.required": "Payment method name is required",
+    "string.empty": "Payment method name cannot be empty",
   }),
-  beneficiary_name: Joi.string().trim().max(100).optional(),
-  beneficiary_address: Joi.string().trim().optional(),
+  beneficiary_name: Joi.string().trim().max(100).allow("", null).optional(),
+  beneficiary_address: Joi.string().trim().allow("", null).optional(),
   bank_name: Joi.string().trim().max(100).required().messages({
     "any.required": "Bank name is required",
+    "string.empty": "Bank name cannot be empty",
   }),
-  account_number: Joi.string().trim().max(100).optional(),
-  ifsc_code: Joi.string().trim().max(50).optional(),
-  swift: Joi.string().trim().max(50).optional(),
-  iban: Joi.string().trim().max(100).optional(),
-  sort_code: Joi.string().trim().max(50).optional(),
-  bank_address: Joi.string().trim().optional(),
+  account_number: Joi.string().trim().max(100).required().messages({
+    "any.required": "Account number is required",
+    "string.empty": "Account number cannot be empty",
+  }),
+  ifsc_code: Joi.string().trim().max(50).required().messages({
+    "any.required": "IFSC code is required",
+    "string.empty": "IFSC code cannot be empty",
+  }),
+  swift: Joi.string().trim().max(50).allow("", null).optional(),
+  iban: Joi.string().trim().max(100).allow("", null).optional(),
+  sort_code: Joi.string().trim().max(50).allow("", null).optional(),
+  bank_address: Joi.string().trim().required().messages({
+    "any.required": "Bank address is required",
+    "string.empty": "Bank address cannot be empty",
+  }),
   country: Joi.string().trim().max(100).required().messages({
     "any.required": "Country is required",
+    "string.empty": "Country cannot be empty",
   }),
-  state_region: Joi.string().trim().max(100).optional(),
-  city: Joi.string().trim().max(100).optional(),
-  postal_code: Joi.string().trim().max(50).optional(),
+  state_region: Joi.string().trim().max(100).allow("", null).optional(),
+  city: Joi.string().trim().max(100).allow("", null).optional(),
+  postal_code: Joi.string().trim().max(50).allow("", null).optional(),
 });
 
 // PayPal / Payoneer / Skrill
@@ -38,6 +50,7 @@ const emailPaymentDetailsSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "any.required": "Email is required for this payment method",
     "string.email": "Invalid email address",
+    "string.empty": "Email cannot be empty",
   }),
 });
 
@@ -45,6 +58,7 @@ const emailPaymentDetailsSchema = Joi.object({
 const otherPaymentDetailsSchema = Joi.object({
   payment_method_name: Joi.string().trim().max(100).required().messages({
     "any.required": "Payment method name is required for 'other' type",
+    "string.empty": "Payment method name cannot be empty",
   }),
 });
 
@@ -57,7 +71,7 @@ export const addVendorPaymentMethodSchema = Joi.object({
     "number.positive": "Vendor ID must be a positive number",
   }),
   payment_method: paymentMethodEnum,
-  note: Joi.string().trim().optional(),
+  note: Joi.string().trim().allow("", null).optional(),
   active_flag: Joi.boolean().optional(),
   is_default: Joi.boolean().optional(),
   details: Joi.alternatives()
@@ -77,7 +91,7 @@ export const addVendorPaymentMethodSchema = Joi.object({
 
 // Update
 export const updateVendorPaymentMethodSchema = Joi.object({
-  note: Joi.string().trim().optional(),
+  note: Joi.string().trim().allow("", null).optional(),
   active_flag: Joi.boolean().optional(),
   is_default: Joi.boolean().optional(),
   details: Joi.object().optional(),

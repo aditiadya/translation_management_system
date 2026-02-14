@@ -27,6 +27,13 @@ const VendorLanguagePair = sequelize.define(
       },
       onDelete: "CASCADE",
     },
+    price_count: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      comment: "Cached count of price list entries for this language pair",
+    },
+
   },
   {
     tableName: "vendor_language_pairs",

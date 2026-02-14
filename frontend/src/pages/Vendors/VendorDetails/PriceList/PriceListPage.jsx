@@ -18,14 +18,24 @@ const PriceListPage = ({ vendorId }) => {
   }, [vendorId]);
 
   const fetchPriceList = async () => {
+    setLoading(true);
     try {
+      // Fetch all price list entries
       const res = await api.get("/vendor-price-list", { withCredentials: true });
+      
+      console.log("Price List Response:", res.data);
+      
+      // Filter by vendor ID
       const filtered = res.data.data.filter(
         (item) => item.vendor?.id === parseInt(vendorId)
       );
+      
+      console.log("Filtered Price List:", filtered);
+      
       setPriceList(filtered);
+      setError("");
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching price list:", err);
       setError("Failed to load vendor price list");
     } finally {
       setLoading(false);
@@ -38,7 +48,21 @@ const PriceListPage = ({ vendorId }) => {
   };
 
   const handleEdit = (item) => {
-    setEditingItem(item);
+    // Transform the item for editing
+    const editData = {
+      id: item.id,
+      vendor_id: item.vendor_id,
+      service_id: item.service?.id || item.service_id,
+      language_pair_id: item.languagePair?.id || item.language_pair_id,
+      specialization_id: item.specialization?.id || item.specialization_id,
+      currency_id: item.currency?.id || item.currency_id,
+      unit: item.unit,
+      price_per_unit: item.price_per_unit,
+      note: item.note || "",
+    };
+    
+    console.log("Editing item:", editData);
+    setEditingItem(editData);
     setShowForm(true);
   };
 
@@ -53,9 +77,10 @@ const PriceListPage = ({ vendorId }) => {
         withCredentials: true,
       });
       setShowDeleteModal(false);
+      setItemToDelete(null);
       fetchPriceList();
     } catch (err) {
-      console.error(err);
+      console.error("Error deleting price:", err);
       alert("Failed to delete price list entry");
     }
   };
@@ -70,27 +95,47 @@ const PriceListPage = ({ vendorId }) => {
         await api.post("/vendor-price-list", data, { withCredentials: true });
       }
       setShowForm(false);
+      setEditingItem(null);
       fetchPriceList();
     } catch (err) {
-      console.error(err);
-      alert("Failed to save vendor price");
+      console.error("Error saving price:", err);
+      alert(err.response?.data?.message || "Failed to save vendor price");
     }
   };
 
-  if (loading) return <div className="text-center mt-6 text-gray-500">Loading...</div>;
-  if (error) return <div className="text-center mt-6 text-red-600">{error}</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-gray-500 animate-pulse text-lg">Loading price list...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center mt-10">
+        <p className="text-red-600 mb-4">{error}</p>
+        <button
+          onClick={fetchPriceList}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="space-y-6">
       {!showForm ? (
         <>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">Vendor Price List</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-800">Vendor Price List</h2>
             <button
               onClick={handleAddNew}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
             >
-              + Add Price
+              Add Price
             </button>
           </div>
           <PriceListTable
@@ -100,20 +145,37 @@ const PriceListPage = ({ vendorId }) => {
           />
         </>
       ) : (
-        <PriceListForm
-          vendorId={vendorId}
-          editingItem={editingItem}
-          onCancel={() => setShowForm(false)}
-          onSave={handleSave}
-        />
+        <div>
+          <button
+            onClick={() => {
+              setShowForm(false);
+              setEditingItem(null);
+            }}
+            className="mb-4 text-gray-600 hover:text-gray-800 flex items-center gap-2"
+          >
+            ← Back to List
+          </button>
+          <PriceListForm
+            vendorId={vendorId}
+            editingItem={editingItem}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingItem(null);
+            }}
+            onSave={handleSave}
+          />
+        </div>
       )}
 
       {showDeleteModal && (
         <ConfirmModal
           title="Delete Price Entry"
-          message="Are you sure you want to delete this price list entry?"
+          message="Are you sure you want to delete this price list entry? This action cannot be undone."
           onConfirm={handleDeleteConfirm}
-          onCancel={() => setShowDeleteModal(false)}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setItemToDelete(null);
+          }}
         />
       )}
     </div>

@@ -2,7 +2,6 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-
 export const createUploader = (folderName, maxFileSizeMB = 10) => {
   const uploadDir = path.join("uploads", folderName);
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -34,12 +33,37 @@ export const createUploader = (folderName, maxFileSizeMB = 10) => {
 
   const limits = { fileSize: maxFileSizeMB * 1024 * 1024 };
 
-  const upload = multer({ storage, fileFilter, limits }).fields([
-  { name: "file", maxCount: 1 }
-]);
+  // CHANGE THIS: Use .single() instead of .fields()
+  const upload = multer({ storage, fileFilter, limits }).single("file");
 
   return (req, res, next) => {
     req.maxFileSizeMB = maxFileSizeMB;
-    upload(req, res, (err) => next(err));
+    upload(req, res, (err) => {
+      if (err) {
+        // Delete uploaded file if multer validation fails
+        if (req.file && fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        
+        if (err instanceof multer.MulterError) {
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({
+              success: false,
+              message: `File too large. Maximum size: ${maxFileSizeMB}MB`,
+            });
+          }
+          return res.status(400).json({
+            success: false,
+            message: err.message,
+          });
+        }
+        
+        return res.status(400).json({
+          success: false,
+          message: err.message || "File upload failed",
+        });
+      }
+      next();
+    });
   };
 };

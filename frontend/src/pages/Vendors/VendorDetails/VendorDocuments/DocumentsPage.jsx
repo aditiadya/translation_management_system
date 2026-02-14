@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import api from "../../../../utils/axiosInstance";
 import DocumentsTable from "./DocumentsTable";
 import DocumentUpload from "./DocumentUpload";
+import ConfirmModal from "../../../../components/Modals/ConfirmModal"; // Adjust path as needed
 import { FaPlus, FaLink } from "react-icons/fa";
 
 const DocumentsPage = ({ vendorId }) => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ show: false, docId: null, docName: "" });
 
   const fetchDocuments = async () => {
     try {
@@ -27,15 +29,23 @@ const DocumentsPage = ({ vendorId }) => {
     fetchDocuments();
   }, [vendorId]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this document?")) return;
+  const handleDeleteClick = (id, name) => {
+    setDeleteModal({ show: true, docId: id, docName: name });
+  };
+
+  const handleDeleteConfirm = async () => {
     try {
-      await api.delete(`/vendor-documents/${id}`, { withCredentials: true });
-      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+      await api.delete(`/vendor-documents/${deleteModal.docId}`, { withCredentials: true });
+      setDocuments((prev) => prev.filter((doc) => doc.id !== deleteModal.docId));
+      setDeleteModal({ show: false, docId: null, docName: "" });
     } catch (error) {
       console.error("Delete failed:", error);
       alert("Failed to delete document");
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ show: false, docId: null, docName: "" });
   };
 
   const handleUploadSuccess = () => {
@@ -51,9 +61,9 @@ const DocumentsPage = ({ vendorId }) => {
         <div className="flex space-x-4">
           <button
             onClick={() => setShowUploadModal(true)}
-            className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded shadow"
+            className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded shadow"
           >
-            <FaPlus className="mr-2" /> Upload Document
+            Upload Document
           </button>
 
           <button
@@ -71,7 +81,7 @@ const DocumentsPage = ({ vendorId }) => {
         ) : documents.length === 0 ? (
           <div className="text-center text-gray-500 py-6">No documents found.</div>
         ) : (
-          <DocumentsTable documents={documents} onDelete={handleDelete} />
+          <DocumentsTable documents={documents} onDelete={handleDeleteClick} />
         )}
       </div>
 
@@ -80,6 +90,18 @@ const DocumentsPage = ({ vendorId }) => {
           vendorId={vendorId}
           onClose={() => setShowUploadModal(false)}
           onSuccess={handleUploadSuccess}
+        />
+      )}
+
+      {deleteModal.show && (
+        <ConfirmModal
+          title="Delete Document"
+          message={`Are you sure you want to delete "${deleteModal.docName}"? This action cannot be undone.`}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          confirmText="Delete"
+          confirmColor="bg-red-600"
+          confirmHoverColor="hover:bg-red-700"
         />
       )}
     </main>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import FormSelect from "../../../../components/Form/FormSelect";
 import CheckboxField from "../../../../components/Form/CheckboxField";
-import ConfirmModal from "../../../../components/Modals/ConfirmModal";
 import PaymentMethodFields from "./PaymentMethodFields";
 import FormTextarea from "../../../../components/Form/TextArea";
 
@@ -38,7 +37,7 @@ const INITIAL_STATE = {
 const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
   const [formData, setFormData] = useState(INITIAL_STATE);
   const [error, setError] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (methodToEdit) {
@@ -83,8 +82,9 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
     }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
+    
     if (!formData.payment_method) {
       setError("Please select a Payment Method.");
       return;
@@ -104,11 +104,10 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
       setError("Payment Method Name is required for 'Other' method.");
       return;
     }
-    setError("");
-    setIsModalOpen(true);
-  };
 
-  const handleConfirmSave = () => {
+    setError("");
+    setSaving(true);
+
     const payload = {
       payment_method: formData.payment_method,
       note: formData.note,
@@ -142,8 +141,13 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
       payload.details = { payment_method_name: formData.payment_method_name };
     }
 
-    onSave(payload);
-    setIsModalOpen(false);
+    try {
+      await onSave(payload);
+    } catch (error) {
+      setError("Failed to save payment method. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -228,30 +232,20 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 transition"
+              disabled={saving}
+              className="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 font-medium hover:bg-gray-300 transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition shadow-md"
+              disabled={saving}
+              className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save
+              {saving ? "Saving..." : "Save"}
             </button>
           </div>
         </form>
-
-        {isModalOpen && (
-          <ConfirmModal
-            title="Confirm Save"
-            message="Do you want to save these changes?"
-            onCancel={() => setIsModalOpen(false)}
-            onConfirm={handleConfirmSave}
-            confirmText="Save"
-            confirmColor="bg-green-600"
-            confirmHoverColor="hover:bg-green-700"
-          />
-        )}
       </div>
     </div>
   );

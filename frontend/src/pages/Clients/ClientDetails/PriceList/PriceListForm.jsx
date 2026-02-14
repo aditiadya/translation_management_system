@@ -17,6 +17,7 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
   const [languagePairs, setLanguagePairs] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [currencies, setCurrencies] = useState([]);
+  const [units, setUnits] = useState([]);
 
   useEffect(() => {
     fetchDropdowns();
@@ -35,23 +36,31 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
   }, [editingItem, clientId]);
 
   const fetchDropdowns = async () => {
-  try {
-    const [svc, lp, spec, cur] = await Promise.all([
-      api.get(`/admin-services/${clientId}/services`),
-      api.get(`/admin-language-pairs/${clientId}/language-pairs`),
-      api.get(`/admin-specializations/${clientId}/specializations`),
-      api.get(`/admin-currencies`),
-    ]);
+    try {
+      const [dataRes, cur, unt] = await Promise.all([
+        api.get(`/client-price-list/${clientId}/price-list`),
+        api.get(`/admin-currencies`),
+        api.get(`/admin-units`),
+      ]);
 
-    setServices(Array.isArray(svc.data.data?.services) ? svc.data.data.services : []);
-    setLanguagePairs(Array.isArray(lp.data.data?.languagePairs) ? lp.data.data.languagePairs : []);
-    setSpecializations(Array.isArray(spec.data.data?.specializations) ? spec.data.data.specializations : []);
-    setCurrencies(Array.isArray(cur.data.data) ? cur.data.data : []);
-  } catch (err) {
-    console.error("Failed to load dropdowns", err);
-  }
-};
+      console.log("Dropdown Data:", dataRes.data);
 
+      const dropdowns = dataRes.data.data?.dropdowns || {};
+      
+      setServices(Array.isArray(dropdowns.services) ? dropdowns.services : []);
+      setLanguagePairs(Array.isArray(dropdowns.languagePairs) ? dropdowns.languagePairs : []);
+      setSpecializations(Array.isArray(dropdowns.specializations) ? dropdowns.specializations : []);
+      
+      const currenciesData = cur.data.data || [];
+      setCurrencies(Array.isArray(currenciesData) ? currenciesData : []);
+      
+      const unitsData = unt.data.data || [];
+      setUnits(Array.isArray(unitsData) ? unitsData : []);
+    } catch (err) {
+      console.error("Failed to load dropdowns", err);
+      console.error("Error details:", err.response?.data);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -68,8 +77,8 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
         {editingItem ? "Edit Price" : "Add New Price"}
       </h2>
 
-      {/* Dropdowns */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Service Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Service</label>
           <select
@@ -82,12 +91,13 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
             <option value="">Select service</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.service?.name}
+                {s.name}
               </option>
             ))}
           </select>
         </div>
 
+        {/* Language Pair Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Language Pair</label>
           <select
@@ -100,12 +110,13 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
             <option value="">Select language pair</option>
             {languagePairs.map((lp) => (
               <option key={lp.id} value={lp.id}>
-                {lp.language_pair?.source_language_id} → {lp.language_pair?.target_language_id}
+                {lp.sourceLanguage?.code || "?"} → {lp.targetLanguage?.code || "?"}
               </option>
             ))}
           </select>
         </div>
 
+        {/* Specialization Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Specialization</label>
           <select
@@ -118,12 +129,13 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
             <option value="">Select specialization</option>
             {specializations.map((sp) => (
               <option key={sp.id} value={sp.id}>
-                {sp.specialization?.name}
+                {sp.name}
               </option>
             ))}
           </select>
         </div>
 
+        {/* Currency Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Currency</label>
           <select
@@ -142,18 +154,26 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
           </select>
         </div>
 
+        {/* Unit Dropdown */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Unit</label>
-          <input
-            type="text"
+          <select
             name="unit"
             value={formData.unit}
             onChange={handleChange}
             required
-            className="w-full border rounded px-3 py-2"
-          />
+            className="w-full border rounded px-3 py-2 bg-white"
+          >
+            <option value="">Select unit</option>
+            {units.map((u) => (
+              <option key={u.id} value={u.name}>
+                {u.name}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Price per Unit */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Price per Unit</label>
           <input
@@ -162,32 +182,38 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
             value={formData.price_per_unit}
             onChange={handleChange}
             required
+            step="0.01"
+            min="0"
             className="w-full border rounded px-3 py-2"
           />
         </div>
       </div>
 
+      {/* Note */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Note</label>
         <textarea
           name="note"
           value={formData.note}
           onChange={handleChange}
+          rows="3"
           className="w-full border rounded px-3 py-2"
+          placeholder="Optional notes..."
         />
       </div>
 
+      {/* Action Buttons */}
       <div className="flex justify-end space-x-3">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border rounded hover:bg-gray-100"
+          className="px-4 py-2 border rounded hover:bg-gray-100 transition"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
         >
           {editingItem ? "Update" : "Create"}
         </button>

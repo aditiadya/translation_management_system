@@ -1,7 +1,14 @@
 import db from "../../models/index.js";
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const { VendorLanguagePair, VendorDetails, AdminLanguagePair, VendorSettings, Language } = db;
+const { 
+  VendorLanguagePair, 
+  VendorDetails, 
+  AdminLanguagePair, 
+  VendorSettings, 
+  Language,
+  VendorPriceList, // ADD THIS
+} = db;
 
 const VENDOR_LANGUAGE_PAIR_ALLOWED_FIELDS = ["vendor_id", "language_pair_id"];
 
@@ -28,55 +35,172 @@ const toClientError = (error) => {
   };
 };
 
-// Create
-export const createVendorLanguagePair = async (req, res) => {
+// Bulk delete vendor language pairs - CASCADE DELETE PRICE LIST
+export const bulkDeleteVendorLanguagePairs = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
   try {
     const adminId = req.user.id;
-    const data = pickAllowed(req.body, VENDOR_LANGUAGE_PAIR_ALLOWED_FIELDS);
+    const { vendor_id, language_pair_ids } = req.body;
 
-    if (!data.vendor_id || !data.language_pair_id) {
+    if (!vendor_id || !language_pair_ids || language_pair_ids.length === 0) {
+      await transaction.rollback();
       return res.status(400).json({
         success: false,
-        message: "vendor_id and language_pair_id are required",
+        message: "vendor_id and language_pair_ids are required",
       });
     }
 
-    const vendor = await VendorDetails.findByPk(data.vendor_id);
-    const languagePair = await AdminLanguagePair.findByPk(data.language_pair_id);
-
-    if (!vendor || !languagePair) {
-      return res.status(404).json({
-        success: false,
-        message: "Vendor or Language Pair not found",
-      });
-    }
-
-    if (vendor.admin_id !== adminId || languagePair.admin_id !== adminId) {
+    const vendor = await VendorDetails.findByPk(vendor_id, { transaction });
+    if (!vendor || vendor.admin_id !== adminId) {
+      await transaction.rollback();
       return res.status(403).json({
         success: false,
-        message: "Vendor and Language Pair must belong to the same admin",
+        message: "Vendor does not belong to your admin account",
       });
     }
 
-    const existing = await VendorLanguagePair.findOne({
-      where: { vendor_id: data.vendor_id, language_pair_id: data.language_pair_id },
+    // Delete related price list entries
+    const deletedPricesCount = await VendorPriceList.destroy({
+      where: {
+        vendor_id: vendor_id,
+        language_pair_id: language_pair_ids,
+      },
+      transaction,
     });
 
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "This vendor-language pair mapping already exists",
-      });
-    }
+    // Delete the mappings
+    const deleted = await VendorLanguagePair.destroy({
+      where: {
+        vendor_id: vendor_id,
+        language_pair_id: language_pair_ids,
+      },
+      transaction,
+    });
 
-    const newVendorLanguagePair = await VendorLanguagePair.create(data);
-    res.status(201).json({
+    await transaction.commit();
+
+    res.json({
       success: true,
-      message: "Vendor language pair created successfully",
-      data: newVendorLanguagePair,
+      message: `${deleted} language pair(s) and ${deletedPricesCount} related price(s) deleted successfully`,
     });
   } catch (error) {
+    await transaction.rollback();
     console.error(error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
+
+// Create - WITH PRICE COUNT
+export const createVendorLanguagePair = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
+  try {
+    const adminId = req.user.id;
+    const { vendor_id, language_pair_id, language_pair_ids } = req.body;
+
+    let pairIds = [];
+    if (language_pair_ids && Array.isArray(language_pair_ids)) {
+      pairIds = language_pair_ids;
+    } else if (language_pair_id) {
+      pairIds = [language_pair_id];
+    }
+
+    const vendor = await VendorDetails.findByPk(vendor_id, { transaction });
+    if (!vendor) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+    }
+
+    if (vendor.admin_id !== adminId) {
+      await transaction.rollback();
+      return res.status(403).json({
+        success: false,
+        message: "Vendor does not belong to your admin account",
+      });
+    }
+
+    const languagePairs = await AdminLanguagePair.findAll({
+      where: {
+        id: pairIds,
+        admin_id: adminId,
+        active_flag: true,
+      },
+      transaction,
+    });
+
+    if (languagePairs.length !== pairIds.length) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Some language pairs not found or don't belong to your admin account",
+      });
+    }
+
+    const existing = await VendorLanguagePair.findAll({
+      where: {
+        vendor_id: vendor_id,
+        language_pair_id: pairIds,
+      },
+      transaction,
+    });
+
+    const existingIds = existing.map((e) => e.language_pair_id);
+    const newPairIds = pairIds.filter((id) => !existingIds.includes(id));
+
+    if (newPairIds.length === 0) {
+      await transaction.commit();
+      return res.status(200).json({
+        success: true,
+        message: "All selected language pairs already exist",
+        data: existing,
+      });
+    }
+
+    // Get price counts for new pairs
+    const priceCounts = await VendorPriceList.findAll({
+      where: {
+        vendor_id: vendor_id,
+        language_pair_id: newPairIds,
+      },
+      attributes: [
+        "language_pair_id",
+        [db.sequelize.fn("COUNT", db.sequelize.col("id")), "count"],
+      ],
+      group: ["language_pair_id"],
+      raw: true,
+      transaction,
+    });
+
+    const priceCountMap = {};
+    priceCounts.forEach((pc) => {
+      priceCountMap[pc.language_pair_id] = parseInt(pc.count) || 0;
+    });
+
+    const dataToCreate = newPairIds.map((pairId) => ({
+      vendor_id: vendor_id,
+      language_pair_id: pairId,
+      price_count: priceCountMap[pairId] || 0,
+    }));
+
+    const newVendorLanguagePairs = await VendorLanguagePair.bulkCreate(
+      dataToCreate,
+      { transaction }
+    );
+
+    await transaction.commit();
+
+    res.status(201).json({
+      success: true,
+      message: `${newVendorLanguagePairs.length} language pair(s) added successfully`,
+      data: newVendorLanguagePairs,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Error creating vendor language pairs:", error);
     const err = toClientError(error);
     res.status(err.code).json(err.body);
   }
@@ -165,6 +289,7 @@ export const getVendorLanguagePairById = async (req, res) => {
   }
 };
 
+// Get vendor language pairs WITH PRICE COUNTS
 export const getVendorLanguagePairsForVendor = async (req, res) => {
   try {
     const adminId = req.user.id;
@@ -191,75 +316,272 @@ export const getVendorLanguagePairsForVendor = async (req, res) => {
 
     const worksWithAll = vendor.settings?.works_with_all_language_pairs;
 
-    // Inclusion logic: We only fetch "code" now
     const languageInclude = [
       {
         model: Language,
         as: "sourceLanguage",
-        attributes: ["code"], 
+        attributes: ["id", "name", "code"],
       },
       {
         model: Language,
         as: "targetLanguage",
-        attributes: ["code"],
+        attributes: ["id", "name", "code"],
       },
     ];
 
-    // Helper function to flatten the language objects for a cleaner response
-    const formatPair = (pair) => ({
-      id: pair.id,
-      admin_id: pair.admin_id,
-      source_language_code: pair.sourceLanguage?.code,
-      target_language_code: pair.targetLanguage?.code,
-    });
+    let languagePairs = [];
 
     if (worksWithAll) {
-      const adminLanguagePairs = await AdminLanguagePair.findAll({
-        where: { admin_id: adminId },
-        attributes: ["id", "admin_id"],
+      // Fetch all admin language pairs
+      const adminPairs = await AdminLanguagePair.findAll({
+        where: { admin_id: adminId, active_flag: true },
+        attributes: ["id", "admin_id", "source_language_id", "target_language_id"],
         include: languageInclude,
         order: [["id", "ASC"]],
       });
 
-      return res.json({
-        success: true,
-        message: "Vendor works with all admin language pairs",
-        data: {
-          vendor,
-          languagePairs: adminLanguagePairs.map(formatPair),
+      // Get price counts dynamically
+      const priceCounts = await VendorPriceList.findAll({
+        where: { vendor_id: id },
+        attributes: [
+          "language_pair_id",
+          [db.sequelize.fn("COUNT", db.sequelize.col("id")), "count"],
+        ],
+        group: ["language_pair_id"],
+        raw: true,
+      });
+
+      const priceCountMap = {};
+      priceCounts.forEach((pc) => {
+        priceCountMap[pc.language_pair_id] = parseInt(pc.count) || 0;
+      });
+
+      languagePairs = adminPairs.map((pair) => ({
+        ...pair.toJSON(),
+        price_count: priceCountMap[pair.id] || 0,
+      }));
+    } else {
+      // ✅ FIXED VERSION - Fetch vendor pairs separately
+      const vendorPairs = await VendorLanguagePair.findAll({
+        where: { vendor_id: id },
+        attributes: ["language_pair_id", "price_count"],
+        raw: true,
+      });
+
+      const priceCountMap = {};
+      vendorPairs.forEach((vp) => {
+        priceCountMap[vp.language_pair_id] = vp.price_count || 0;
+      });
+
+      console.log("Price count map (disabled mode):", priceCountMap);
+
+      // Fetch admin language pairs
+      const languagePairIds = Object.keys(priceCountMap).map(Number);
+      
+      if (languagePairIds.length === 0) {
+        return res.json({
+          success: true,
+          message: "No language pairs selected for this vendor",
+          data: {
+            vendor: {
+              id: vendor.id,
+              company_name: vendor.company_name,
+              works_with_all_language_pairs: worksWithAll,
+            },
+            languagePairs: [],
+          },
+        });
+      }
+
+      const adminPairs = await AdminLanguagePair.findAll({
+        where: {
+          id: languagePairIds,
+          admin_id: adminId,
+          active_flag: true,
         },
+        attributes: ["id", "admin_id", "source_language_id", "target_language_id"],
+        include: languageInclude,
+        order: [["id", "ASC"]],
+      });
+
+      languagePairs = adminPairs.map((pair) => ({
+        ...pair.toJSON(),
+        price_count: priceCountMap[pair.id] || 0,
+      }));
+
+      console.log("Final language pairs:", languagePairs);
+    }
+
+    return res.json({
+      success: true,
+      message: worksWithAll
+        ? "Vendor works with all admin language pairs"
+        : "Vendor-specific language pairs fetched successfully",
+      data: {
+        vendor: {
+          id: vendor.id,
+          company_name: vendor.company_name,
+          works_with_all_language_pairs: worksWithAll,
+        },
+        languagePairs: languagePairs,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching vendor language pairs:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
+
+// Get admin language pairs WITH SELECTION AND PRICE COUNTS
+export const getAdminLanguagePairsForVendor = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { id } = req.params;
+
+    const vendor = await VendorDetails.findOne({
+      where: { id, admin_id: adminId },
+      attributes: ["id"],
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found or does not belong to your admin account",
       });
     }
 
-    const vendorLanguagePairs = await VendorLanguagePair.findAll({
-      where: { vendor_id: vendor.id },
+    const adminPairs = await AdminLanguagePair.findAll({
+      where: { admin_id: adminId, active_flag: true },
+      attributes: ["id", "source_language_id", "target_language_id"],
       include: [
         {
-          model: AdminLanguagePair,
-          as: "languagePair",
-          attributes: ["id", "admin_id"],
-          where: { admin_id: adminId },
-          include: languageInclude,
+          model: Language,
+          as: "sourceLanguage",
+          attributes: ["id", "name", "code"],
+        },
+        {
+          model: Language,
+          as: "targetLanguage",
+          attributes: ["id", "name", "code"],
         },
       ],
       order: [["id", "ASC"]],
     });
 
+    const vendorPairs = await VendorLanguagePair.findAll({
+      where: { vendor_id: id },
+      attributes: ["language_pair_id", "price_count"],
+    });
+
+    const selectedPairMap = {};
+    vendorPairs.forEach((vp) => {
+      selectedPairMap[vp.language_pair_id] = vp.price_count || 0;
+    });
+
+    const pairsWithSelection = adminPairs.map((pair) => ({
+      ...pair.toJSON(),
+      is_selected: selectedPairMap.hasOwnProperty(pair.id),
+      price_count: selectedPairMap[pair.id] || 0,
+    }));
+
     return res.json({
       success: true,
-      message: "Vendor-specific language pairs fetched successfully",
-      data: {
-        vendor,
-        languagePairs: vendorLanguagePairs.map((v) => formatPair(v.languagePair)),
-      },
+      data: pairsWithSelection,
     });
   } catch (error) {
-    console.error("Error fetching vendor language pairs:", error);
-    // Standard error handling
-    const status = error.code || 500;
-    res.status(status).json({ success: false, message: error.message });
+    console.error("Error fetching admin language pairs for vendor:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
   }
 };
+
+// NEW: Initialize all language pairs when toggle is disabled
+export const initializeVendorLanguagePairs = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
+  try {
+    const adminId = req.user.id;
+    const { vendor_id } = req.body;
+
+    if (!vendor_id) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "vendor_id is required",
+      });
+    }
+
+    const vendor = await VendorDetails.findOne({
+      where: { id: vendor_id, admin_id: adminId },
+      transaction,
+    });
+
+    if (!vendor) {
+      await transaction.rollback();
+      return res.status(403).json({
+        success: false,
+        message: "Vendor not found or access denied",
+      });
+    }
+
+    const adminPairs = await AdminLanguagePair.findAll({
+      where: { admin_id: adminId, active_flag: true },
+      attributes: ["id"],
+      transaction,
+    });
+
+    console.log("Admin pairs:", adminPairs.map(p => p.id));
+
+    const priceCounts = await VendorPriceList.findAll({
+      where: { vendor_id: vendor_id },
+      attributes: [
+        "language_pair_id",
+        [db.sequelize.fn("COUNT", db.sequelize.col("id")), "count"],
+      ],
+      group: ["language_pair_id"],
+      raw: true,
+      transaction,
+    });
+
+    console.log("Price counts:", priceCounts);
+
+    const priceCountMap = {};
+    priceCounts.forEach((pc) => {
+      priceCountMap[pc.language_pair_id] = parseInt(pc.count) || 0;
+    });
+
+    console.log("Price count map:", priceCountMap);
+
+    const vendorPairsToUpsert = adminPairs.map((pair) => ({
+      vendor_id: vendor_id,
+      language_pair_id: pair.id,
+      price_count: priceCountMap[pair.id] || 0,
+    }));
+
+    console.log("Pairs to upsert:", vendorPairsToUpsert);
+
+    await VendorLanguagePair.bulkCreate(vendorPairsToUpsert, {
+      updateOnDuplicate: ["price_count", "updatedAt"],
+      transaction,
+    });
+
+    await transaction.commit();
+
+    res.json({
+      success: true,
+      message: "All language pairs initialized for vendor",
+    });
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Error initializing vendor language pairs:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
+
+
 
 // Update
 export const updateVendorLanguagePair = async (req, res) => {
@@ -307,8 +629,9 @@ export const updateVendorLanguagePair = async (req, res) => {
   }
 };
 
-// Delete
+// DELETE - CASCADE DELETE PRICE LIST
 export const deleteVendorLanguagePair = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
   try {
     const adminId = req.user.id;
     const { id } = req.params;
@@ -317,11 +640,13 @@ export const deleteVendorLanguagePair = async (req, res) => {
       where: { id },
       include: [
         { model: VendorDetails, as: "vendor", attributes: ["admin_id"] },
-        { model: AdminLanguagePair, as: "languagePair", attributes: ["admin_id"] },
+        { model: AdminLanguagePair, as: "languagePair", attributes: ["admin_id", "id"] },
       ],
+      transaction,
     });
 
     if (!vendorLanguagePair) {
+      await transaction.rollback();
       return res.status(404).json({
         success: false,
         message: "Vendor language pair not found",
@@ -332,21 +657,38 @@ export const deleteVendorLanguagePair = async (req, res) => {
       vendorLanguagePair.vendor.admin_id !== adminId ||
       vendorLanguagePair.languagePair.admin_id !== adminId
     ) {
+      await transaction.rollback();
       return res.status(403).json({
         success: false,
         message: "Access denied: This record doesn't belong to your admin account",
       });
     }
 
-    await vendorLanguagePair.destroy();
+    // Delete related price list entries
+    const deletedPricesCount = await VendorPriceList.destroy({
+      where: {
+        vendor_id: vendorLanguagePair.vendor_id,
+        language_pair_id: vendorLanguagePair.language_pair_id,
+      },
+      transaction,
+    });
+
+    console.log(
+      `Deleted ${deletedPricesCount} price(s) for vendor_id=${vendorLanguagePair.vendor_id}, language_pair_id=${vendorLanguagePair.language_pair_id}`
+    );
+
+    await vendorLanguagePair.destroy({ transaction });
+    await transaction.commit();
 
     res.json({
       success: true,
-      message: "Vendor language pair deleted successfully",
+      message: `Vendor language pair and ${deletedPricesCount} related price(s) deleted successfully`,
     });
   } catch (error) {
+    await transaction.rollback();
     console.error(error);
     const err = toClientError(error);
     res.status(err.code).json(err.body);
   }
 };
+

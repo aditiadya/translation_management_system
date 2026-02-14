@@ -76,3 +76,64 @@ export const getVendorLanguagePairsForVendorSchema = Joi.object({
     }),
   }),
 });
+
+// Bulk create vendor language pairs
+export const bulkCreateVendorLanguagePairSchema = Joi.object({
+  vendor_id: Joi.number().integer().positive().required().messages({
+    "any.required": "Vendor ID is required",
+    "number.base": "Vendor ID must be a number",
+    "number.positive": "Vendor ID must be a positive number",
+  }),
+  language_pair_ids: Joi.array()
+    .items(Joi.number().integer().positive())
+    .min(1)
+    .required()
+    .messages({
+      "any.required": "Language pair IDs are required",
+      "array.base": "Language pair IDs must be an array",
+      "array.min": "At least one language pair ID is required",
+      "number.base": "Each language pair ID must be a number",
+      "number.positive": "Each language pair ID must be a positive number",
+    }),
+});
+
+// Bulk delete vendor language pairs
+export const bulkDeleteVendorLanguagePairSchema = Joi.object({
+  vendor_id: Joi.number().integer().positive().required().messages({
+    "any.required": "Vendor ID is required",
+    "number.base": "Vendor ID must be a number",
+    "number.positive": "Vendor ID must be a positive number",
+  }),
+  language_pair_ids: Joi.array()
+    .items(Joi.number().integer().positive())
+    .min(1)
+    .required()
+    .messages({
+      "any.required": "Language pair IDs are required",
+      "array.base": "Language pair IDs must be an array",
+      "array.min": "At least one language pair ID is required",
+      "number.base": "Each language pair ID must be a number",
+      "number.positive": "Each language pair ID must be a positive number",
+    }),
+});
+
+// Get admin language pairs for vendor selection
+export const getAdminLanguagePairsForVendorSchema = Joi.object({
+  params: Joi.object({
+    id: Joi.number().integer().positive().required().messages({
+      "any.required": "Vendor ID is required in URL params",
+      "number.base": "Vendor ID must be a number",
+      "number.positive": "Vendor ID must be a positive number",
+    }),
+  }),
+});
+
+// Initialize all language pairs for vendor
+export const initializeVendorLanguagePairsSchema = Joi.object({
+  vendor_id: Joi.number().integer().positive().required().messages({
+    "any.required": "Vendor ID is required",
+    "number.base": "Vendor ID must be a number",
+    "number.integer": "Vendor ID must be an integer",
+    "number.positive": "Vendor ID must be a positive number",
+  }),
+});

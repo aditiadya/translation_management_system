@@ -10,48 +10,18 @@ const VendorLanguagePairsPage = ({ vendorId }) => {
   const [error, setError] = useState("");
   const [showEditPage, setShowEditPage] = useState(false);
 
-  const fetchVendorSettings = async () => {
-    try {
-      const res = await api.get(`/vendor-settings/${vendorId}`, { withCredentials: true });
-      setWorksWithAll(res.data.data?.works_with_all_language_pairs || false);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to fetch vendor settings");
-    }
-  };
-
-  const fetchAdminLanguagePairs = async () => {
-    try {
-      const res = await api.get(`/admin-language-pairs`, { withCredentials: true });
-      return res.data?.data || [];
-    } catch (err) {
-      console.error("Error fetching admin language pairs:", err);
-      return [];
-    }
-  };
-
   const fetchVendorLanguagePairs = async () => {
     setLoading(true);
+    setError("");
     try {
-      const [vendorRes, adminPairs] = await Promise.all([
-        api.get(`/vendor-language-pairs/${vendorId}/language-pairs`, { withCredentials: true }),
-        fetchAdminLanguagePairs(),
-      ]);
+      const res = await api.get(
+        `/vendor-language-pairs/${vendorId}/language-pairs`,
+        { withCredentials: true }
+      );
 
-      const vendorData = vendorRes.data?.data?.languagePairs || [];
-
-      const merged = vendorData.map((vp) => {
-        const match = adminPairs.find(
-          (ap) => ap.source_language_id === vp.source_language_id && ap.target_language_id === vp.target_language_id
-        );
-        return {
-          ...vp,
-          sourceLanguage: match?.sourceLanguage,
-          targetLanguage: match?.targetLanguage,
-        };
-      });
-
-      setLanguagePairs(merged);
+      const data = res.data?.data;
+      setWorksWithAll(data?.vendor?.works_with_all_language_pairs || false);
+      setLanguagePairs(data?.languagePairs || []);
     } catch (err) {
       console.error("Error fetching vendor language pairs:", err);
       setError("Failed to fetch vendor language pairs");
@@ -61,21 +31,33 @@ const VendorLanguagePairsPage = ({ vendorId }) => {
   };
 
   useEffect(() => {
-    fetchVendorSettings();
     fetchVendorLanguagePairs();
   }, [vendorId]);
 
   const handleToggle = async () => {
     try {
       const newValue = !worksWithAll;
-      setWorksWithAll(newValue);
-      await api.put(`/vendor-settings/${vendorId}`, {
-        works_with_all_language_pairs: newValue,
-      });
-      fetchVendorLanguagePairs();
+
+      // If disabling (newValue = false), initialize all language pairs
+      if (!newValue) {
+        await api.post("/vendor-language-pairs/initialize", {
+          vendor_id: parseInt(vendorId),
+        });
+      }
+
+      await api.put(
+        `/vendor-settings/${vendorId}`,
+        {
+          works_with_all_language_pairs: newValue,
+        },
+        { withCredentials: true }
+      );
+
+      await fetchVendorLanguagePairs();
+      setError("");
     } catch (err) {
-      console.error(err);
-      alert("Failed to update vendor settings");
+      console.error("Error updating vendor settings:", err);
+      setError(err.response?.data?.message || "Failed to update vendor settings");
     }
   };
 
@@ -84,61 +66,79 @@ const VendorLanguagePairsPage = ({ vendorId }) => {
     fetchVendorLanguagePairs();
   };
 
-  if (loading)
-    return <div className="text-center mt-10 text-gray-500">Loading...</div>;
-  if (error)
-    return <div className="text-center mt-10 text-red-600">{error}</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-gray-500 animate-pulse text-lg">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
-      <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <span className="text-gray-800 font-medium">
-            Works with all language pairs:
-          </span>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-center">
+          <span>{error}</span>
           <button
-            onClick={handleToggle}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
-              worksWithAll ? "bg-blue-600" : "bg-gray-300"
-            }`}
+            onClick={() => setError("")}
+            className="text-red-900 hover:text-red-700 font-bold"
           >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-                worksWithAll ? "translate-x-6" : "translate-x-1"
-              }`}
-            />
+            ✕
           </button>
-          <span
-            className={`font-semibold ${
-              worksWithAll ? "text-gray-700" : "text-gray-500"
-            }`}
-          >
-            {worksWithAll ? "Enabled" : "Disabled"}
-          </span>
         </div>
-        {worksWithAll && (
-          <p className="text-gray-500 text-sm italic">
-            This vendor works with all language pairs.
-          </p>
-        )}
+      )}
+
+      <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <span className="text-gray-800 font-medium">
+              Works with all language pairs:
+            </span>
+            <button
+              onClick={handleToggle}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${
+                worksWithAll ? "bg-blue-600" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
+                  worksWithAll ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+            <span
+              className={`font-semibold ${
+                worksWithAll ? "text-blue-700" : "text-gray-500"
+              }`}
+            >
+              {worksWithAll ? "Enabled" : "Disabled"}
+            </span>
+          </div>
+          {worksWithAll && (
+            <p className="text-gray-500 text-sm italic">
+              This vendor inherits all admin language pairs automatically.
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-between items-center">
-        <h3 className="text-2xl font-bold text-gray-800">Language Pairs</h3>
+        <h3 className="text-2xl font-bold text-gray-800">
+          Language Pairs
+        </h3>
         {!worksWithAll && (
           <button
             onClick={() => setShowEditPage(true)}
-            className="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+            className="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition active:scale-95"
           >
-            Update
+            Update Selection
           </button>
         )}
       </div>
 
       <VendorLanguagePairsTable
         languagePairs={languagePairs}
-        vendorId={vendorId}
-        allowUpdate={!worksWithAll}
+        worksWithAll={worksWithAll}
       />
 
       {showEditPage && (
@@ -147,7 +147,7 @@ const VendorLanguagePairsPage = ({ vendorId }) => {
           onClick={() => setShowEditPage(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 relative"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-6 relative max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button

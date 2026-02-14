@@ -58,6 +58,7 @@ export const addVendorPaymentMethod = async (req, res) => {
         message: "You are not authorized to manage this vendor",
       });
 
+    // If setting as default, unset all other defaults for this vendor
     if (is_default) {
       await VendorPaymentMethod.update(
         { is_default: false },
@@ -69,25 +70,27 @@ export const addVendorPaymentMethod = async (req, res) => {
       {
         vendor_id,
         payment_method,
-        note: body.note,
+        note: body.note || null,
         active_flag: body.active_flag ?? true,
         is_default: !!is_default,
       },
       { transaction }
     );
 
+    let createdDetails = null;
+
     if (payment_method === "bank_transfer" && body.details) {
-      await VendorBankTransferDetail.create(
+      createdDetails = await VendorBankTransferDetail.create(
         { payment_method_id: payment.id, ...body.details },
         { transaction }
       );
     } else if (["paypal", "payoneer", "skrill"].includes(payment_method) && body.details) {
-      await VendorEmailPaymentDetail.create(
+      createdDetails = await VendorEmailPaymentDetail.create(
         { payment_method_id: payment.id, email: body.details.email },
         { transaction }
       );
     } else if (payment_method === "other" && body.details) {
-      await VendorOtherPaymentDetail.create(
+      createdDetails = await VendorOtherPaymentDetail.create(
         {
           payment_method_id: payment.id,
           payment_method_name: body.details.payment_method_name,
@@ -97,10 +100,20 @@ export const addVendorPaymentMethod = async (req, res) => {
     }
 
     await transaction.commit();
+
+    // Fetch complete data with associations
+    const completePayment = await VendorPaymentMethod.findByPk(payment.id, {
+      include: [
+        { model: VendorBankTransferDetail, as: "bank_transfer_detail" },
+        { model: VendorEmailPaymentDetail, as: "email_payment_detail" },
+        { model: VendorOtherPaymentDetail, as: "other_payment_detail" },
+      ],
+    });
+
     return res.status(201).json({
       success: true,
       message: "Vendor payment method added successfully",
-      data: payment,
+      data: completePayment,
     });
   } catch (error) {
     console.log(error);
@@ -174,18 +187,25 @@ export const updateVendorPaymentMethod = async (req, res) => {
       });
     }
 
+    // If setting as default, unset all other defaults for this vendor (excluding current one)
     if (is_default) {
       await VendorPaymentMethod.update(
         { is_default: false },
-        { where: { vendor_id: vendor.id }, transaction }
+        { 
+          where: { 
+            vendor_id: vendor.id, 
+            id: { [db.Sequelize.Op.ne]: id } 
+          }, 
+          transaction 
+        }
       );
     }
 
     await existing.update(
       {
-        note: note ?? existing.note,
-        active_flag: active_flag ?? existing.active_flag,
-        is_default: !!is_default,
+        note: note !== undefined ? note : existing.note,
+        active_flag: active_flag !== undefined ? active_flag : existing.active_flag,
+        is_default: is_default !== undefined ? !!is_default : existing.is_default,
       },
       { transaction }
     );
@@ -219,7 +239,6 @@ export const updateVendorPaymentMethod = async (req, res) => {
   }
 };
 
-
 // Delete
 export const deleteVendorPaymentMethod = async (req, res) => {
   const transaction = await db.sequelize.transaction();
@@ -250,6 +269,24 @@ export const deleteVendorPaymentMethod = async (req, res) => {
         success: false,
         message: "You are not authorized to delete this vendor's payment method",
       });
+    }
+
+    // Check if this is the default payment method
+    if (payment.is_default) {
+      // Count total payment methods for this vendor
+      const totalMethods = await VendorPaymentMethod.count({
+        where: { vendor_id: payment.vendor_id },
+        transaction,
+      });
+
+      // If there are other methods, require user to change default first
+      if (totalMethods > 1) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          message: "Cannot delete default payment method. Please set another payment method as default first.",
+        });
+      }
     }
 
     await payment.destroy({ transaction });

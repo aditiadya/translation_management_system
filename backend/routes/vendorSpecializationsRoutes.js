@@ -5,7 +5,8 @@ import {
   getVendorSpecializationById,
   getAllVendorSpecializations,
   deleteVendorSpecialization,
-  getVendorSpecializationsForVendor
+  getVendorSpecializationsForVendor,
+  initializeVendorSpecializations
 } from "../controllers/vendor/vendorSpecializations.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
 import { validate } from "../middlewares/validate.js";
@@ -28,5 +29,6 @@ router.get("/:id", validate(getVendorSpecializationSchema), getVendorSpecializat
 router.get("/", validate(getAllVendorSpecializationsSchema), getAllVendorSpecializations);
 router.get("/:id/specializations", validate(getVendorSpecializationsForVendorSchema), getVendorSpecializationsForVendor);
 router.delete("/:id", validate(deleteVendorSpecializationSchema), deleteVendorSpecialization);
+router.post("/initialize", initializeVendorSpecializations);
 
 export default router;

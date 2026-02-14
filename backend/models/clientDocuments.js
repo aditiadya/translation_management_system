@@ -41,6 +41,11 @@ const ClientDocuments = sequelize.define(
     uploaded_by: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "admin_details",
+        key: "id",
+      },
+      onDelete: "SET NULL",
     },
     description: {
       type: DataTypes.TEXT,
@@ -60,6 +65,12 @@ ClientDocuments.associate = (models) => {
     foreignKey: "client_id",
     as: "client",
     onDelete: "CASCADE",
+  });
+
+  // NEW: Add association with AdminDetails
+  ClientDocuments.belongsTo(models.AdminDetails, {
+    foreignKey: "uploaded_by",
+    as: "uploader",
   });
 };
 
