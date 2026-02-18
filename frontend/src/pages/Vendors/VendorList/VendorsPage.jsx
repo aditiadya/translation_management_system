@@ -27,7 +27,7 @@ const VendorsPage = () => {
   return (
     <>
         <div className="flex justify-between items-center gap-3 mb-8">
-          <h1 className="ttext-2xl font-bold text-gray-900">Vendors</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Vendors</h1>
           <div>
             <button
               onClick={() => navigate("/vendors/create-vendor")}

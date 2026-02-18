@@ -4,10 +4,9 @@ import api from "../../../../../utils/axiosInstance";
 
 const useEditUnitBasedPayable = () => {
   const navigate = useNavigate();
-  const { id: projectId, payableId } = useParams();
+  const { id: projectId, jobId, payableId } = useParams();
 
   const [form, setForm] = useState({
-    job_id: "",
     unit_amount: "",
     unit_id: "",
     price_per_unit: "",
@@ -22,16 +21,24 @@ const useEditUnitBasedPayable = () => {
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const [jobs, setJobs] = useState([]);
   const [units, setUnits] = useState([]);
   const [currencies, setCurrencies] = useState([]);
   const [files, setFiles] = useState([]);
   const [prices, setPrices] = useState([]);
   const [selectedPriceId, setSelectedPriceId] = useState(null);
 
-  const [projectMeta, setProjectMeta] = useState({
-    client_name: "",
+  const [meta, setMeta] = useState({
+    project_code: "",
+    project_name: "",
     specialization_name: "",
+    client_id: null,
+    client_name: "",
+    vendor_id: null,
+    vendor_name: "",
+    job_code: "",
+    job_name: "",
+    service_name: "",
+    language_pair: "",
   });
 
   const [loading, setLoading] = useState(true);
@@ -44,29 +51,50 @@ const useEditUnitBasedPayable = () => {
         setLoading(true);
         setServerError("");
 
-        const [projectRes, payableRes] = await Promise.all([
-          api.get(`/projects/${projectId}`),
+        const [jobRes, payableRes, unitsRes, currenciesRes, filesRes] = await Promise.all([
+          api.get(`/jobs/${jobId}`),
           api.get(`/project-finances/unit-based-payables/${payableId}`),
+          api.get(`/admin-units`).catch(() => ({ data: { data: [] } })),
+          api.get(`/admin-currencies`).catch(() => ({ data: { data: [] } })),
+          api.get(`/job-input-files?job_id=${jobId}`).catch(() => ({ data: { data: [] } })),
         ]);
 
-        const projectData = projectRes.data.data;
+        const job = jobRes.data.data;
         const payable = payableRes.data.data;
+        const project = job.project;
 
-        const clientName =
-          projectData.client?.company_name ||
-          `${projectData.client?.primary_user?.first_name || ""} ${
-            projectData.client?.primary_user?.last_name || ""
-          }`.trim() ||
-          "—";
+        // Client name
+        const client = project?.client;
+        const clientName = client?.type === "Company"
+          ? client.company_name
+          : `${client?.primary_user?.first_name || ""} ${client?.primary_user?.last_name || ""}`.trim() || "—";
 
-        setProjectMeta({
+        // Vendor name
+        const vendor = job.vendor;
+        const vendorName = vendor?.type === "Company"
+          ? vendor.company_name
+          : `${vendor?.primary_users?.first_name || ""} ${vendor?.primary_users?.last_name || ""}`.trim() || "—";
+
+        const languagePair = job.languagePair
+          ? `${job.languagePair?.sourceLanguage?.name || "?"} - ${job.languagePair?.targetLanguage?.name || "?"}`
+          : "—";
+
+        setMeta({
+          project_code: project?.project_code || project?.code || "—",
+          project_name: project?.project_name || "—",
+          specialization_name: project?.specialization?.name || "—",
+          client_id: project?.client_id,
           client_name: clientName,
-          specialization_name: projectData.specialization?.name || "—",
+          vendor_id: job.vendor_id,
+          vendor_name: vendorName,
+          job_code: job.job_code || job.code || "—",
+          job_name: job.name || "—",
+          service_name: job.service?.name || "—",
+          language_pair: languagePair,
         });
 
-        // Pre-fill form with existing values
+        // Pre-fill form
         setForm({
-          job_id: payable.job_id ? String(payable.job_id) : "",
           unit_amount: payable.unit_amount ? String(payable.unit_amount) : "",
           unit_id: payable.unit_id ? String(payable.unit_id) : "",
           price_per_unit: payable.price_per_unit ? String(payable.price_per_unit) : "",
@@ -77,23 +105,20 @@ const useEditUnitBasedPayable = () => {
           internal_note: payable.internal_note || "",
         });
 
-        // Fetch jobs, units, currencies in parallel
-        const [jobsRes, unitsRes, currenciesRes] = await Promise.all([
-          api.get(`/jobs?project_id=${projectId}`).catch(() => ({ data: { data: [] } })),
-          api.get(`/admin-units`).catch(() => ({ data: { data: [] } })),
-          api.get(`/currencies`).catch(() => ({ data: { data: [] } })),
-        ]);
-
-        setJobs(Array.isArray(jobsRes.data.data) ? jobsRes.data.data : []);
         setUnits(Array.isArray(unitsRes.data.data) ? unitsRes.data.data : []);
         setCurrencies(Array.isArray(currenciesRes.data.data) ? currenciesRes.data.data : []);
+        setFiles(Array.isArray(filesRes.data.data) ? filesRes.data.data : []);
 
-        // Fetch files for the pre-existing job
-        if (payable.job_id) {
-          const filesRes = await api
-            .get(`/jobs/${payable.job_id}/input-files`)
+        // Fetch vendor prices
+        if (job.vendor_id) {
+          const pricesRes = await api
+            .get(`/vendor-price-list?vendor_id=${job.vendor_id}`)
             .catch(() => ({ data: { data: [] } }));
-          setFiles(Array.isArray(filesRes.data.data) ? filesRes.data.data : []);
+          const priceData = Array.isArray(pricesRes.data.data) ? pricesRes.data.data : [];
+          setPrices(priceData.map((row) => ({
+            ...row,
+            isMatching: !payable.unit_id || row.unit_id === Number(payable.unit_id),
+          })));
         }
       } catch (err) {
         console.error("Failed to load data", err);
@@ -104,85 +129,19 @@ const useEditUnitBasedPayable = () => {
     };
 
     fetchAll();
-  }, [projectId, payableId]);
+  }, [projectId, jobId, payableId]);
 
-  /* ================= Fetch files when job changes ================= */
-
-  useEffect(() => {
-    // Skip during initial load — handled in fetchAll above
-    if (loading) return;
-
-    const fetchJobFiles = async () => {
-      if (!form.job_id) {
-        setFiles([]);
-        setForm((prev) => ({ ...prev, file_id: "" }));
-        return;
-      }
-
-      try {
-        const res = await api
-          .get(`/jobs/${form.job_id}/input-files`)
-          .catch(() => ({ data: { data: [] } }));
-        const filesData = Array.isArray(res.data.data) ? res.data.data : [];
-        setFiles(filesData);
-
-        // Reset file only if it no longer belongs to the new job
-        setForm((prev) => {
-          const fileStillValid = filesData.some((f) => f.id === Number(prev.file_id));
-          return fileStillValid ? prev : { ...prev, file_id: "" };
-        });
-      } catch (err) {
-        console.error("Failed to load job files", err);
-      }
-    };
-
-    fetchJobFiles();
-  }, [form.job_id]);
-
-  /* ================= Fetch vendor prices when job/unit changes ================= */
+  /* ================= Re-match prices when unit changes ================= */
 
   useEffect(() => {
-    const fetchPrices = async () => {
-      if (!form.job_id) {
-        setPrices([]);
-        return;
-      }
-
-      try {
-        const jobRes = await api
-          .get(`/jobs/${form.job_id}`)
-          .catch(() => ({ data: { data: null } }));
-
-        const job = jobRes.data.data;
-        if (!job?.vendor_id) {
-          setPrices([]);
-          return;
-        }
-
-        const params = new URLSearchParams();
-        params.append("vendor_id", job.vendor_id);
-        if (form.unit_id) params.append("unit_id", form.unit_id);
-
-        const res = await api
-          .get(`/vendor-price-list?${params}`)
-          .catch(() => ({ data: { data: [] } }));
-
-        const data = Array.isArray(res.data.data) ? res.data.data : [];
-
-        const marked = data.map((row) => ({
-          ...row,
-          isMatching: !form.unit_id || row.unit_id === Number(form.unit_id),
-        }));
-
-        marked.sort((a, b) => (b.isMatching ? 1 : 0) - (a.isMatching ? 1 : 0));
-        setPrices(marked);
-      } catch (err) {
-        console.error("Failed to load vendor prices", err);
-      }
-    };
-
-    fetchPrices();
-  }, [form.job_id, form.unit_id]);
+    if (!prices.length) return;
+    setPrices((prev) =>
+      prev.map((row) => ({
+        ...row,
+        isMatching: !form.unit_id || row.unit_id === Number(form.unit_id),
+      }))
+    );
+  }, [form.unit_id]);
 
   /* ================= Auto-calculate subtotal ================= */
 
@@ -212,7 +171,6 @@ const useEditUnitBasedPayable = () => {
 
   const validate = () => {
     const e = {};
-    if (!form.job_id) e.job_id = "Job is required.";
     if (!form.unit_amount) e.unit_amount = "Unit amount is required.";
     if (!form.unit_id) e.unit_id = "Unit is required.";
     if (!form.price_per_unit) e.price_per_unit = "Price per unit is required.";
@@ -226,8 +184,6 @@ const useEditUnitBasedPayable = () => {
     if (!value) setErrors((prev) => ({ ...prev, [name]: "This field is required." }));
   };
 
-  /* ================= Handlers ================= */
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
@@ -237,7 +193,9 @@ const useEditUnitBasedPayable = () => {
   };
 
   const buildPayload = () => ({
-    job_id: Number(form.job_id),
+    job_id: Number(jobId),
+    client_id: meta.client_id,
+    vendor_id: meta.vendor_id,
     unit_amount: Number(form.unit_amount),
     unit_id: Number(form.unit_id),
     price_per_unit: Number(form.price_per_unit),
@@ -259,7 +217,6 @@ const useEditUnitBasedPayable = () => {
         `/project-finances/unit-based-payables/${payableId}`,
         payload
       );
-
       setSuccess(res.data.message || "Payable updated successfully");
       setTimeout(() => navigate(-1), 1500);
     } catch (err) {
@@ -268,18 +225,16 @@ const useEditUnitBasedPayable = () => {
   };
 
   return {
-    projectId,
     form,
     errors,
     serverError,
     success,
-    jobs,
     units,
     currencies,
     files,
     prices,
     selectedPriceId,
-    projectMeta,
+    meta,
     loading,
     handleChange,
     handleBlur,

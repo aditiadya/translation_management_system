@@ -6,18 +6,16 @@ import FormTextarea from "../../../../../components/Form/TextArea";
 
 const EditUnitBasedPayablePage = () => {
   const {
-    projectId,
     form,
     errors,
     serverError,
     success,
-    jobs,
     units,
     currencies,
     files,
     prices,
     selectedPriceId,
-    projectMeta,
+    meta,
     loading,
     handleChange,
     handleBlur,
@@ -36,49 +34,40 @@ const EditUnitBasedPayablePage = () => {
 
   return (
     <div>
+      <div className="flex items-center gap-3 mb-5">
+        <BackButton to={-1} />
+        <h1 className="text-2xl font-bold text-gray-900">Edit Unit Based Payable</h1>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-180px)]">
 
         {/* LEFT COLUMN */}
         <form className="bg-white shadow rounded-lg p-8 overflow-y-auto">
           <div className="space-y-4">
-            <div className="flex items-center gap-3 mb-8">
-              <BackButton to={`/project/${projectId}?tab=finances`} />
-              <h1 className="text-2xl font-bold text-gray-900">
-                Edit Unit Based Payable
-              </h1>
-            </div>
 
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs uppercase text-gray-500 font-semibold mb-1">
-                  Project Client
-                </p>
-                <p className="text-gray-900 font-medium">
-                  {projectMeta.client_name || "—"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase text-gray-500 font-semibold mb-1">
-                  Project Specialization
-                </p>
-                <p className="text-gray-900 font-medium">
-                  {projectMeta.specialization_name || "—"}
-                </p>
-              </div>
-            </div>
+            {/* Info Table */}
+            <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden mb-2">
+              <tbody>
+                {[
+                  { label: "Project",        value: `${meta.project_code} ${meta.project_name}`.trim(), highlight: true },
+                  { label: "Specialization", value: meta.specialization_name },
+                  { label: "Client",         value: meta.client_name, highlight: true },
+                  { label: "Vendor",         value: meta.vendor_name, highlight: true },
+                  { label: "Job",            value: `${meta.job_code} ${meta.job_name}`.trim(), highlight: true },
+                  { label: "Service",        value: meta.service_name },
+                  { label: "Language Pair",  value: meta.language_pair },
+                ].map(({ label, value, highlight }) => (
+                  <tr key={label} className="border-b border-gray-100 last:border-0">
+                    <td className="py-2 px-4 font-medium text-gray-600 w-40 bg-gray-50">{label}</td>
+                    <td className={`py-2 px-4 ${highlight ? "text-blue-600" : "text-gray-800"}`}>
+                      {value || "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-            <hr className="my-4 border-gray-200" />
-
-            <FormSelect
-              label="Job"
-              name="job_id"
-              value={form.job_id}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              options={jobs.map((j) => ({ value: j.id, label: j.job_name }))}
-              error={errors.job_id}
-              required
-            />
+            <hr className="border-gray-200" />
 
             <FormInput
               label="Unit Amount"
@@ -130,7 +119,7 @@ const EditUnitBasedPayablePage = () => {
               onBlur={handleBlur}
               options={currencies.map((c) => ({
                 value: c.id,
-                label: `${c.currency?.code || "?"} (${c.currency?.symbol || "?"})`,
+                label: `${c.currency?.code || c.code || "?"} - ${c.currency?.name || c.name || "?"}`,
               }))}
               error={errors.currency_id}
               required
@@ -143,28 +132,27 @@ const EditUnitBasedPayablePage = () => {
               onChange={handleChange}
               options={files.map((f) => ({
                 value: f.id,
-                label: f.original_file_name || f.file_name,
+                label: f.linkedProjectFile?.original_file_name || f.original_file_name || f.file_name || `File #${f.id}`,
               }))}
-              disabled={!form.job_id}
             />
 
             <FormTextarea
-              label="Note for Vendor"
-              name="note_for_vendor"
-              value={form.note_for_vendor}
-              onChange={handleChange}
-              rows={3}
-            />
-
-            <FormTextarea
-              label="Internal Note"
+              label="Note (hidden from vendor)"
               name="internal_note"
               value={form.internal_note}
               onChange={handleChange}
               rows={3}
             />
 
-            <span className="text-gray-500 text-sm mt-1">
+            <FormTextarea
+              label="Note (visible to vendor)"
+              name="note_for_vendor"
+              value={form.note_for_vendor}
+              onChange={handleChange}
+              rows={3}
+            />
+
+            <span className="text-gray-500 text-sm">
               Fields marked with <span className="text-red-600">*</span> are mandatory.
             </span>
 
@@ -184,27 +172,20 @@ const EditUnitBasedPayablePage = () => {
 
         {/* RIGHT COLUMN — Vendor Prices */}
         <div className="bg-white shadow rounded-lg p-8 overflow-y-auto">
-          <h1 className="text-2xl font-bold text-gray-900 mb-5">
-            Relevant Prices
-          </h1>
-
+          <h2 className="text-2xl font-bold text-gray-900 mb-5">Relevant Prices</h2>
           <p className="text-sm text-gray-500 mb-3">
             Click a row to copy data to form. Matched prices are highlighted in green.
           </p>
 
           {prices.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              No relevant prices found
-            </div>
+            <div className="text-center text-gray-500 py-8">No relevant prices found</div>
           ) : (
             <div className="border rounded-lg overflow-auto max-h-[520px]">
               <table className="min-w-full text-xs">
                 <thead className="bg-gray-100 sticky top-0">
                   <tr>
                     {["Vendor", "Service", "Language Pair", "Unit", "Price per Unit", "Currency", "Note"].map((h) => (
-                      <th key={h} className="px-3 py-2 text-center font-semibold text-gray-700">
-                        {h}
-                      </th>
+                      <th key={h} className="px-3 py-2 text-center font-semibold text-gray-700">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -223,7 +204,11 @@ const EditUnitBasedPayablePage = () => {
                             : "hover:bg-gray-50"
                         }`}
                       >
-                        <td className="px-3 py-2">{row.vendor?.company_name || "—"}</td>
+                        <td className="px-3 py-2">
+                          {row.vendor?.type === "Company"
+                            ? row.vendor?.company_name || "—"
+                            : `${row.vendor?.primary_users?.first_name || ""} ${row.vendor?.primary_users?.last_name || ""}`.trim() || "—"}
+                        </td>
                         <td className="px-3 py-2">{row.service?.name || "—"}</td>
                         <td className="px-3 py-2">
                           {row.languagePair?.sourceLanguage?.name || "?"} →{" "}

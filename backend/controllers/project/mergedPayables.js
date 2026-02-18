@@ -14,7 +14,7 @@ const {
 // Shared associations for FlatRate payables
 const flatRateIncludes = [
   { model: ProjectDetails, as: "project", attributes: ["id", "project_name"] },
-  { model: JobDetails, as: "job", attributes: ["id", "job_name"] },
+  { model: JobDetails, as: "job", attributes: ["id", "name"] },
   {
     model: AdminCurrency,
     as: "currency",

@@ -1,13 +1,13 @@
 import { Pencil, Trash2, Copy } from "lucide-react";
 
 const TYPE_STYLES = {
-  flat_rate:   "border-l-2 border-violet-400",
-  unit_based:  "border-l-2 border-sky-400",
+  flat_rate: "border-l-2 border-amber-400",
+  unit_based: "border-l-2 border-teal-400",
 };
 
 const TYPE_BADGE = {
-  flat_rate:  { label: "Flat",  cls: "bg-violet-100 text-violet-700" },
-  unit_based: { label: "Unit",  cls: "bg-sky-100 text-sky-700" },
+  flat_rate: { label: "Flat", cls: "bg-amber-100 text-amber-700" },
+  unit_based: { label: "Unit", cls: "bg-teal-100 text-teal-700" },
 };
 
 const ReceivablesTable = ({
@@ -87,11 +87,11 @@ const ReceivablesTable = ({
       {/* Legend */}
       <div className="flex items-center gap-4 px-4 py-2 border-b bg-gray-50 text-xs text-gray-500">
         <span className="flex items-center gap-1">
-          <span className="inline-block w-2 h-3 rounded-sm bg-violet-400" />
+          <span className="inline-block w-2 h-3 rounded-sm bg-amber-400" />
           Flat Rate
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block w-2 h-3 rounded-sm bg-sky-400" />
+          <span className="inline-block w-2 h-3 rounded-sm bg-teal-400" />
           Unit Based
         </span>
       </div>

@@ -15,6 +15,8 @@ const {
 const ALLOWED_FIELDS = [
   "project_id",
   "job_id",
+  "client_id",
+  "vendor_id",
   "unit_amount",
   "unit_id",
   "price_per_unit",
@@ -28,6 +30,8 @@ const ALLOWED_FIELDS = [
 const createSchema = Joi.object({
   project_id: Joi.number().integer().required(),
   job_id: Joi.number().integer().required(),
+  client_id: Joi.number().integer().required(),
+  vendor_id: Joi.number().integer().required(),
   unit_amount: Joi.number().positive().required(),
   unit_id: Joi.number().integer().required(),
   price_per_unit: Joi.number().positive().required(),
@@ -40,6 +44,8 @@ const createSchema = Joi.object({
 
 const updateSchema = Joi.object({
   job_id: Joi.number().integer().optional(),
+  client_id: Joi.number().integer().optional(),
+  vendor_id: Joi.number().integer().optional(),
   unit_amount: Joi.number().positive().optional(),
   unit_id: Joi.number().integer().optional(),
   price_per_unit: Joi.number().positive().optional(),
@@ -116,64 +122,43 @@ export const createUnitBasedPayable = async (req, res) => {
 
   const { error } = createSchema.validate(payload);
   if (error)
-    return res
-      .status(400)
-      .json({ success: false, message: error.details[0].message });
+    return res.status(400).json({ success: false, message: error.details[0].message });
 
   try {
-    // Validate project ownership
     const project = await ProjectDetails.findOne({
       where: { id: payload.project_id, admin_id: adminId },
     });
     if (!project)
-      return res
-        .status(400)
-        .json({ success: false, message: "Project not found" });
+      return res.status(400).json({ success: false, message: "Project not found" });
 
-    // Validate job belongs to the project
     const job = await JobDetails.findOne({
       where: { id: payload.job_id, project_id: payload.project_id },
     });
     if (!job)
-      return res
-        .status(400)
-        .json({ success: false, message: "Job not found for this project" });
+      return res.status(400).json({ success: false, message: "Job not found for this project" });
 
-    // Validate unit
     const unit = await AdminUnits.findOne({
       where: { id: payload.unit_id, admin_id: adminId },
     });
     if (!unit)
-      return res
-        .status(400)
-        .json({ success: false, message: "Unit not found" });
+      return res.status(400).json({ success: false, message: "Unit not found" });
 
-    // Validate currency
     const currency = await AdminCurrency.findOne({
       where: { id: payload.currency_id, admin_id: adminId },
     });
     if (!currency)
-      return res
-        .status(400)
-        .json({ success: false, message: "Currency not found" });
+      return res.status(400).json({ success: false, message: "Currency not found" });
 
-    // Validate file if provided
     if (payload.file_id) {
       const file = await JobInputFiles.findOne({
         where: { id: payload.file_id, job_id: payload.job_id },
       });
       if (!file)
-        return res
-          .status(400)
-          .json({ success: false, message: "File not found for this job" });
+        return res.status(400).json({ success: false, message: "File not found for this job" });
     }
 
     const payable = await UnitBasedPayables.create(payload);
-
-    const payableWithDetails = await UnitBasedPayables.findByPk(
-      payable.id,
-      getWithAssociations()
-    );
+    const payableWithDetails = await UnitBasedPayables.findByPk(payable.id, getWithAssociations());
 
     return res.status(201).json({
       success: true,
@@ -187,25 +172,20 @@ export const createUnitBasedPayable = async (req, res) => {
   }
 };
 
-// GET ALL (by project)
+// GET ALL
 export const getAllUnitBasedPayables = async (req, res) => {
   const adminId = req.user.id;
   const { project_id, job_id, page = 1, limit = 25 } = req.query;
 
   if (!project_id)
-    return res
-      .status(400)
-      .json({ success: false, message: "project_id is required" });
+    return res.status(400).json({ success: false, message: "project_id is required" });
 
   try {
-    // Verify project ownership
     const project = await ProjectDetails.findOne({
       where: { id: project_id, admin_id: adminId },
     });
     if (!project)
-      return res
-        .status(404)
-        .json({ success: false, message: "Project not found" });
+      return res.status(404).json({ success: false, message: "Project not found" });
 
     const whereClause = { project_id };
     if (job_id) whereClause.job_id = job_id;
@@ -238,27 +218,22 @@ export const getAllUnitBasedPayables = async (req, res) => {
 // GET BY ID
 export const getUnitBasedPayableById = async (req, res) => {
   const adminId = req.user.id;
-  const { id } = req.params;
+  const { payableId } = req.params;
 
   try {
     const payable = await UnitBasedPayables.findOne({
-      where: { id },
+      where: { id: payableId },
       ...getWithAssociations(),
     });
 
     if (!payable)
-      return res
-        .status(404)
-        .json({ success: false, message: "Payable not found" });
+      return res.status(404).json({ success: false, message: "Payable not found" });
 
-    // Verify project ownership
     const project = await ProjectDetails.findOne({
       where: { id: payable.project_id, admin_id: adminId },
     });
     if (!project)
-      return res
-        .status(403)
-        .json({ success: false, message: "Access denied" });
+      return res.status(403).json({ success: false, message: "Access denied" });
 
     return res.status(200).json({ success: true, data: payable });
   } catch (err) {
@@ -270,7 +245,7 @@ export const getUnitBasedPayableById = async (req, res) => {
 // UPDATE
 export const updateUnitBasedPayable = async (req, res) => {
   const adminId = req.user.id;
-  const { id } = req.params;
+  const { payableId } = req.params;
   const payload = pickAllowed(
     req.body,
     ALLOWED_FIELDS.filter((f) => f !== "project_id")
@@ -282,78 +257,55 @@ export const updateUnitBasedPayable = async (req, res) => {
 
   const { error } = updateSchema.validate(payload);
   if (error)
-    return res
-      .status(400)
-      .json({ success: false, message: error.details[0].message });
+    return res.status(400).json({ success: false, message: error.details[0].message });
 
   try {
-    const existing = await UnitBasedPayables.findByPk(id);
+    const existing = await UnitBasedPayables.findByPk(payableId);
     if (!existing)
-      return res
-        .status(404)
-        .json({ success: false, message: "Payable not found" });
+      return res.status(404).json({ success: false, message: "Payable not found" });
 
-    // Verify project ownership
     const project = await ProjectDetails.findOne({
       where: { id: existing.project_id, admin_id: adminId },
     });
     if (!project)
-      return res
-        .status(403)
-        .json({ success: false, message: "Access denied" });
+      return res.status(403).json({ success: false, message: "Access denied" });
 
     const effectiveJobId = payload.job_id ?? existing.job_id;
 
-    // Validate new job if provided
     if (payload.job_id) {
       const job = await JobDetails.findOne({
         where: { id: payload.job_id, project_id: existing.project_id },
       });
       if (!job)
-        return res
-          .status(400)
-          .json({ success: false, message: "Job not found for this project" });
+        return res.status(400).json({ success: false, message: "Job not found for this project" });
     }
 
-    // Validate unit if provided
     if (payload.unit_id) {
       const unit = await AdminUnits.findOne({
         where: { id: payload.unit_id, admin_id: adminId },
       });
       if (!unit)
-        return res
-          .status(400)
-          .json({ success: false, message: "Unit not found" });
+        return res.status(400).json({ success: false, message: "Unit not found" });
     }
 
-    // Validate currency if provided
     if (payload.currency_id) {
       const currency = await AdminCurrency.findOne({
         where: { id: payload.currency_id, admin_id: adminId },
       });
       if (!currency)
-        return res
-          .status(400)
-          .json({ success: false, message: "Currency not found" });
+        return res.status(400).json({ success: false, message: "Currency not found" });
     }
 
-    // Validate file if provided
     if (payload.file_id) {
       const file = await JobInputFiles.findOne({
         where: { id: payload.file_id, job_id: effectiveJobId },
       });
       if (!file)
-        return res
-          .status(400)
-          .json({ success: false, message: "File not found for this job" });
+        return res.status(400).json({ success: false, message: "File not found for this job" });
     }
 
-    await UnitBasedPayables.update(payload, { where: { id } });
-
-    const updated = await UnitBasedPayables.findByPk(
-      id,
-      getWithAssociations()
-    );
+    await UnitBasedPayables.update(payload, { where: { id: payableId } });
+    const updated = await UnitBasedPayables.findByPk(payableId, getWithAssociations());
 
     return res.status(200).json({
       success: true,
@@ -370,29 +322,22 @@ export const updateUnitBasedPayable = async (req, res) => {
 // DELETE
 export const deleteUnitBasedPayable = async (req, res) => {
   const adminId = req.user.id;
-  const { id } = req.params;
+  const { payableId } = req.params;
 
   try {
-    const payable = await UnitBasedPayables.findByPk(id);
+    const payable = await UnitBasedPayables.findByPk(payableId);
     if (!payable)
-      return res
-        .status(404)
-        .json({ success: false, message: "Payable not found" });
+      return res.status(404).json({ success: false, message: "Payable not found" });
 
-    // Verify project ownership
     const project = await ProjectDetails.findOne({
       where: { id: payable.project_id, admin_id: adminId },
     });
     if (!project)
-      return res
-        .status(403)
-        .json({ success: false, message: "Access denied" });
+      return res.status(403).json({ success: false, message: "Access denied" });
 
-    await UnitBasedPayables.destroy({ where: { id } });
+    await UnitBasedPayables.destroy({ where: { id: payableId } });
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Payable deleted successfully" });
+    return res.status(200).json({ success: true, message: "Payable deleted successfully" });
   } catch (err) {
     console.error("deleteUnitBasedPayable err:", err);
     return res.status(500).json({ success: false, message: "Server error" });

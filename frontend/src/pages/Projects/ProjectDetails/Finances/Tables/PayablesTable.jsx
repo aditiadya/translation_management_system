@@ -1,45 +1,43 @@
 import { Pencil, Trash2, Copy } from "lucide-react";
 
 const TYPE_STYLES = {
-  flat_rate:  "border-l-2 border-amber-400",
+  flat_rate: "border-l-2 border-amber-400",
   unit_based: "border-l-2 border-teal-400",
 };
 
 const TYPE_BADGE = {
-  flat_rate:  { label: "Flat", cls: "bg-amber-100 text-amber-700" },
+  flat_rate: { label: "Flat", cls: "bg-amber-100 text-amber-700" },
   unit_based: { label: "Unit", cls: "bg-teal-100 text-teal-700" },
 };
 
 const PayablesTable = ({ data = [], onEdit, onDelete, onClone }) => {
-
   const fmt = (v, fallback = "—") =>
     v !== undefined && v !== null && v !== "" ? v : fallback;
 
   const fmtNum = (v, fallback = "0.00") =>
-    v !== undefined && v !== null && v !== "" ? v : fallback;
+    v !== undefined && v !== null && v !== "" ? Number(v).toFixed(2) : fallback;
 
   const formatCurrency = (c) => c?.currency?.code || "—";
 
   const formatDate = (d) => {
     if (!d) return "—";
-    try { return new Date(d).toLocaleDateString(); } catch { return "—"; }
-  };
-
-  const formatLanguagePair = (lp) => {
-    if (!lp) return "—";
-    const src = lp.sourceLanguage?.name || lp.sourceLanguage?.code || "";
-    const tgt = lp.targetLanguage?.name || lp.targetLanguage?.code || "";
-    return src && tgt ? `${src} → ${tgt}` : "—";
+    try {
+      const date = new Date(d);
+      const dd = String(date.getDate()).padStart(2, "0");
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const yyyy = date.getFullYear();
+      const hh = String(date.getHours()).padStart(2, "0");
+      const min = String(date.getMinutes()).padStart(2, "0");
+      return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+    } catch {
+      return "—";
+    }
   };
 
   const HEADERS = [
-    "Type",
+    "Type", // ← add
     "Code",
     "Invoice",
-    "Job",
-    "Job Vendor",
-    "Job Service",
-    "Job Language Pair",
     "Unit Amount",
     "Unit",
     "Price per Unit",
@@ -57,27 +55,23 @@ const PayablesTable = ({ data = [], onEdit, onDelete, onClone }) => {
   ];
 
   const COL_WIDTHS = [
-    "3%",   // Type
-    "4%",   // Code
-    "4%",   // Invoice
-    "6%",   // Job
-    "6%",   // Vendor
-    "6%",   // Service
-    "8%",   // Language Pair
-    "4%",   // Unit Amount
-    "4%",   // Unit
-    "5%",   // Price per Unit
-    "4%",   // Subtotal
-    "4%",   // Extra Charge
-    "4%",   // Discount
-    "4%",   // Total
-    "5%",   // Currency
-    "3%",   // CAT Log
-    "8%",   // Filename
-    "6%",   // Note for Vendor
-    "6%",   // Internal Note
-    "5%",   // Issued At
-    "6%",   // Actions
+    "3%", // Type  ← add
+    "4%", // Code
+    "4%", // Invoice
+    "5%", // Unit Amount
+    "5%", // Unit
+    "6%", // Price per Unit
+    "5%", // Subtotal
+    "5%", // Extra Charge
+    "5%", // Discount
+    "5%", // Total
+    "6%", // Currency
+    "4%", // CAT Log
+    "9%", // Filename
+    "7%", // Note for Vendor
+    "7%", // Internal Note
+    "7%", // Issued At
+    "6%", // Actions
   ];
 
   return (
@@ -94,8 +88,8 @@ const PayablesTable = ({ data = [], onEdit, onDelete, onClone }) => {
         </span>
       </div>
 
-      <div className="max-h-[460px] overflow-y-auto overflow-x-auto">
-        <table className="w-full table-auto border-collapse min-w-[1600px]">
+      <div className=" max-h-[250px] overflow-y-auto">
+        <table className="w-full table-auto border-collapse min-w-[1200px]">
           <colgroup>
             {COL_WIDTHS.map((w, i) => (
               <col key={i} style={{ width: w }} />
@@ -105,7 +99,10 @@ const PayablesTable = ({ data = [], onEdit, onDelete, onClone }) => {
           <thead className="sticky top-0 z-10">
             <tr className="bg-white border-b text-[10px] tracking-widest text-gray-500 uppercase">
               {HEADERS.map((h) => (
-                <th key={h} className="px-3 py-2 text-center font-semibold whitespace-nowrap">
+                <th
+                  key={h}
+                  className="px-3 py-2 text-center font-semibold whitespace-nowrap"
+                >
                   {h}
                 </th>
               ))}
@@ -115,7 +112,10 @@ const PayablesTable = ({ data = [], onEdit, onDelete, onClone }) => {
           <tbody>
             {data.length === 0 ? (
               <tr>
-                <td colSpan={HEADERS.length} className="py-10 text-center text-gray-400 text-xs">
+                <td
+                  colSpan={HEADERS.length}
+                  className="py-10 text-center text-gray-400 text-xs"
+                >
                   No payables found.
                 </td>
               </tr>
@@ -131,94 +131,102 @@ const PayablesTable = ({ data = [], onEdit, onDelete, onClone }) => {
                     key={`${row.type}-${row.id}`}
                     className={`${rowBg} ${typeStyle} hover:bg-blue-50 transition-colors`}
                   >
-                    {/* Type badge */}
                     <td className="px-3 py-2 text-center whitespace-nowrap">
-                      <span className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${badge.cls}`}>
+                      <span
+                        className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${badge.cls}`}
+                      >
                         {badge.label}
                       </span>
                     </td>
 
+                    {/* Code — empty for now */}
                     <td className="px-3 py-2 text-xs text-blue-600 whitespace-nowrap">
                       {fmt(row.code)}
                     </td>
 
-                    {/* Invoice — placeholder */}
-                    <td className="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">—</td>
-
-                    <td className="px-3 py-2 text-xs break-words">
-                      {row.job?.job_name || fmt(row.job_name)}
+                    {/* Invoice — empty for now */}
+                    <td className="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">
+                      —
                     </td>
 
-                    <td className="px-3 py-2 text-xs break-words">
-                      {row.job?.vendor?.company_name || "—"}
-                    </td>
-
-                    <td className="px-3 py-2 text-xs break-words">
-                      {row.job?.service?.name || "—"}
-                    </td>
-
-                    <td className="px-3 py-2 text-xs break-words">
-                      {formatLanguagePair(row.job?.languagePair)}
-                    </td>
-
-                    {/* Unit Amount — only unit_based */}
+                    {/* Unit Amount — flat rate shows — */}
                     <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                      {isFlat ? <span className="text-gray-300">—</span> : fmt(row.unit_amount)}
+                      {isFlat ? (
+                        <span className="text-gray-300">—</span>
+                      ) : (
+                        fmt(row.unit_amount)
+                      )}
                     </td>
 
-                    {/* Unit — only unit_based */}
+                    {/* Unit — flat rate shows — */}
                     <td className="px-3 py-2 text-xs whitespace-nowrap">
-                      {isFlat
-                        ? <span className="text-gray-300">—</span>
-                        : (row.unit?.name || fmt(row.unit))}
+                      {isFlat ? (
+                        <span className="text-gray-300">—</span>
+                      ) : (
+                        row.unit?.name || fmt(row.unit)
+                      )}
                     </td>
 
-                    {/* Price per Unit — only unit_based */}
+                    {/* Price per Unit — flat rate shows — */}
                     <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                      {isFlat ? <span className="text-gray-300">—</span> : fmt(row.price_per_unit)}
+                      {isFlat ? (
+                        <span className="text-gray-300">—</span>
+                      ) : (
+                        fmt(row.price_per_unit)
+                      )}
                     </td>
 
+                    {/* Subtotal */}
                     <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
                       {fmtNum(row.subtotal)}
                     </td>
 
-                    <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                      {fmtNum(row.extra_charge)}
+                    {/* Extra Charge — empty for now */}
+                    <td className="px-3 py-2 text-xs text-gray-400 text-right whitespace-nowrap">
+                      —
                     </td>
 
-                    <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                      {fmtNum(row.discount)}
+                    {/* Discount — empty for now */}
+                    <td className="px-3 py-2 text-xs text-gray-400 text-right whitespace-nowrap">
+                      —
                     </td>
 
-                    <td className="px-3 py-2 text-xs font-semibold text-right whitespace-nowrap">
-                      {fmtNum(row.total)}
+                    {/* Total — empty for now */}
+                    <td className="px-3 py-2 text-xs font-semibold text-gray-400 text-right whitespace-nowrap">
+                      —
                     </td>
 
+                    {/* Currency */}
                     <td className="px-3 py-2 text-xs whitespace-nowrap">
                       {formatCurrency(row.currency)}
                     </td>
 
-                    {/* CAT Log — placeholder */}
-                    <td className="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">—</td>
-
-                    <td className="px-3 py-2 text-xs break-words">
-                      {row.file?.file_name || fmt(row.file_name)}
+                    {/* CAT Log — empty for now */}
+                    <td className="px-3 py-2 text-xs text-gray-400 whitespace-nowrap">
+                      —
                     </td>
 
+                    {/* Filename */}
+                    <td className="px-3 py-2 text-xs break-words">
+                      {row.file?.file_name || fmt(row.file?.file_code)}
+                    </td>
+
+                    {/* Note for Vendor */}
                     <td className="px-3 py-2 text-xs text-gray-600 break-words">
                       {fmt(row.note_for_vendor)}
                     </td>
 
+                    {/* Internal Note */}
                     <td className="px-3 py-2 text-xs text-gray-600 break-words">
                       {fmt(row.internal_note)}
                     </td>
 
+                    {/* Issued At — DD/MM/YYYY HH:MM */}
                     <td className="px-3 py-2 text-xs whitespace-nowrap">
-                      {formatDate(row.createdAt) !== "—"
-                        ? formatDate(row.createdAt)
-                        : formatDate(row.issued_at)}
+                      {formatDate(row.createdAt)}
                     </td>
 
+                    {/* Actions */}
                     <td className="px-3 py-2 text-center whitespace-nowrap">
                       <div className="flex justify-center gap-3">
                         <Copy

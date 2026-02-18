@@ -61,16 +61,16 @@ router.get("/receivables/merged", getMergedReceivables);
 // ============ FLAT RATE PAYABLES ============
 router.post("/flat-rate-payables", createFlatRatePayable);
 router.get("/flat-rate-payables", getAllFlatRatePayables);
-router.get("/flat-rate-payables/:id", getFlatRatePayableById);
-router.put("/flat-rate-payables/:id", updateFlatRatePayable);
-router.delete("/flat-rate-payables/:id", deleteFlatRatePayable);
+router.get("/flat-rate-payables/:payableId", getFlatRatePayableById);
+router.put("/flat-rate-payables/:payableId", updateFlatRatePayable);
+router.delete("/flat-rate-payables/:payableId", deleteFlatRatePayable);
 
 // ============ UNIT BASED PAYABLES ============
 router.post("/unit-based-payables", createUnitBasedPayable);
 router.get("/unit-based-payables", getAllUnitBasedPayables);
-router.get("/unit-based-payables/:id", getUnitBasedPayableById);
-router.put("/unit-based-payables/:id", updateUnitBasedPayable);
-router.delete("/unit-based-payables/:id", deleteUnitBasedPayable);
+router.get("/unit-based-payables/:payableId", getUnitBasedPayableById);
+router.put("/unit-based-payables/:payableId", updateUnitBasedPayable);
+router.delete("/unit-based-payables/:payableId", deleteUnitBasedPayable);
 
 // ============ MERGED PAYABLES ============
 router.get("/payables/merged", getMergedPayables);

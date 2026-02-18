@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 const LinkedInputFilesCard = ({ projectId, files = [] }) => {
 
   const formatFileSize = (bytes) => {

@@ -10,7 +10,23 @@ const PayablesToVendorCard = ({ job }) => {
   const [payables, setPayables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [jobMeta, setJobMeta] = useState({ client_id: null, vendor_id: null });
   const dropdownRef = useRef(null);
+
+  /* ── Fetch job meta once (for clone) ── */
+
+  useEffect(() => {
+    if (!jobId) return;
+    api.get(`/jobs/${jobId}`)
+      .then((res) => {
+        const jobData = res.data.data;
+        setJobMeta({
+          client_id: jobData.project?.client_id,
+          vendor_id: jobData.vendor_id,
+        });
+      })
+      .catch((err) => console.error("Failed to fetch job meta", err));
+  }, [jobId]);
 
   /* ── Fetch payables filtered by this job ── */
 
@@ -46,12 +62,12 @@ const PayablesToVendorCard = ({ job }) => {
   /* ── Handlers ── */
 
   const handleEdit = (row) => {
-  if (row.type === "flat_rate") {
-    navigate(`/project/${projectId}/job/${jobId}/edit-flat-rate-receivable/${row.id}`);
-  } else {
-    navigate(`/project/${projectId}/job/${jobId}/edit-unit-based-receivable/${row.id}`);
-  }
-};
+    if (row.type === "flat_rate") {
+      navigate(`/project/${projectId}/job/${jobId}/edit-flat-rate-receivable/${row.id}`);
+    } else {
+      navigate(`/project/${projectId}/job/${jobId}/edit-unit-based-receivable/${row.id}`);
+    }
+  };
 
   const handleDelete = async (row) => {
     const endpoint = row.type === "flat_rate"
@@ -79,7 +95,13 @@ const PayablesToVendorCard = ({ job }) => {
     } = row;
 
     try {
-      const { data } = await api.post(endpoint, { ...payload, project_id: projectId });
+      const { data } = await api.post(endpoint, {
+        ...payload,
+        project_id: Number(projectId),
+        job_id: Number(jobId),
+        client_id: jobMeta.client_id,
+        vendor_id: jobMeta.vendor_id,
+      });
       if (data.success) fetchPayables();
     } catch (err) {
       console.error("Clone failed", err);
@@ -87,9 +109,9 @@ const PayablesToVendorCard = ({ job }) => {
   };
 
   const goTo = (path) => {
-  setOpen(false);
-  navigate(`/project/${projectId}/job/${jobId}/${path}`);
-};
+    setOpen(false);
+    navigate(`/project/${projectId}/job/${jobId}/${path}`);
+  };
 
   return (
     <div className="bg-white shadow rounded-lg space-y-4">
@@ -106,27 +128,27 @@ const PayablesToVendorCard = ({ job }) => {
             New Payable <span className="text-xs">▾</span>
           </button>
           {open && (
-  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
-    <button
-      onClick={() => goTo("new-flat-rate-receivable")}
-      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-    >
-      Flat Rate Payable
-    </button>
-    <button
-      onClick={() => goTo("new-unit-based-receivable")}
-      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-    >
-      Unit Based Payable
-    </button>
-    <button
-      onClick={() => goTo("new-cat-log")}
-      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-    >
-      CAT Log
-    </button>
-  </div>
-)}
+            <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+              <button
+                onClick={() => goTo("new-flat-rate-receivable")}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              >
+                Flat Rate Payable
+              </button>
+              <button
+                onClick={() => goTo("new-unit-based-receivable")}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              >
+                Unit Based Payable
+              </button>
+              <button
+                onClick={() => goTo("new-cat-log")}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+              >
+                CAT Log
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

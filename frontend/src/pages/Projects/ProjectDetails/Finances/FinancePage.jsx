@@ -67,10 +67,10 @@ const FinancePage = () => {
     } = row;
 
     try {
-      const { data } = await api.post(endpoint, { ...payload, project_id: projectId });
+      const { data } = await api.post(endpoint, { ...payload, project_id: Number(projectId) });
       if (data.success) fetchReceivables();
     } catch (err) {
-      console.error("Clone failed", err);
+      console.error("Clone receivable failed", err);
     }
   };
 
@@ -89,13 +89,13 @@ const FinancePage = () => {
   };
 
   const handleEditPayable = (row) => {
-  const jobId = row.job_id;
-  if (row.type === "flat_rate") {
-    navigate(`/project/${projectId}/job/${jobId}/edit-flat-rate-receivable/${row.id}`);
-  } else {
-    navigate(`/project/${projectId}/job/${jobId}/edit-unit-based-receivable/${row.id}`);
-  }
-};
+    const jobId = row.job_id;
+    if (row.type === "flat_rate") {
+      navigate(`/project/${projectId}/job/${jobId}/edit-flat-rate-receivable/${row.id}`);
+    } else {
+      navigate(`/project/${projectId}/job/${jobId}/edit-unit-based-receivable/${row.id}`);
+    }
+  };
 
   const handleDeletePayable = async (row) => {
     const endpoint = row.type === "flat_rate"
@@ -123,10 +123,20 @@ const FinancePage = () => {
     } = row;
 
     try {
-      const { data } = await api.post(endpoint, { ...payload, project_id: projectId });
+      // Fetch job to get client_id and vendor_id
+      const jobRes = await api.get(`/jobs/${row.job_id}`);
+      const jobData = jobRes.data.data;
+
+      const { data } = await api.post(endpoint, {
+        ...payload,
+        project_id: Number(projectId),
+        job_id: row.job_id,
+        client_id: jobData.project?.client_id,
+        vendor_id: jobData.vendor_id,
+      });
       if (data.success) fetchPayables();
     } catch (err) {
-      console.error("Clone failed", err);
+      console.error("Clone payable failed", err);
     }
   };
 
@@ -204,17 +214,22 @@ const FinancePage = () => {
 
         {payablesLoading
           ? <div className="text-sm text-gray-400 py-6 text-center">Loading payables...</div>
-          : <PayablesTable data={payables} onEdit={handleEditPayable} onDelete={handleDeletePayable} onClone={handleClonePayable} />
+          : <PayablesTable
+              data={payables}
+              onEdit={handleEditPayable}
+              onDelete={handleDeletePayable}
+              onClone={handleClonePayable}
+            />
         }
       </section>
 
       {/* ── Summary ── */}
-      <section>
+      {/* <section>
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold text-gray-900">Project Finance Summary</h2>
         </div>
         <FinanceSummaryTable />
-      </section>
+      </section> */}
     </div>
   );
 };
