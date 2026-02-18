@@ -3,7 +3,7 @@ import path from "path";
 import db from "../../models/index.js";
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const { ProjectInputFiles, ProjectDetails } = db;
+const { ProjectInputFiles, ProjectDetails, AdminAuth, AdminDetails } = db;
 
 const PROJECT_INPUT_ALLOWED_FIELDS = [
   "project_id",
@@ -33,7 +33,7 @@ const toProjectFileError = (error) => {
 // Create
 export const createProjectInputFile = async (req, res) => {
   const adminId = req.user.id;
-  const file = req.files?.file?.[0];
+  const file = req.file;;
 
   try {
     const data = pickAllowed(req.body, PROJECT_INPUT_ALLOWED_FIELDS);
@@ -114,6 +114,20 @@ export const getAllProjectInputFiles = async (req, res) => {
 
     const files = await ProjectInputFiles.findAll({
       where: { project_id },
+      include: [
+        {
+          model: db.AdminAuth,
+          as: "uploader",
+          attributes: ["id", "email"],
+          include: [
+            {
+              model: db.AdminDetails,
+              as: "details",
+              attributes: ["first_name", "last_name"],
+            },
+          ],
+        },
+      ],
       order: [["uploaded_at", "DESC"]],
     });
 
@@ -249,6 +263,7 @@ export const updateProjectInputFile = async (req, res) => {
 };
 
 // Delete file
+// Delete file
 export const deleteProjectInputFile = async (req, res) => {
   const adminId = req.user.id;
   const { id } = req.params;
@@ -272,9 +287,29 @@ export const deleteProjectInputFile = async (req, res) => {
       });
     }
 
+    // Find and delete all linked JobInputFiles entries
+    const linkedJobFiles = await db.JobInputFiles.findAll({
+      where: {
+        project_input_file_id: id,
+        is_linked: true,
+      },
+    });
+
+    // Destroy all linked job input file records (no physical file to delete since they're linked)
+    if (linkedJobFiles.length > 0) {
+      await db.JobInputFiles.destroy({
+        where: {
+          project_input_file_id: id,
+          is_linked: true,
+        },
+      });
+    }
+
+    // Now delete the actual physical file
     const filePath = path.resolve(file.file_path);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
+    // Delete the project input file record
     await file.destroy();
 
     return res.status(200).json({

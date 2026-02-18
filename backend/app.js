@@ -41,6 +41,7 @@ import projectStatusHistoryRoutes from "./routes/projectStatusHistoryRoutes.js"
 import projectFileRoutes from "./routes/projectFileRoutes.js";
 
 import jobRoutes from "./routes/jobRoutes.js";
+import jobFileRoutes from "./routes/jobFileRoutes.js";
 
 const app = express();
 
@@ -97,5 +98,6 @@ app.use("/api/project-status-history", projectStatusHistoryRoutes);
 app.use("/api", projectFileRoutes);
 
 app.use("/api", jobRoutes);
+app.use("/api", jobFileRoutes);
 
 export default app;

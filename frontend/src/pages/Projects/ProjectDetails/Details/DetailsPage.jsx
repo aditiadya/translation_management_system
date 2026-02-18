@@ -32,7 +32,7 @@ const DetailsPage = () => {
   }, [id]);
 
   const handleEdit = () => {
-    navigate(`/projects/edit/${id}`);
+    navigate(`/project/edit/${id}`);
   };
 
   const handleDelete = async () => {

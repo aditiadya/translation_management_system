@@ -55,9 +55,15 @@ export default {
       },
 
       uploaded_by: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: {
+        model: "admin_auth",
+        key: "id",
       },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
 
       input_for_jobs: {
         type: Sequelize.STRING,

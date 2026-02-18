@@ -1,11 +1,43 @@
-import { useState } from "react";
-import { Trash2, Download, Upload, Link as LinkIcon } from "lucide-react";
-import UploadOutputFileModal from "./UploadOutputFileModal";
+import { useState, useEffect } from "react";
+import { Trash2, Download } from "lucide-react";
+import UploadProjectOutputModal from "./UploadProjectOutputModal";
+import api from "../../../../utils/axiosInstance";
 
-const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
+const ProjectOutputFilesCard = ({ projectId, files = [], onRefresh }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showUrlModal, setShowUrlModal] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [jobDetailsMap, setJobDetailsMap] = useState({});
+
+  // Fetch job details for all unique job_ids in files
+  useEffect(() => {
+    const uniqueJobIds = [
+      ...new Set(files.map((f) => f.job_id).filter(Boolean)),
+    ];
+    if (uniqueJobIds.length === 0) return;
+
+    const fetchJobDetails = async () => {
+      try {
+        const results = await Promise.all(
+          uniqueJobIds.map((jobId) =>
+            api
+              .get(`/jobs/${jobId}`, { withCredentials: true })
+              .then((res) => ({ jobId, data: res.data.data }))
+              .catch(() => ({ jobId, data: null })),
+          ),
+        );
+
+        const map = {};
+        results.forEach(({ jobId, data }) => {
+          if (data) map[jobId] = data;
+        });
+        setJobDetailsMap(map);
+      } catch (error) {
+        console.error("Failed to fetch job details:", error);
+      }
+    };
+
+    fetchJobDetails();
+  }, [files]);
 
   const formatFileSize = (bytes) => {
     if (!bytes) return "—";
@@ -30,16 +62,10 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
   const handleDownloadSingle = async (file) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(
-          file.file_path
-        )}`,
-        {
-          credentials: "include",
-        }
+        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(file.file_path)}`,
+        { credentials: "include" },
       );
-
       if (!response.ok) throw new Error("Download failed");
-
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -56,27 +82,19 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
   };
 
   const handleDownloadZip = async () => {
-    if (files.length === 0) {
-      alert("No files to download");
-      return;
-    }
-
+    if (files.length === 0) return alert("No files to download");
     try {
       setDownloading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/job-output-files/download-zip?job_id=${jobId}`,
-        {
-          credentials: "include",
-        }
+        `${import.meta.env.VITE_API_URL}/project-output-files/download-zip?project_id=${projectId}`,
+        { credentials: "include" },
       );
-
       if (!response.ok) throw new Error("Download failed");
-
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `job-${jobId}-output-files.zip`;
+      a.download = `project-${projectId}-output-files.zip`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -90,25 +108,21 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
   };
 
   const handleDelete = async (file) => {
-    if (!window.confirm(`Are you sure you want to delete "${file.original_file_name}"?`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to remove "${file.original_file_name}" from project output?`,
+      )
+    )
       return;
-    }
-
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/job-output-files/${file.id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
+        `${import.meta.env.VITE_API_URL}/project-output-files/${file.id}`,
+        { method: "DELETE", credentials: "include" },
       );
-
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || "Failed to delete file");
       }
-
-      alert("File deleted successfully");
       onRefresh();
     } catch (error) {
       console.error("Delete error:", error);
@@ -116,35 +130,32 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
     }
   };
 
-  const handleAddToProjectOutput = async (file) => {
-    if (file.is_project_output) {
-      alert("This file is already added to project output");
-      return;
-    }
+  const getJobField = (jobId, field) => {
+    const job = jobDetailsMap[jobId];
+    if (!job) return "—";
 
-    if (!window.confirm(`Add "${file.original_file_name}" to project output?`)) {
-      return;
-    }
+    switch (field) {
+      case "service":
+        return typeof job.service === "object"
+          ? job.service?.name || "—"
+          : job.service_name || job.service || "—";
 
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/job-output-files/${file.id}/add-to-project`,
-        {
-          method: "POST",
-          credentials: "include",
+      case "lang_pair":
+        return job.languagePair?.sourceLanguage?.name &&
+          job.languagePair?.targetLanguage?.name
+          ? `${job.languagePair.sourceLanguage.name} → ${job.languagePair.targetLanguage.name}`
+          : "—";
+
+      case "vendor":
+        if (!job.vendor) return "—";
+        if (job.vendor.type === "Company") {
+          return job.vendor.company_name || "—";
         }
-      );
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Failed to add to project output");
-      }
-
-      alert("File added to project output successfully");
-      onRefresh();
-    } catch (error) {
-      console.error("Add to project output error:", error);
-      alert(error.message || "Failed to add to project output");
+        const firstName = job.vendor.primary_users?.first_name || "";
+        const lastName = job.vendor.primary_users?.last_name || "";
+        return `${firstName} ${lastName}`.trim() || "—";
+      default:
+        return "—";
     }
   };
 
@@ -154,33 +165,28 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
         {/* Header */}
         <div className="flex justify-between items-center pt-6 pl-6 pr-6">
           <h3 className="text-base font-semibold text-gray-800">
-            Output files ({files.length})
+            Project Output Files ({files.length})
           </h3>
-
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setShowUploadModal(true)}
               className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
             >
-             
               Upload
             </button>
-
             <button
-              
-              className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
+              onClick={() => alert("Add URL feature coming soon!")}
+              className="flex items-center gap-2 bg-gray-600 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-700"
             >
-              
               Add URL
             </button>
-
             <button
               onClick={handleDownloadZip}
               disabled={downloading || files.length === 0}
               className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-             
-              {downloading ? "Downloading..." : "Download as zip"}
+              <Download className="w-4 h-4" />
+              {downloading ? "Downloading..." : "Download as ZIP"}
             </button>
           </div>
         </div>
@@ -190,32 +196,35 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
           <div className="max-h-[200px] overflow-y-auto">
             <table className="w-full table-auto border-collapse">
               <thead>
-                <tr className="bg-gray-50 text-black-600 text-[11px] tracking-widest border-b">
+                <tr className="bg-gray-50 text-gray-600 text-[11px] tracking-widest border-b">
                   {[
                     "File #",
                     "Filename",
                     "Size",
                     "Uploaded at",
                     "Uploaded by",
-                    "Input for jobs",
-                    "Is project output",
-                    "Actions",
+                    "Job Code",
+                    "Job Service",
+                    "Job Language Pair",
+                    "Job Vendor",
                   ].map((h) => (
-                    <th key={h} className="px-3 py-2 text-center font-bold pl-2 pr-2">
+                    <th
+                      key={h}
+                      className="px-3 py-2 text-center font-bold pl-5 pr-5"
+                    >
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-
               <tbody>
                 {files.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={10}
                       className="py-6 text-center text-gray-500 text-xs"
                     >
-                      No output files found.
+                      No project output files found.
                     </td>
                   </tr>
                 ) : (
@@ -224,15 +233,15 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
                       key={file.id || index}
                       className={
                         index % 2 === 0
-                          ? "bg-gray-50 hover:bg-gray-100"
-                          : "hover:bg-gray-100"
+                          ? "bg-white hover:bg-gray-50"
+                          : "bg-gray-50 hover:bg-gray-100"
                       }
                     >
-                      <td className="px-3 py-2 text-xs whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs text-center whitespace-nowrap">
                         {file.file_code || `#${index + 1}`}
                       </td>
 
-                      <td className="px-3 py-2 text-xs break-words">
+                      <td className="px-3 py-2 text-xs text-center break-words">
                         <button
                           onClick={() => handleDownloadSingle(file)}
                           className="text-blue-600 hover:text-blue-800 underline"
@@ -241,46 +250,39 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
                         </button>
                       </td>
 
-                      <td className="px-3 py-2 text-xs whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs text-center whitespace-nowrap">
                         {formatFileSize(file.file_size)}
                       </td>
 
-                      <td className="px-3 py-2 text-xs whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs text-center whitespace-nowrap">
                         {formatDateTime(file.uploaded_at)}
                       </td>
 
-                      <td className="px-3 py-2 text-xs whitespace-nowrap">
-                        {file.adminUploader?.details
-  ? `${file.adminUploader.details.first_name} ${file.adminUploader.details.last_name}`
-  : file.vendorUploader
-  ? `${file.vendorUploader.company_name || "Vendor"}`
-  : "—"}
+                      <td className="px-3 py-2 text-xs text-center whitespace-nowrap">
+                        {file.uploader?.details
+                          ? `${file.uploader.details.first_name} ${file.uploader.details.last_name}`
+                          : file.uploader?.email || "—"}
                       </td>
 
-                      <td className="px-3 py-2 text-xs whitespace-nowrap">
-                        {file.input_for_job || "—"}
+                      {/* Job Code — blank for now */}
+                      <td className="px-3 py-2 text-xs text-center whitespace-nowrap">
+                        —
                       </td>
 
-                      <td className="px-3 py-2 text-xs whitespace-nowrap">
-                        {file.is_project_output ? (
-                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">
-                            Yes
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleAddToProjectOutput(file)}
-                            className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium hover:bg-blue-200"
-                          >
-                            Add
-                          </button>
-                        )}
+                      <td className="px-3 py-2 text-xs text-center whitespace-nowrap">
+                        {file.job_id
+                          ? getJobField(file.job_id, "service")
+                          : "—"}
                       </td>
 
-                      <td className="px-3 py-2 text-center whitespace-nowrap">
-                        <Trash2
-                          className="w-4 h-4 text-red-500 hover:text-red-600 cursor-pointer mx-auto"
-                          onClick={() => handleDelete(file)}
-                        />
+                      <td className="px-3 py-2 text-xs text-center whitespace-nowrap">
+                        {file.job_id
+                          ? getJobField(file.job_id, "lang_pair")
+                          : "—"}
+                      </td>
+
+                      <td className="px-3 py-2 text-xs text-center whitespace-nowrap">
+                        {file.job_id ? getJobField(file.job_id, "vendor") : "—"}
                       </td>
                     </tr>
                   ))
@@ -291,10 +293,9 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
         </div>
       </div>
 
-      {/* Upload Modal */}
       {showUploadModal && (
-        <UploadOutputFileModal
-          jobId={jobId}
+        <UploadProjectOutputModal
+          projectId={projectId}
           onClose={() => setShowUploadModal(false)}
           onSuccess={() => {
             setShowUploadModal(false);
@@ -302,20 +303,8 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
           }}
         />
       )}
-
-      {/* Add URL Modal
-      {showUrlModal && (
-        <AddOutputUrlModal
-          jobId={jobId}
-          onClose={() => setShowUrlModal(false)}
-          onSuccess={() => {
-            setShowUrlModal(false);
-            onRefresh();
-          }}
-        />
-      )} */}
     </>
   );
 };
 
-export default OutputFilesCard;
+export default ProjectOutputFilesCard;

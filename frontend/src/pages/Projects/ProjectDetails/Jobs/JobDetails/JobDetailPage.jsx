@@ -20,6 +20,8 @@ const JobDetailPage = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [inputFiles, setInputFiles] = useState([]);
+  const [outputFiles, setOutputFiles] = useState([]);
 
   // Fetch job details
   useEffect(() => {
@@ -41,6 +43,36 @@ const JobDetailPage = () => {
     if (jobId) {
       fetchJobDetails();
     }
+  }, [jobId]);
+
+  const fetchJobInputFiles = async () => {
+    try {
+      const response = await api.get(`/job-input-files?job_id=${jobId}`, {
+        withCredentials: true,
+      });
+      setInputFiles(response.data.data || []);
+    } catch (error) {
+      console.error("Failed to fetch job input files:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobInputFiles();
+  }, [jobId]);
+
+  const fetchJobOutputFiles = async () => {
+    try {
+      const response = await api.get(`/job-output-files?job_id=${jobId}`, {
+        withCredentials: true,
+      });
+      setOutputFiles(response.data.data || []);
+    } catch (error) {
+      console.error("Failed to fetch job output files:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobOutputFiles();
   }, [jobId]);
 
   // Refresh job data
@@ -196,13 +228,21 @@ const JobDetailPage = () => {
 
       <PayablesToVendorCard job={job} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-6">
-          <LinkedInputFilesCard job={job} />
+          <LinkedInputFilesCard
+        jobId={jobId}
+        files={inputFiles}
+        onRefresh={fetchJobInputFiles}
+      />
         </div>
 
         <div className="lg:col-span-6">
-          <OutputFilesCard job={job} />
+          <OutputFilesCard
+            jobId={jobId}
+            files={outputFiles}
+            onRefresh={fetchJobOutputFiles}
+          />
         </div>
       </div>
 

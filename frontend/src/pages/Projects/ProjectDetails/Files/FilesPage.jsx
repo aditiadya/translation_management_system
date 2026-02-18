@@ -1,103 +1,146 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import api from "../../../../utils/axiosInstance";
-import FilesTable from "./FilesTable";
+import ProjectInputFilesCard from "./ProjectInputFilesCard";
 import UploadFilePage from "./UploadFilePage";
-import { FaPlus, FaLink } from "react-icons/fa";
 import BackButton from "../../../../components/Button/BackButton";
+import LinkedInputFilesCard from "./JobLinkedInputFilesCard";
+import OutputFilesCard from "./JobOutputFilesCard";
+import ProjectOutputFilesCard from "./ProjectOutputFilesCard";
 
-const FilesPage = ({ projectId }) => {
-  const [files, setFiles] = useState([]);
+const FilesPage = () => {
+  const { id: projectId } = useParams();
+
+  const [projectInputFiles, setProjectInputFiles] = useState([]);
+  const [jobInputFiles, setJobInputFiles] = useState([]);
+  const [jobOutputFiles, setJobOutputFiles] = useState([]);
+  const [projectOutputFiles, setProjectOutputFiles] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
-  const fetchFiles = async () => {
+  const fetchProjectInputFiles = async () => {
     if (!projectId) return;
-
     try {
       setLoading(true);
-
-      const res = await api.get(
-        `/project-input-files?project_id=${projectId}`,
-        { withCredentials: true }
-      );
-
-      setFiles(res.data.data || []);
+      const res = await api.get(`/project-input-files?project_id=${projectId}`, { withCredentials: true });
+      setProjectInputFiles(res.data.data || []);
     } catch (error) {
-      console.error("Error fetching files:", error);
-      alert("Failed to fetch files");
+      console.error("Error fetching project input files:", error);
+      alert("Failed to fetch project input files");
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchJobInputFiles = async () => {
+    if (!projectId) return;
+    try {
+      const res = await api.get(`/job-input-files?project_id=${projectId}`, { withCredentials: true });
+      setJobInputFiles(res.data.data || []);
+    } catch (error) {
+      console.error("Error fetching job input files:", error);
+    }
+  };
+
+  const fetchJobOutputFiles = async () => {
+    if (!projectId) return;
+    try {
+      const res = await api.get(`/job-output-files?project_id=${projectId}`, { withCredentials: true });
+      setJobOutputFiles(res.data.data || []);
+    } catch (error) {
+      console.error("Error fetching job output files:", error);
+    }
+  };
+
+  const fetchProjectOutputFiles = async () => {
+    if (!projectId) return;
+    try {
+      const res = await api.get(`/project-output-files?project_id=${projectId}`, { withCredentials: true });
+      setProjectOutputFiles(res.data.data || []);
+    } catch (error) {
+      console.error("Error fetching project output files:", error);
+    }
+  };
+
   useEffect(() => {
-    fetchFiles();
+    if (projectId) {
+      fetchProjectInputFiles();
+      fetchJobInputFiles();
+      fetchJobOutputFiles();
+      fetchProjectOutputFiles();
+    }
   }, [projectId]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this file?")) return;
-
     try {
-      await api.delete(`/project-input-files/${id}`, {
-        withCredentials: true,
-      });
-
-      setFiles((prev) => prev.filter((f) => f.id !== id));
+      await api.delete(`/project-input-files/${id}`, { withCredentials: true });
+      setProjectInputFiles((prev) => prev.filter((f) => f.id !== id));
+      await fetchJobInputFiles();
+      alert("File deleted successfully");
     } catch (error) {
       console.error("Delete failed:", error);
-      alert("Failed to delete file");
+      alert(error.response?.data?.message || "Failed to delete file");
     }
   };
 
-  const handleUploadSuccess = () => {
-    setShowUploadModal(false);
-    fetchFiles();
-  };
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-5">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <BackButton to="/projects" />
-          <h2 className="text-2xl font-bold text-gray-900">Project Input Files</h2>
-        </div>
-
-        <div className="flex space-x-4">
-          <button
-            onClick={() => setShowUploadModal(true)}
-            className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded shadow"
-          >
-            <FaPlus className="mr-2" /> Upload File
-          </button>
-
-          <button
-            onClick={() => alert("Add URL feature coming soon!")}
-            className="flex items-center bg-gray-600 hover:bg-gray-700 text-white font-medium px-6 py-2 rounded shadow"
-          >
-            <FaLink className="mr-2" /> Add URL
-          </button>
+          <BackButton to={`/project/${projectId}`} />
+          <h2 className="text-2xl font-bold text-gray-900">Project Files</h2>
         </div>
       </div>
 
-      <div className="overflow-x-auto shadow rounded-lg bg-white">
-        {loading ? (
-          <div className="text-center text-gray-500 py-6">
-            Loading files...
-          </div>
-        ) : files.length === 0 ? (
-          <div className="text-center text-gray-500 py-6">
-            No files found.
-          </div>
-        ) : (
-          <FilesTable files={files} onDelete={handleDelete} />
-        )}
+      {/* Project Input Files */}
+      <ProjectInputFilesCard
+        files={projectInputFiles}
+        loading={loading}
+        onDelete={handleDelete}
+        onUpload={() => setShowUploadModal(true)}
+      />
+
+      {/* Job Files Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-5">
+          <LinkedInputFilesCard
+            projectId={projectId}
+            files={jobInputFiles}
+          />
+        </div>
+        <div className="lg:col-span-7">
+          <OutputFilesCard
+            projectId={projectId}
+            files={jobOutputFiles}
+            onRefresh={() => {
+              fetchJobOutputFiles();
+              fetchProjectOutputFiles();
+            }}
+          />
+        </div>
       </div>
 
+      {/* Project Output Files */}
+      <div className="w-full">
+        <ProjectOutputFilesCard
+          projectId={projectId}
+          files={projectOutputFiles}
+          onRefresh={fetchProjectOutputFiles}
+        />
+      </div>
+
+      {/* Upload Modal */}
       {showUploadModal && (
         <UploadFilePage
           projectId={projectId}
           onClose={() => setShowUploadModal(false)}
-          onSuccess={handleUploadSuccess}
+          onSuccess={() => {
+            setShowUploadModal(false);
+            fetchProjectInputFiles();
+          }}
         />
       )}
     </div>

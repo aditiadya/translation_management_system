@@ -13,6 +13,7 @@ const {
   VendorContactPersons,
   AdminService,
   AdminLanguagePair,
+  AdminSpecialization,
   ManagerDetails,
   Language,
 } = db;
@@ -91,6 +92,11 @@ const getJobWithAssociations = (transaction = null) => {
         as: "project",
         attributes: ["id", "project_name", "client_id"],
         include: [
+            {
+            model: AdminSpecialization,
+            as: "specialization",
+            attributes: ["id", "name", "active_flag"],
+          },
           {
             model: ClientDetails,
             as: "client",
@@ -113,6 +119,7 @@ const getJobWithAssociations = (transaction = null) => {
             as: "secondaryManager",
             attributes: ["id", "first_name", "last_name"],
           },
+          
         ],
       },
       {

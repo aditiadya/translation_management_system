@@ -2,8 +2,8 @@ import { Pencil, Trash2, Copy } from "lucide-react";
 
 const PayablesToVendorCard = ({ data = [] }) => {
   return (
-    <div className="bg-white shadow rounded-lg p-6 space-y-4">
-        <div className="flex justify-between items-start">
+    <div className="bg-white shadow rounded-lg space-y-4">
+        <div className="flex justify-between items-start pt-6 pl-6 pr-6">
         <h3 className="text-base font-semibold text-gray-800">
           Payables To Vendors
         </h3>

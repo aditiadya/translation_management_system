@@ -117,7 +117,7 @@ const JobDetailsInfoCard = ({
             )
           }
         />
-        <Row label="Note for vendor" value={job?.note_for_vendor} />
+        <Row label="Instructions" value={job?.instructions} />
       </Section>
 
       {/* Other details */}

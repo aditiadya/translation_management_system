@@ -4,6 +4,7 @@ import BackButton from "../../../../components/Button/BackButton";
 
 const ProjectDetailsCard = ({ project, onEdit, onDelete }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPairs, setShowPairs] = useState(false);
 
   const handleConfirmDelete = () => {
     setIsModalOpen(false);

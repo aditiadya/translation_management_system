@@ -120,9 +120,9 @@ const AssignmentStatusCard = ({
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-6 space-y-6">
+    <div className="bg-white shadow rounded-lg  space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start pt-6 pl-6 pr-6">
         <h3 className="text-base font-semibold text-gray-800">
           Job Assignment & Status
         </h3>

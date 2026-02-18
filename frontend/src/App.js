@@ -44,6 +44,7 @@ import CreateUnitBasedReceivablePage from "./pages/Projects/ProjectDetails/Finan
 import CreateJobsPage from "./pages/Projects/ProjectDetails/Jobs/CreateJobsPage";
 import JobsPage from "./pages/Jobs/JobsPage";
 import JobDetailPage from "./pages/Projects/ProjectDetails/Jobs/JobDetails/JobDetailPage"
+import EditProjectDetails from "./pages/Projects/ProjectDetails/Details/EditProjectDetails"
 
 const App = () => (
   <AuthProvider>
@@ -266,6 +267,8 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+
+          <Route path="/project/edit/:id" element={<EditProjectDetails />} />
           
           <Route path="/project/:id/new-flat-rate-receivable" element={<CreateFlatRateReceivablePage />} />
           <Route path="/project/:id/new-unit-based-receivable" element={<CreateUnitBasedReceivablePage />} />

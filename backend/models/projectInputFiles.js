@@ -48,9 +48,14 @@ const ProjectInputFiles = sequelize.define(
       allowNull: true,
     },
     uploaded_by: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
+  type: DataTypes.INTEGER,
+  allowNull: true,
+  references: {         
+    model: "admin_auth",
+    key: "id",
+  },
+  onDelete: "SET NULL", 
+},
     input_for_jobs: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -78,7 +83,7 @@ ProjectInputFiles.beforeValidate(async (file, options) => {
   let next = 1;
 
   if (lastFile?.file_code) {
-    const numeric = parseInt(lastFile.file_code.substring(1));
+    const numeric = parseInt(lastFile.file_code.replace("PI", ""));
     if (!Number.isNaN(numeric)) next = numeric + 1;
   }
 
@@ -91,6 +96,11 @@ ProjectInputFiles.associate = (models) => {
     as: "project",
     onDelete: "CASCADE",
   });
+
+  ProjectInputFiles.belongsTo(models.AdminAuth, {
+  foreignKey: "uploaded_by",
+  as: "uploader",
+});
 };
 
 export default ProjectInputFiles;

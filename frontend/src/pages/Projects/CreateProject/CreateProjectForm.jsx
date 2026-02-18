@@ -40,6 +40,7 @@ const CreateProjectForm = () => {
   const [languagePairs, setLanguagePairs] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [managers, setManagers] = useState([]);
+  const [showPairs, setShowPairs] = useState(false);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -322,43 +323,51 @@ const CreateProjectForm = () => {
           )}
 
           {form.language_pair_ids.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              {form.language_pair_ids.map((id) => {
-                const pair = languagePairs.find((lp) => lp.id === id);
-                if (!pair) return null;
+  <div className="mt-3 border rounded-lg bg-gray-50">
+    <button
+      type="button"
+      onClick={() => setShowPairs((prev) => !prev)}
+      className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg"
+    >
+      <span>{form.language_pair_ids.length} language pair{form.language_pair_ids.length > 1 ? "s" : ""} selected</span>
+      <span className="text-gray-400">{showPairs ? "▲" : "▼"}</span>
+    </button>
 
-                return (
-                  <span
-                    key={id}
-                    className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium"
-                  >
-                    {pair.sourceLanguage?.name} → {pair.targetLanguage?.name}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          language_pair_ids: prev.language_pair_ids.filter(
-                            (pid) => pid !== id
-                          ),
-                        }))
-                      }
-                      className="text-red-500 hover:text-red-700 font-bold text-lg leading-none"
-                      aria-label="Remove language pair"
-                    >
-                      ×
-                    </button>
-                  </span>
-                );
-              })}
-            </div>
-          )}
+    {showPairs && (
+      <div className="flex flex-wrap gap-2 px-3 pb-3">
+        {form.language_pair_ids.map((id) => {
+          const pair = languagePairs.find((lp) => lp.id === id);
+          if (!pair) return null;
+          return (
+            <span
+              key={id}
+              className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium"
+            >
+              {pair.sourceLanguage?.name} → {pair.targetLanguage?.name}
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((prev) => ({
+                    ...prev,
+                    language_pair_ids: prev.language_pair_ids.filter(
+                      (pid) => pid !== id
+                    ),
+                  }))
+                }
+                className="text-red-500 hover:text-red-700 font-bold text-lg leading-none"
+                aria-label="Remove language pair"
+              >
+                ×
+              </button>
+            </span>
+          );
+        })}
+      </div>
+    )}
+  </div>
+)}
 
-          {form.language_pair_ids.length > 0 && (
-            <p className="text-sm text-gray-500 mt-2">
-              {form.language_pair_ids.length} language pair{form.language_pair_ids.length > 1 ? 's' : ''} selected
-            </p>
-          )}
+         
         </div>
 
         <FormSelect
