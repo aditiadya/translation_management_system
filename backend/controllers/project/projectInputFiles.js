@@ -3,7 +3,7 @@ import path from "path";
 import db from "../../models/index.js";
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
-const { ProjectInputFiles, ProjectDetails, AdminAuth, AdminDetails } = db;
+const { ProjectInputFiles, ProjectDetails, AdminAuth, AdminDetails, ClientDetails } = db;
 
 const PROJECT_INPUT_ALLOWED_FIELDS = [
   "project_id",
@@ -263,7 +263,6 @@ export const updateProjectInputFile = async (req, res) => {
 };
 
 // Delete file
-// Delete file
 export const deleteProjectInputFile = async (req, res) => {
   const adminId = req.user.id;
   const { id } = req.params;
@@ -318,6 +317,84 @@ export const deleteProjectInputFile = async (req, res) => {
     });
   } catch (error) {
     console.error("DELETE PROJECT INPUT FILE ERROR:", error);
+    const err = toProjectFileError(error);
+    return res.status(err.code).json(err.body);
+  }
+};
+
+// Get all input files for a specific client (across all their projects)
+export const getClientInputFiles = async (req, res) => {
+  const adminId = req.user.id;
+  const { id: clientId } = req.params;
+
+  try {
+    // Verify client ownership
+    const { ClientDetails } = db;
+    
+    const client = await ClientDetails.findOne({
+      where: { id: clientId, admin_id: adminId },
+      attributes: ["id", "company_name"],
+    });
+
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "Client not found or access denied",
+      });
+    }
+
+    // Get all projects for this client
+    const projects = await ProjectDetails.findAll({
+      where: { 
+        client_id: clientId,
+        admin_id: adminId 
+      },
+      attributes: ["id", "project_name"],
+    });
+
+    const projectIds = projects.map(p => p.id);
+
+    if (projectIds.length === 0) {
+      return res.json({
+        success: true,
+        data: [],
+        message: "No projects found for this client",
+      });
+    }
+
+    // Get all input files for these projects
+    const files = await ProjectInputFiles.findAll({
+      where: { 
+        project_id: projectIds 
+      },
+      include: [
+        {
+          model: ProjectDetails,
+          as: "project",
+          attributes: ["id", "project_name"],
+        }
+      ],
+      attributes: [
+        "id",
+        "project_id",
+        "original_file_name",
+        "file_name",
+        "file_code",
+        "category",
+        "file_size",
+        // "file_type",  ❌ REMOVE THIS LINE
+        "uploaded_at",
+      ],
+      order: [["uploaded_at", "DESC"]],
+    });
+
+    return res.json({
+      success: true,
+      count: files.length,
+      data: files,
+    });
+  } catch (error) {
+    console.error("GET CLIENT INPUT FILES ERROR:", error);
     const err = toProjectFileError(error);
     return res.status(err.code).json(err.body);
   }

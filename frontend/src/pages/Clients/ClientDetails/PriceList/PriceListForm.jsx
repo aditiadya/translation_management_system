@@ -38,7 +38,7 @@ const PriceListForm = ({ clientId, editingItem, onSave, onCancel }) => {
   const fetchDropdowns = async () => {
     try {
       const [dataRes, cur, unt] = await Promise.all([
-        api.get(`/client-price-list/${clientId}/price-list`),
+        api.get(`/client-price-list/client/${clientId}/price-list`),
         api.get(`/admin-currencies`),
         api.get(`/admin-units`),
       ]);

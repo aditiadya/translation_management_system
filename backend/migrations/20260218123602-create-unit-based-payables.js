@@ -1,5 +1,5 @@
 export async function up(queryInterface, Sequelize) {
-  await queryInterface.createTable("flat_rate_receivables", {
+  await queryInterface.createTable("unit_based_payables", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -18,19 +18,36 @@ export async function up(queryInterface, Sequelize) {
       onDelete: "RESTRICT",
     },
 
-    po_number: {
-      type: Sequelize.STRING,
-      allowNull: true,
+    job_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: {
+        model: "job_details",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
 
-    service_id: {
-      type: Sequelize.INTEGER,
+    unit_amount: {
+      type: Sequelize.DECIMAL(12, 3),
       allowNull: false,
     },
 
-    language_pair_id: {
+    unit_id: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: false,
+      references: {
+        model: "admin_units",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
+    },
+
+    price_per_unit: {
+      type: Sequelize.DECIMAL(12, 2),
+      allowNull: false,
     },
 
     subtotal: {
@@ -42,17 +59,27 @@ export async function up(queryInterface, Sequelize) {
     currency_id: {
       type: Sequelize.INTEGER,
       allowNull: false,
+      references: {
+        model: "admin_currencies",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
 
     file_id: {
       type: Sequelize.INTEGER,
       allowNull: true,
       references: {
-        model: "project_input_file",
+        model: "job_input_files",
         key: "id",
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+
+    note_for_vendor: {
+      type: Sequelize.TEXT,
+      allowNull: true,
     },
 
     internal_note: {
@@ -63,17 +90,15 @@ export async function up(queryInterface, Sequelize) {
     createdAt: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.fn("NOW"),
     },
 
     updatedAt: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.fn("NOW"),
     },
   });
 }
 
-export async function down(queryInterface) {
-  await queryInterface.dropTable("flat_rate_receivables");
+export async function down(queryInterface, Sequelize) {
+  await queryInterface.dropTable("unit_based_payables");
 }

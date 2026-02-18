@@ -20,7 +20,7 @@ export async function up(queryInterface, Sequelize) {
 
     po_number: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 
     service_id: {
@@ -30,7 +30,7 @@ export async function up(queryInterface, Sequelize) {
 
     language_pair_id: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
 
     unit_amount: {

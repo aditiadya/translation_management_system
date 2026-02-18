@@ -45,6 +45,15 @@ import CreateJobsPage from "./pages/Projects/ProjectDetails/Jobs/CreateJobsPage"
 import JobsPage from "./pages/Jobs/JobsPage";
 import JobDetailPage from "./pages/Projects/ProjectDetails/Jobs/JobDetails/JobDetailPage"
 import EditProjectDetails from "./pages/Projects/ProjectDetails/Details/EditProjectDetails"
+import EditFlatRateReceivable from "./pages/Projects/ProjectDetails/Finances/EditFlatRateReceivable";
+import EditUnitBasedReceivablePage from "./pages/Projects/ProjectDetails/Finances/EditUnitBasedReceivable";
+
+import CreateFlatRatePayablePage from "./pages/Projects/ProjectDetails/Jobs/PayableToVendors/CreateFlatRatePayablePage"
+import UnitBasedPayablePage from "./pages/Projects/ProjectDetails/Jobs/PayableToVendors/UniBasedPayablePage"
+import EditFlatRatePayable from "./pages/Projects/ProjectDetails/Jobs/PayableToVendors/EditFlatRatePayable";
+import EditUnitBasedPayablePage from "./pages/Projects/ProjectDetails/Jobs/PayableToVendors/EditUnitBasedPayable";
+
+
 
 const App = () => (
   <AuthProvider>
@@ -273,6 +282,16 @@ const App = () => (
           <Route path="/project/:id/new-flat-rate-receivable" element={<CreateFlatRateReceivablePage />} />
           <Route path="/project/:id/new-unit-based-receivable" element={<CreateUnitBasedReceivablePage />} />
           {/* <Route path="/project/:id/new-cat-log" element={<CreateCATLogPage />} /> */}
+          <Route path="/project/:id/edit-flat-rate-receivable/:receivableId" element={<EditFlatRateReceivable />} />
+          <Route path="/project/:id/edit-unit-based-receivable/:receivableId" element={<EditUnitBasedReceivablePage />} />
+
+
+          <Route path="/project/:id/job/:jobId/new-flat-rate-receivable" element={<CreateFlatRatePayablePage />} />
+          <Route path="/project/:id/job/:jobId/new-unit-based-receivable" element={<UnitBasedPayablePage />} />
+          {/* <Route path="/project/:id/job/:jobId/:id/new-cat-log" element={<CreateCATLogPage />} /> */}
+          <Route path="/project/:id/job/:jobId/edit-flat-rate-receivable/:payableId" element={<EditFlatRatePayable />} />
+          <Route path="/project/:id/job/:jobId/edit-unit-based-receivable/:payableId" element={<EditUnitBasedPayablePage />} />
+
 
           <Route path="/project/:id/create-job" element={<CreateJobsPage />} />
 

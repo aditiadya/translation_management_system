@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 
-const UnitBasedReceivables = sequelize.define(
-  "UnitBasedReceivables",
+const UnitBasedPayables = sequelize.define(
+  "UnitBasedPayables",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -19,17 +19,15 @@ const UnitBasedReceivables = sequelize.define(
       onUpdate: "CASCADE",
       onDelete: "RESTRICT",
     },
-    po_number: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    service_id: {
+    job_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    },
-    language_pair_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+      references: {
+        model: "job_details",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
     unit_amount: {
       type: DataTypes.DECIMAL(12, 3),
@@ -57,16 +55,25 @@ const UnitBasedReceivables = sequelize.define(
     currency_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "admin_currencies",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     file_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: "project_input_file",
+        model: "job_input_files",
         key: "id",
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+    note_for_vendor: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     internal_note: {
       type: DataTypes.TEXT,
@@ -74,43 +81,37 @@ const UnitBasedReceivables = sequelize.define(
     },
   },
   {
-    tableName: "unit_based_receivables",
+    tableName: "unit_based_payables",
     timestamps: true,
     underscored: false,
   }
 );
 
-// ADD THIS ASSOCIATE METHOD
-UnitBasedReceivables.associate = (models) => {
-  UnitBasedReceivables.belongsTo(models.ProjectDetails, {
+UnitBasedPayables.associate = (models) => {
+  UnitBasedPayables.belongsTo(models.ProjectDetails, {
     foreignKey: "project_id",
     as: "project",
   });
 
-  UnitBasedReceivables.belongsTo(models.AdminService, {
-    foreignKey: "service_id",
-    as: "service",
+  UnitBasedPayables.belongsTo(models.JobDetails, {
+    foreignKey: "job_id",
+    as: "job",
   });
 
-  UnitBasedReceivables.belongsTo(models.AdminLanguagePair, {
-    foreignKey: "language_pair_id",
-    as: "languagePair",
-  });
-
-  UnitBasedReceivables.belongsTo(models.AdminUnits, {
+  UnitBasedPayables.belongsTo(models.AdminUnits, {
     foreignKey: "unit_id",
     as: "unit",
   });
 
-  UnitBasedReceivables.belongsTo(models.AdminCurrency, {
+  UnitBasedPayables.belongsTo(models.AdminCurrency, {
     foreignKey: "currency_id",
     as: "currency",
   });
 
-  UnitBasedReceivables.belongsTo(models.ProjectInputFiles, {
+  UnitBasedPayables.belongsTo(models.JobInputFiles, {
     foreignKey: "file_id",
     as: "file",
   });
 };
 
-export default UnitBasedReceivables;
+export default UnitBasedPayables;

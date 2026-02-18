@@ -39,6 +39,7 @@ import vendorPriceListRoutes from "./routes/vendorPriceListRoutes.js"
 import projectDetailsRoutes from "./routes/projectDetailsRoutes.js"
 import projectStatusHistoryRoutes from "./routes/projectStatusHistoryRoutes.js"
 import projectFileRoutes from "./routes/projectFileRoutes.js";
+import projectFinancesRoutes from "./routes/projectFinances.js";
 
 import jobRoutes from "./routes/jobRoutes.js";
 import jobFileRoutes from "./routes/jobFileRoutes.js";
@@ -96,6 +97,8 @@ app.use("/api/vendor-price-list", vendorPriceListRoutes);
 app.use("/api/projects", projectDetailsRoutes);
 app.use("/api/project-status-history", projectStatusHistoryRoutes);
 app.use("/api", projectFileRoutes);
+app.use("/api/project-finances", projectFinancesRoutes);
+
 
 app.use("/api", jobRoutes);
 app.use("/api", jobFileRoutes);

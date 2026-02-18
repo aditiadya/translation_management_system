@@ -1,5 +1,5 @@
 export async function up(queryInterface, Sequelize) {
-  await queryInterface.createTable("flat_rate_receivables", {
+  await queryInterface.createTable("flat_rate_payables", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -18,19 +18,25 @@ export async function up(queryInterface, Sequelize) {
       onDelete: "RESTRICT",
     },
 
-    po_number: {
-      type: Sequelize.STRING,
-      allowNull: true,
-    },
-
-    service_id: {
+    job_id: {
       type: Sequelize.INTEGER,
       allowNull: false,
+      references: {
+        model: "job_details",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "RESTRICT",
     },
 
-    language_pair_id: {
+    currency_id: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: false,
+      references: {
+        model: "admin_currencies",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
 
     subtotal: {
@@ -39,20 +45,20 @@ export async function up(queryInterface, Sequelize) {
       defaultValue: 0,
     },
 
-    currency_id: {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-    },
-
     file_id: {
       type: Sequelize.INTEGER,
       allowNull: true,
       references: {
-        model: "project_input_file",
+        model: "job_input_files",
         key: "id",
       },
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
+    },
+
+    note_for_vendor: {
+      type: Sequelize.TEXT,
+      allowNull: true,
     },
 
     internal_note: {
@@ -63,17 +69,15 @@ export async function up(queryInterface, Sequelize) {
     createdAt: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.fn("NOW"),
     },
 
     updatedAt: {
       type: Sequelize.DATE,
       allowNull: false,
-      defaultValue: Sequelize.fn("NOW"),
     },
   });
 }
 
-export async function down(queryInterface) {
-  await queryInterface.dropTable("flat_rate_receivables");
+export async function down(queryInterface, Sequelize) {
+  await queryInterface.dropTable("flat_rate_payables");
 }

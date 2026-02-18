@@ -195,6 +195,17 @@ ProjectDetails.associate = (models) => {
     as: "statusHistory",
     onDelete: "CASCADE",
   });
+  
+   ProjectDetails.hasMany(models.FlatRateReceivables, {
+    foreignKey: "project_id",
+    as: "flatRateReceivables",
+  });
+
+  ProjectDetails.hasMany(models.UnitBasedReceivables, {
+    foreignKey: "project_id",
+    as: "unitBasedReceivables",
+  });
+
 };
 
 export default ProjectDetails;

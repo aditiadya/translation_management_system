@@ -9,6 +9,7 @@ import {
   getAllProjectInputFiles,
   getProjectInputFileById,
   deleteProjectInputFile,
+  getClientInputFiles,
 } from "../controllers/project/projectInputFiles.js";
 import {
   createProjectOutputFile,
@@ -23,6 +24,8 @@ import { authenticateToken } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router.use(authenticateToken);
+
+router.get("/client/:id/input-files", getClientInputFiles);
 
 // ========== PROJECT INPUT FILES ==========
 router.post("/project-input-files", projectInputUpload, createProjectInputFile);

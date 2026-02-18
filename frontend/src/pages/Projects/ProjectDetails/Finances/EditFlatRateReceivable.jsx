@@ -6,9 +6,9 @@ import FormSelect from "../../../../components/Form/FormSelect";
 import FormTextarea from "../../../../components/Form/TextArea";
 import BackButton from "../../../../components/Button/BackButton";
 
-const CreateFlatRateReceivable = () => {
+const EditFlatRateReceivable = () => {
   const navigate = useNavigate();
-  const { id: projectId } = useParams();
+  const { id: projectId, receivableId } = useParams(); // route: /project/:id/edit-flat-rate-receivable/:receivableId
 
   const [form, setForm] = useState({
     po_number: "",
@@ -37,22 +37,24 @@ const CreateFlatRateReceivable = () => {
 
   const [loading, setLoading] = useState(true);
 
-  /* ================= Fetch initial data ================= */
+  /* ================= Fetch existing receivable + dropdowns ================= */
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchAll = async () => {
       try {
         setLoading(true);
         setServerError("");
 
-        // First get project details to extract client_id
-        const projectRes = await api.get(`/projects/${projectId}`);
+        // Fetch project + existing receivable in parallel
+        const [projectRes, receivableRes] = await Promise.all([
+          api.get(`/projects/${projectId}`),
+          api.get(`/project-finances/flat-rate-receivables/${receivableId}`),
+        ]);
+
         const projectData = projectRes.data.data;
+        const receivable = receivableRes.data.data;
         const clientId = projectData.client_id;
 
-        console.log("Project Data:", projectData);
-
-        // Extract client name with fallback logic
         const clientName =
           projectData.client?.company_name ||
           `${projectData.client?.primary_user?.first_name || ""} ${
@@ -60,85 +62,57 @@ const CreateFlatRateReceivable = () => {
           }`.trim() ||
           "—";
 
-        // Extract specialization name
-        const specializationName = projectData.specialization?.name || "—";
-
         setProjectMeta({
           client_id: clientId,
           client_name: clientName,
-          specialization_name: specializationName,
+          specialization_name: projectData.specialization?.name || "—",
+        });
+
+        // Pre-fill form with existing values
+        setForm({
+          po_number: receivable.po_number || "",
+          service_id: receivable.service_id ? String(receivable.service_id) : "",
+          language_pair_id: receivable.language_pair_id ? String(receivable.language_pair_id) : "",
+          subtotal: receivable.subtotal ? String(receivable.subtotal) : "",
+          currency_id: receivable.currency_id ? String(receivable.currency_id) : "",
+          file_id: receivable.file_id ? String(receivable.file_id) : "",
+          internal_note: receivable.internal_note || "",
         });
 
         // Fetch dropdowns in parallel
-        const dropdownPromises = [
-          api.get(`/client-price-list/client/${clientId}/services`).catch(err => {
-            console.error("Services API error:", err);
-            return { data: { data: [] } };
-          }),
-          api.get(`/client-price-list/client/${clientId}/language-pairs`).catch(err => {
-            console.error("Language pairs API error:", err);
-            return { data: { data: [] } };
-          }),
-          api.get(`/client-price-list/client/${clientId}/currencies`).catch(err => {
-            console.error("Currencies API error:", err);
-            return { data: { data: [] } };
-          }),
-          api.get(`/client/${clientId}/input-files`).catch(err => {
-            console.error("Files API error:", err);
-            return { data: { data: [] } };
-          }),
-        ];
+        const [s, l, c, f] = await Promise.all([
+          api.get(`/client-price-list/client/${clientId}/services`).catch(() => ({ data: { data: [] } })),
+          api.get(`/client-price-list/client/${clientId}/language-pairs`).catch(() => ({ data: { data: [] } })),
+          api.get(`/client-price-list/client/${clientId}/currencies`).catch(() => ({ data: { data: [] } })),
+          api.get(`/client/${clientId}/input-files`).catch(() => ({ data: { data: [] } })),
+        ]);
 
-        const [s, l, c, f] = await Promise.all(dropdownPromises);
-
-        console.log("Services Response:", s.data);
-        console.log("Language Pairs Response:", l.data);
-        console.log("Currencies Response:", c.data);
-        console.log("Files Response:", f.data);
-
-        const servicesData = Array.isArray(s.data.data) ? s.data.data : [];
-        const languagePairsData = Array.isArray(l.data.data) ? l.data.data : [];
-        const currenciesData = Array.isArray(c.data.data) ? c.data.data : [];
-        const filesData = Array.isArray(f.data.data) ? f.data.data : [];
-
-        setServices(servicesData);
-        setLanguagePairs(languagePairsData);
-        setCurrencies(currenciesData);
-        setFiles(filesData);
-
-        console.log("Services State:", servicesData);
-        console.log("Language Pairs State:", languagePairsData);
-        console.log("Currencies State:", currenciesData);
-        console.log("Files State:", filesData);
-
-        setLoading(false);
+        setServices(Array.isArray(s.data.data) ? s.data.data : []);
+        setLanguagePairs(Array.isArray(l.data.data) ? l.data.data : []);
+        setCurrencies(Array.isArray(c.data.data) ? c.data.data : []);
+        setFiles(Array.isArray(f.data.data) ? f.data.data : []);
       } catch (err) {
-        console.error("Failed to load dropdown data", err);
-        console.error("Error details:", err.response?.data);
-        setServerError(
-          err.response?.data?.message || "Failed to load form data. Please try again."
-        );
+        console.error("Failed to load data", err);
+        setServerError(err.response?.data?.message || "Failed to load form data. Please try again.");
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchInitialData();
-  }, [projectId]);
+    fetchAll();
+  }, [projectId, receivableId]);
 
   /* ================= Dynamic currency filtering ================= */
 
   useEffect(() => {
     const fetchFilteredCurrencies = async () => {
       if (!projectMeta.client_id) return;
-
-      // Only filter if both service and language pair are selected
       if (!form.service_id && !form.language_pair_id) return;
 
       try {
         const params = new URLSearchParams();
         if (form.service_id) params.append("service_id", form.service_id);
-        if (form.language_pair_id)
-          params.append("language_pair_id", form.language_pair_id);
+        if (form.language_pair_id) params.append("language_pair_id", form.language_pair_id);
 
         const res = await api.get(
           `/client-price-list/client/${projectMeta.client_id}/currencies?${params}`
@@ -147,14 +121,9 @@ const CreateFlatRateReceivable = () => {
         const currenciesData = Array.isArray(res.data.data) ? res.data.data : [];
         setCurrencies(currenciesData);
 
-        // Reset currency selection if current selection is not in filtered list
         if (form.currency_id) {
-          const currencyExists = currenciesData.some(
-            (c) => c.id === Number(form.currency_id)
-          );
-          if (!currencyExists) {
-            setForm((prev) => ({ ...prev, currency_id: "" }));
-          }
+          const exists = currenciesData.some((c) => c.id === Number(form.currency_id));
+          if (!exists) setForm((prev) => ({ ...prev, currency_id: "" }));
         }
       } catch (err) {
         console.error("Failed to load filtered currencies", err);
@@ -177,9 +146,7 @@ const CreateFlatRateReceivable = () => {
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    if (!value) {
-      setErrors((prev) => ({ ...prev, [name]: "This field is required." }));
-    }
+    if (!value) setErrors((prev) => ({ ...prev, [name]: "This field is required." }));
   };
 
   /* ================= Handlers ================= */
@@ -193,12 +160,9 @@ const CreateFlatRateReceivable = () => {
   };
 
   const buildPayload = () => ({
-    project_id: Number(projectId),
     po_number: form.po_number || null,
     service_id: Number(form.service_id),
-    language_pair_id: form.language_pair_id
-      ? Number(form.language_pair_id)
-      : null,
+    language_pair_id: form.language_pair_id ? Number(form.language_pair_id) : null,
     subtotal: Number(form.subtotal),
     currency_id: Number(form.currency_id),
     file_id: form.file_id ? Number(form.file_id) : null,
@@ -207,35 +171,20 @@ const CreateFlatRateReceivable = () => {
 
   /* ================= Submit ================= */
 
-  const submit = async (clone) => {
+  const submit = async () => {
     if (!validate()) return;
 
     try {
       const payload = buildPayload();
-      const res = await api.post(
-        "/project-finances/flat-rate-receivables",
+      const res = await api.put(
+        `/project-finances/flat-rate-receivables/${receivableId}`,
         payload
       );
 
-      setSuccess(res.data.message || "Receivable created successfully");
-
-      if (!clone) {
-        setTimeout(() => navigate(-1), 1500);
-      } else {
-        // Reset form for cloning, keep same service/language pair/currency
-        setForm((prev) => ({
-          ...prev,
-          po_number: "",
-          subtotal: "",
-          file_id: "",
-          internal_note: "",
-        }));
-        setTimeout(() => setSuccess(""), 3000);
-      }
+      setSuccess(res.data.message || "Receivable updated successfully");
+      setTimeout(() => navigate(-1), 1500);
     } catch (err) {
-      setServerError(
-        err.response?.data?.message || "Failed to create receivable"
-      );
+      setServerError(err.response?.data?.message || "Failed to update receivable");
     }
   };
 
@@ -255,28 +204,19 @@ const CreateFlatRateReceivable = () => {
         <div className="flex items-center gap-3 mb-5">
           <BackButton to={`/project/${projectId}?tab=finances`} />
           <h1 className="text-2xl font-bold text-gray-900">
-            New Flat Rate Receivable
+            Edit Flat Rate Receivable
           </h1>
         </div>
 
         <form className="bg-white shadow rounded-lg p-8 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-xs uppercase text-gray-500 font-semibold mb-1">
-                Project Client
-              </p>
-              <p className="text-gray-900 font-medium">
-                {projectMeta.client_name}
-              </p>
+              <p className="text-xs uppercase text-gray-500 font-semibold mb-1">Project Client</p>
+              <p className="text-gray-900 font-medium">{projectMeta.client_name}</p>
             </div>
-
             <div>
-              <p className="text-xs uppercase text-gray-500 font-semibold mb-1">
-                Project Specialization
-              </p>
-              <p className="text-gray-900 font-medium">
-                {projectMeta.specialization_name}
-              </p>
+              <p className="text-xs uppercase text-gray-500 font-semibold mb-1">Project Specialization</p>
+              <p className="text-gray-900 font-medium">{projectMeta.specialization_name}</p>
             </div>
           </div>
 
@@ -297,10 +237,7 @@ const CreateFlatRateReceivable = () => {
               value={form.service_id}
               onChange={handleChange}
               onBlur={handleBlur}
-              options={services.map((s) => ({
-                value: s.id,
-                label: s.name,
-              }))}
+              options={services.map((s) => ({ value: s.id, label: s.name }))}
               error={errors.service_id}
               required
             />
@@ -312,9 +249,7 @@ const CreateFlatRateReceivable = () => {
               onChange={handleChange}
               options={languagePairs.map((l) => ({
                 value: l.id,
-                label: `${l.sourceLanguage?.name || "?"} → ${
-                  l.targetLanguage?.name || "?"
-                }`,
+                label: `${l.sourceLanguage?.name || "?"} → ${l.targetLanguage?.name || "?"}`,
               }))}
               error={errors.language_pair_id}
             />
@@ -339,9 +274,7 @@ const CreateFlatRateReceivable = () => {
               onBlur={handleBlur}
               options={currencies.map((c) => ({
                 value: c.id,
-                label: `${c.currency?.code || "?"} (${
-                  c.currency?.symbol || "?"
-                })`,
+                label: `${c.currency?.code || "?"} (${c.currency?.symbol || "?"})`,
               }))}
               error={errors.currency_id}
               required
@@ -372,8 +305,7 @@ const CreateFlatRateReceivable = () => {
           </div>
 
           <span className="text-gray-500 text-sm mt-1">
-            Fields marked with <span className="text-red-600">*</span> are
-            mandatory.
+            Fields marked with <span className="text-red-600">*</span> are mandatory.
           </span>
 
           {serverError && (
@@ -391,20 +323,11 @@ const CreateFlatRateReceivable = () => {
           <div className="mt-4 space-x-4">
             <button
               type="button"
-              onClick={() => submit(false)}
+              onClick={submit}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
             >
-              Create
+              Save Changes
             </button>
-
-            <button
-              type="button"
-              onClick={() => submit(true)}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600"
-            >
-              Create & Clone
-            </button>
-
             <button
               type="button"
               onClick={() => navigate(-1)}
@@ -419,4 +342,4 @@ const CreateFlatRateReceivable = () => {
   );
 };
 
-export default CreateFlatRateReceivable;
+export default EditFlatRateReceivable;

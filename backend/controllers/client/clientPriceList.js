@@ -10,6 +10,8 @@ const {
   AdminLanguagePair,
   Currency,
   Language,
+  ProjectInputFiles,
+  ProjectDetails,
 } = db;
 
 const CLIENT_PRICE_ALLOWED_FIELDS = [
@@ -494,6 +496,225 @@ export const deleteClientPrice = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error("Error deleting client price:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
+// GET SERVICES WITH PRICE LIST FOR CLIENT
+export const getServicesWithPriceList = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { id: clientId } = req.params;
+
+    // Verify client ownership
+    const client = await ClientDetails.findOne({
+      where: { id: clientId, admin_id: adminId },
+      attributes: ["id", "company_name"],
+    });
+
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "Client not found or access denied",
+      });
+    }
+
+    // Get distinct service IDs from client price list
+    const priceListServices = await ClientPriceList.findAll({
+      where: { client_id: clientId },
+      attributes: [
+        [db.Sequelize.fn("DISTINCT", db.Sequelize.col("service_id")), "service_id"]
+      ],
+      raw: true,
+    });
+
+    const serviceIds = priceListServices.map((item) => item.service_id);
+
+    if (serviceIds.length === 0) {
+      return res.json({
+        success: true,
+        data: [],
+        message: "No services found with price list for this client",
+      });
+    }
+
+    // Fetch full service details from admin_services
+    const services = await AdminService.findAll({
+      where: {
+        id: serviceIds,
+        admin_id: adminId,
+      },
+      attributes: ["id", "name", "active_flag"],
+      order: [["name", "ASC"]],
+    });
+
+    return res.json({
+      success: true,
+      data: services,
+    });
+  } catch (error) {
+    console.error("Error fetching services with price list:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
+// GET LANGUAGE PAIRS WITH PRICE LIST FOR CLIENT
+export const getLanguagePairsWithPriceList = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { id: clientId } = req.params;
+
+    // Verify client ownership
+    const client = await ClientDetails.findOne({
+      where: { id: clientId, admin_id: adminId },
+      attributes: ["id", "company_name"],
+    });
+
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "Client not found or access denied",
+      });
+    }
+
+    // Get distinct language pair IDs from client price list
+    const priceListLanguagePairs = await ClientPriceList.findAll({
+      where: { client_id: clientId },
+      attributes: [
+        [
+          db.Sequelize.fn("DISTINCT", db.Sequelize.col("language_pair_id")),
+          "language_pair_id",
+        ],
+      ],
+      raw: true,
+    });
+
+    const languagePairIds = priceListLanguagePairs.map(
+      (item) => item.language_pair_id
+    );
+
+    if (languagePairIds.length === 0) {
+      return res.json({
+        success: true,
+        data: [],
+        message: "No language pairs found with price list for this client",
+      });
+    }
+
+    // Fetch full language pair details from admin_language_pairs
+    const languagePairs = await AdminLanguagePair.findAll({
+      where: {
+        id: languagePairIds,
+        admin_id: adminId,
+      },
+      attributes: ["id", "source_language_id", "target_language_id", "active_flag"],
+      include: [
+        {
+          model: Language,
+          as: "sourceLanguage",
+          attributes: ["id", "name", "code"],
+        },
+        {
+          model: Language,
+          as: "targetLanguage",
+          attributes: ["id", "name", "code"],
+        },
+      ],
+      order: [
+        [{ model: Language, as: "sourceLanguage" }, "name", "ASC"],
+        [{ model: Language, as: "targetLanguage" }, "name", "ASC"],
+      ],
+    });
+
+    return res.json({
+      success: true,
+      data: languagePairs,
+    });
+  } catch (error) {
+    console.error("Error fetching language pairs with price list:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
+// OPTIONAL: GET CURRENCIES WITH PRICE LIST FOR CLIENT
+export const getCurrenciesWithPriceList = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { id: clientId } = req.params;
+    const { service_id, language_pair_id } = req.query;
+
+    // Verify client ownership
+    const client = await ClientDetails.findOne({
+      where: { id: clientId, admin_id: adminId },
+      attributes: ["id", "company_name"],
+    });
+
+    if (!client) {
+      return res.status(404).json({
+        success: false,
+        message: "Client not found or access denied",
+      });
+    }
+
+    // Build where clause for filtering
+    const whereClause = { client_id: clientId };
+    
+    if (service_id) {
+      whereClause.service_id = service_id;
+    }
+    
+    if (language_pair_id) {
+      whereClause.language_pair_id = language_pair_id;
+    }
+
+    // Get distinct currency IDs from client price list
+    const priceListCurrencies = await ClientPriceList.findAll({
+      where: whereClause,
+      attributes: [
+        [
+          db.Sequelize.fn("DISTINCT", db.Sequelize.col("currency_id")),
+          "currency_id",
+        ],
+      ],
+      raw: true,
+    });
+
+    const currencyIds = priceListCurrencies.map((item) => item.currency_id);
+
+    if (currencyIds.length === 0) {
+      return res.json({
+        success: true,
+        data: [],
+        message: "No currencies found with price list for this client",
+      });
+    }
+
+    // Fetch full currency details from admin_currencies
+    const currencies = await AdminCurrency.findAll({
+      where: {
+        id: currencyIds,
+        admin_id: adminId,
+      },
+      attributes: ["id", "currency_id", "active_flag"],
+      include: [
+        {
+          model: Currency,
+          as: "currency",
+          attributes: ["id", "name", "code", "symbol"],
+        },
+      ],
+      order: [[{ model: Currency, as: "currency" }, "code", "ASC"]],
+    });
+
+    return res.json({
+      success: true,
+      data: currencies,
+    });
+  } catch (error) {
+    console.error("Error fetching currencies with price list:", error);
     const err = toClientError(error);
     res.status(err.code).json(err.body);
   }

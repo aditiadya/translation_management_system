@@ -1,18 +1,17 @@
-import useCreateUnitBasedReceivable from "./useCreateUnitBasedReceivable";
-import BackButton from "../../../../components/Button/BackButton";
-import FormInput from "../../../../components/Form/FormInput";
-import FormSelect from "../../../../components/Form/FormSelect";
-import FormTextarea from "../../../../components/Form/TextArea";
+import useEditUnitBasedPayable from "./useEditUnitBasedPayable";
+import BackButton from "../../../../../components/Button/BackButton";
+import FormInput from "../../../../../components/Form/FormInput";
+import FormSelect from "../../../../../components/Form/FormSelect";
+import FormTextarea from "../../../../../components/Form/TextArea";
 
-const UnitBasedReceivablePage = () => {  
+const EditUnitBasedPayablePage = () => {
   const {
     projectId,
     form,
     errors,
     serverError,
     success,
-    services,
-    languagePairs,
+    jobs,
     units,
     currencies,
     files,
@@ -25,7 +24,7 @@ const UnitBasedReceivablePage = () => {
     handlePriceSelect,
     submit,
     navigate,
-  } = useCreateUnitBasedReceivable();
+  } = useEditUnitBasedPayable();
 
   if (loading) {
     return (
@@ -37,16 +36,15 @@ const UnitBasedReceivablePage = () => {
 
   return (
     <div>
-      {/* MAIN GRID WITH FIXED HEIGHT */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-180px)]">
-        
-        {/* LEFT COLUMN — ALWAYS SCROLLABLE */}
+
+        {/* LEFT COLUMN */}
         <form className="bg-white shadow rounded-lg p-8 overflow-y-auto">
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-8">
               <BackButton to={`/project/${projectId}?tab=finances`} />
               <h1 className="text-2xl font-bold text-gray-900">
-                New Unit Based Receivable
+                Edit Unit Based Payable
               </h1>
             </div>
 
@@ -59,7 +57,6 @@ const UnitBasedReceivablePage = () => {
                   {projectMeta.client_name || "—"}
                 </p>
               </div>
-
               <div>
                 <p className="text-xs uppercase text-gray-500 font-semibold mb-1">
                   Project Specialization
@@ -72,38 +69,15 @@ const UnitBasedReceivablePage = () => {
 
             <hr className="my-4 border-gray-200" />
 
-            <FormInput
-              label="PO Number"
-              name="po_number"
-              value={form.po_number}
-              onChange={handleChange}
-            />
-
             <FormSelect
-              label="Service"
-              name="service_id"
-              value={form.service_id}
+              label="Job"
+              name="job_id"
+              value={form.job_id}
               onChange={handleChange}
               onBlur={handleBlur}
-              options={services.map((s) => ({
-                value: s.id,
-                label: s.name,
-              }))}
-              error={errors.service_id}
+              options={jobs.map((j) => ({ value: j.id, label: j.job_name }))}
+              error={errors.job_id}
               required
-            />
-
-            <FormSelect
-              label="Language Pair"
-              name="language_pair_id"
-              value={form.language_pair_id}
-              onChange={handleChange}
-              options={languagePairs.map((l) => ({
-                value: l.id,
-                label: `${l.sourceLanguage?.name || "?"} → ${
-                  l.targetLanguage?.name || "?"
-                }`,
-              }))}
             />
 
             <FormInput
@@ -124,10 +98,7 @@ const UnitBasedReceivablePage = () => {
               value={form.unit_id}
               onChange={handleChange}
               onBlur={handleBlur}
-              options={units.map((u) => ({
-                value: u.id,
-                label: u.name,
-              }))}
+              options={units.map((u) => ({ value: u.id, label: u.name }))}
               error={errors.unit_id}
               required
             />
@@ -174,6 +145,15 @@ const UnitBasedReceivablePage = () => {
                 value: f.id,
                 label: f.original_file_name || f.file_name,
               }))}
+              disabled={!form.job_id}
+            />
+
+            <FormTextarea
+              label="Note for Vendor"
+              name="note_for_vendor"
+              value={form.note_for_vendor}
+              onChange={handleChange}
+              rows={3}
             />
 
             <FormTextarea
@@ -185,8 +165,7 @@ const UnitBasedReceivablePage = () => {
             />
 
             <span className="text-gray-500 text-sm mt-1">
-              Fields marked with <span className="text-red-600">*</span> are
-              mandatory.
+              Fields marked with <span className="text-red-600">*</span> are mandatory.
             </span>
 
             {serverError && (
@@ -203,15 +182,14 @@ const UnitBasedReceivablePage = () => {
           </div>
         </form>
 
-        {/* RIGHT COLUMN — SCROLLS ONLY IF TABLE OVERFLOWS */}
+        {/* RIGHT COLUMN — Vendor Prices */}
         <div className="bg-white shadow rounded-lg p-8 overflow-y-auto">
           <h1 className="text-2xl font-bold text-gray-900 mb-5">
             Relevant Prices
           </h1>
 
           <p className="text-sm text-gray-500 mb-3">
-            Click table row to copy data to form. Matched prices are highlighted
-            in green.
+            Click a row to copy data to form. Matched prices are highlighted in green.
           </p>
 
           {prices.length === 0 ? (
@@ -223,20 +201,8 @@ const UnitBasedReceivablePage = () => {
               <table className="min-w-full text-xs">
                 <thead className="bg-gray-100 sticky top-0">
                   <tr>
-                    {[
-                      "Client",
-                      "Service",
-                      "Language Pair",
-                      "Specialization",
-                      "Unit",
-                      "Price per unit",
-                      "Currency",
-                      "Note",
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        className="px-3 py-2 text-center font-semibold text-gray-700"
-                      >
+                    {["Vendor", "Service", "Language Pair", "Unit", "Price per Unit", "Currency", "Note"].map((h) => (
+                      <th key={h} className="px-3 py-2 text-center font-semibold text-gray-700">
                         {h}
                       </th>
                     ))}
@@ -245,7 +211,6 @@ const UnitBasedReceivablePage = () => {
                 <tbody>
                   {prices.map((row) => {
                     const isSelected = selectedPriceId === row.id;
-
                     return (
                       <tr
                         key={row.id}
@@ -258,20 +223,16 @@ const UnitBasedReceivablePage = () => {
                             : "hover:bg-gray-50"
                         }`}
                       >
-                        <td className="px-3 py-2">{row.client?.company_name || "—"}</td>
+                        <td className="px-3 py-2">{row.vendor?.company_name || "—"}</td>
                         <td className="px-3 py-2">{row.service?.name || "—"}</td>
                         <td className="px-3 py-2">
-                          {row.languagePair?.sourceLanguage?.name || "?"} → {row.languagePair?.targetLanguage?.name || "?"}
+                          {row.languagePair?.sourceLanguage?.name || "?"} →{" "}
+                          {row.languagePair?.targetLanguage?.name || "?"}
                         </td>
-                        <td className="px-3 py-2">{row.specialization?.name || "—"}</td>
                         <td className="px-3 py-2">{row.unit || "—"}</td>
-                        <td className="px-3 py-2 font-semibold">
-                          {row.price_per_unit}
-                        </td>
+                        <td className="px-3 py-2 font-semibold">{row.price_per_unit}</td>
                         <td className="px-3 py-2">{row.currency?.currency?.code || "—"}</td>
-                        <td className="px-3 py-2 truncate max-w-[150px]">
-                          {row.note || "—"}
-                        </td>
+                        <td className="px-3 py-2 truncate max-w-[150px]">{row.note || "—"}</td>
                       </tr>
                     );
                   })}
@@ -282,16 +243,15 @@ const UnitBasedReceivablePage = () => {
         </div>
       </div>
 
-      {/* ACTION BUTTONS — STAY FIXED */}
+      {/* ACTION BUTTONS */}
       <div className="mt-6 space-x-4">
         <button
           type="button"
           onClick={submit}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
         >
-          Create
+          Save Changes
         </button>
-
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -304,4 +264,4 @@ const UnitBasedReceivablePage = () => {
   );
 };
 
-export default UnitBasedReceivablePage;  
+export default EditUnitBasedPayablePage;

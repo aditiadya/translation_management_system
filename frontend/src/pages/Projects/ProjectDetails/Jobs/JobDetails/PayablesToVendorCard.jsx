@@ -1,183 +1,144 @@
-import { Pencil, Trash2, Copy } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../../../../../utils/axiosInstance";
+import PayablesTable from "../../../../Projects/ProjectDetails/Finances/Tables/PayablesTable";
 
-const PayablesToVendorCard = ({ data = [] }) => {
+const PayablesToVendorCard = ({ job }) => {
+  const { id: projectId, jobId } = useParams();
+  const navigate = useNavigate();
+
+  const [payables, setPayables] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  /* ── Fetch payables filtered by this job ── */
+
+  const fetchPayables = async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get(
+        `/project-finances/payables/merged?project_id=${projectId}&job_id=${jobId}`
+      );
+      if (data.success) setPayables(data.data);
+    } catch (err) {
+      console.error("Failed to fetch payables", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (projectId && jobId) fetchPayables();
+  }, [projectId, jobId]);
+
+  /* ── Click outside dropdown ── */
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
+        setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  /* ── Handlers ── */
+
+  const handleEdit = (row) => {
+  if (row.type === "flat_rate") {
+    navigate(`/project/${projectId}/job/${jobId}/edit-flat-rate-receivable/${row.id}`);
+  } else {
+    navigate(`/project/${projectId}/job/${jobId}/edit-unit-based-receivable/${row.id}`);
+  }
+};
+
+  const handleDelete = async (row) => {
+    const endpoint = row.type === "flat_rate"
+      ? `/project-finances/flat-rate-payables/${row.id}`
+      : `/project-finances/unit-based-payables/${row.id}`;
+
+    if (!window.confirm("Delete this payable?")) return;
+    try {
+      const { data } = await api.delete(endpoint);
+      if (data.success) fetchPayables();
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
+
+  const handleClone = async (row) => {
+    const endpoint = row.type === "flat_rate"
+      ? `/project-finances/flat-rate-payables`
+      : `/project-finances/unit-based-payables`;
+
+    const {
+      id, createdAt, updatedAt, type,
+      project, job, currency, unit, file,
+      ...payload
+    } = row;
+
+    try {
+      const { data } = await api.post(endpoint, { ...payload, project_id: projectId });
+      if (data.success) fetchPayables();
+    } catch (err) {
+      console.error("Clone failed", err);
+    }
+  };
+
+  const goTo = (path) => {
+  setOpen(false);
+  navigate(`/project/${projectId}/job/${jobId}/${path}`);
+};
+
   return (
     <div className="bg-white shadow rounded-lg space-y-4">
-        <div className="flex justify-between items-start pt-6 pl-6 pr-6">
+      <div className="flex justify-between items-start pt-6 pl-6 pr-6">
         <h3 className="text-base font-semibold text-gray-800">
-          Payables To Vendors
+          Payables to Vendor
         </h3>
-        <button
-            
-            className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
+
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setOpen((prev) => !prev)}
+            className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 flex items-center gap-2"
           >
-            New Payable
+            New Payable <span className="text-xs">▾</span>
           </button>
+          {open && (
+  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+    <button
+      onClick={() => goTo("new-flat-rate-receivable")}
+      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+    >
+      Flat Rate Payable
+    </button>
+    <button
+      onClick={() => goTo("new-unit-based-receivable")}
+      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+    >
+      Unit Based Payable
+    </button>
+    <button
+      onClick={() => goTo("new-cat-log")}
+      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+    >
+      CAT Log
+    </button>
+  </div>
+)}
+        </div>
       </div>
 
-    <div className="w-full bg-white shadow rounded-lg overflow-hidden">
-      <div className="max-h-[420px] overflow-y-auto">
-        <table className="w-full table-auto border-collapse">
-
-          {/* Column width control */}
-          <colgroup>
-            <col style={{ width: "4%" }} />   {/* Code */}
-            <col style={{ width: "4%" }} />   {/* Invoice */}
-            <col style={{ width: "5%" }} />   {/* Job */}
-            <col style={{ width: "6%" }} />  {/* Vendor */}
-            <col style={{ width: "6%" }} />  {/* Service */}
-            <col style={{ width: "8%" }} />  {/* Language Pair */}
-            <col style={{ width: "6%" }} />   {/* Units */}
-            <col style={{ width: "4%" }} />   {/* Unit */}
-            <col style={{ width: "5%" }} />   {/* Price */}
-            <col style={{ width: "5%" }} />   {/* Subtotal */}
-            <col style={{ width: "4%" }} />   {/* Extra */}
-            <col style={{ width: "4%" }} />   {/* Discount */}
-            <col style={{ width: "4%" }} />   {/* Total */}
-            <col style={{ width: "6%" }} />   {/* Currency */}
-            <col style={{ width: "3%" }} />   {/* Cat Log */}
-            <col style={{ width: "18%" }} />  {/* File */}
-            <col style={{ width: "7%" }} />  {/* Internal Note */}
-            <col style={{ width: "7%" }} />   {/* Issued */}
-            <col style={{ width: "6%" }} />   {/* Actions */}
-          </colgroup>
-
-          <thead>
-            <tr className="bg-gray-50 text-black-600 text-[11px] tracking-widest border-b">
-              {[
-                "Code",
-                "Included in invoice",
-                "Job",
-                "Job Vendor",
-                "Job Service",
-                "Job Language Pair",
-                "Unit Amount",
-                "Unit",
-                "Price per Unit",
-                "Subtotal",
-                "Extra Charge",
-                "Discount",
-                "Total",
-                "Currency",
-                "CAT Log",
-                "Filename",
-                "Internal Note",
-                "Issued at",
-                "Actions",
-              ].map((h) => (
-                <th key={h} className="px-3 py-2 text-center font-bold">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {data.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={19}
-                  className="py-6 text-center text-gray-500 text-xs"
-                >
-                  No payables found.
-                </td>
-              </tr>
-            ) : (
-              data.map((row, index) => (
-                <tr
-                  key={row.id}
-                  className={
-                    index % 2 === 0
-                      ? "bg-gray-50 hover:bg-gray-100"
-                      : "hover:bg-gray-100"
-                  }
-                >
-                  <td className="px-3 py-2 text-xs text-blue-600 whitespace-nowrap">
-                    {row.code}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs whitespace-nowrap">
-                    {row.invoice}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs break-words">
-                    {row.job}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs break-words">
-                    {row.vendor}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs break-words">
-                    {row.service}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs break-words">
-                    {row.language_pair}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                    {row.unit_amount}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs whitespace-nowrap">
-                    {row.unit}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                    {row.price_per_unit}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                    {row.subtotal}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                    {row.extra_charge}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs text-right whitespace-nowrap">
-                    {row.discount}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs font-semibold text-right whitespace-nowrap">
-                    {row.total}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs whitespace-nowrap">
-                    {row.currency}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs whitespace-nowrap">
-                    {row.catalog}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs break-words">
-                    {row.file_name}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs text-gray-600 break-words">
-                    {row.internal_note || "—"}
-                  </td>
-
-                  <td className="px-3 py-2 text-xs whitespace-nowrap">
-                    {row.issued_at || "—"}
-                  </td>
-
-                  <td className="px-3 py-2 text-center whitespace-nowrap">
-                    <div className="flex justify-center gap-3">
-                      <Copy className="w-4 h-4 text-gray-500 hover:text-gray-700 cursor-pointer" />
-                      <Pencil className="w-4 h-4 text-blue-500 hover:text-blue-600 cursor-pointer" />
-                      <Trash2 className="w-4 h-4 text-red-500 hover:text-red-600 cursor-pointer" />
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      {loading
+        ? <div className="text-sm text-gray-400 py-6 text-center">Loading payables...</div>
+        : <PayablesTable
+            data={payables}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onClone={handleClone}
+          />
+      }
     </div>
   );
 };

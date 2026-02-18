@@ -7,7 +7,10 @@ import {
   getClientPriceById,
   updateClientPrice,
   deleteClientPrice,
-  getClientPriceListForClient
+  getClientPriceListForClient,
+  getServicesWithPriceList,
+  getLanguagePairsWithPriceList,
+  getCurrenciesWithPriceList,
 } from "../controllers/client/clientPriceList.js";
 
 const router = express.Router();
@@ -16,9 +19,14 @@ router.use(authenticateToken);
 
 router.post("/", createClientPrice);
 router.get("/", getAllClientPrices);
+
+router.get("/client/:id/price-list", getClientPriceListForClient);
+router.get("/client/:id/services", getServicesWithPriceList);
+router.get("/client/:id/language-pairs", getLanguagePairsWithPriceList);
+router.get("/client/:id/currencies", getCurrenciesWithPriceList);
+
 router.get("/:id", getClientPriceById);
 router.put("/:id", updateClientPrice);
 router.delete("/:id", deleteClientPrice);
-router.get("/:id/price-list", getClientPriceListForClient);
 
 export default router;
