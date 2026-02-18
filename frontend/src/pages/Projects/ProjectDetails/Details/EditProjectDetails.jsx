@@ -186,7 +186,7 @@ const EditProjectDetails = () => {
 
       setSuccess("Project updated successfully!");
       setTimeout(() => {
-        navigate(`/projects/${id}`);
+        navigate(`/project/${id}`);
       }, 1500);
     } catch (err) {
       console.error("Update project error:", err);
@@ -465,7 +465,7 @@ const EditProjectDetails = () => {
 
         <button
           type="button"
-          onClick={() => navigate(`/projects/${id}`)}
+          onClick={() => navigate(`/project/${id}`)}
           disabled={isSubmitting}
           className="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
         >

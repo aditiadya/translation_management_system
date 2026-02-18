@@ -47,7 +47,7 @@ const UpdateLinkedFilesModal = ({ jobId, existingFiles = [], onClose, onSuccess 
       const allProjectFiles = response.data.data || [];
       setProjectFiles(allProjectFiles);
 
-      // Pre-select files that are already linked
+      // Pre-select files that are already linked to this job
       const linkedFileIds = existingFiles
         .filter((f) => f.is_linked && f.project_input_file_id)
         .map((f) => f.project_input_file_id);
@@ -204,7 +204,9 @@ const UpdateLinkedFilesModal = ({ jobId, existingFiles = [], onClose, onSuccess 
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category (Optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category (Optional)
+                </label>
                 <input
                   type="text"
                   value={uploadCategory}
@@ -220,7 +222,9 @@ const UpdateLinkedFilesModal = ({ jobId, existingFiles = [], onClose, onSuccess 
                 <h3 className="text-sm font-semibold text-gray-800 mb-3">
                   Select Project Files to Link
                   {selectedProjectFiles.length > 0 && (
-                    <span className="ml-2 text-blue-600">({selectedProjectFiles.length} selected)</span>
+                    <span className="ml-2 text-blue-600">
+                      ({selectedProjectFiles.length} selected)
+                    </span>
                   )}
                 </h3>
 
@@ -236,7 +240,10 @@ const UpdateLinkedFilesModal = ({ jobId, existingFiles = [], onClose, onSuccess 
                           <th className="px-4 py-2 text-left w-12">
                             <input
                               type="checkbox"
-                              checked={selectedProjectFiles.length === projectFiles.length}
+                              checked={
+                                projectFiles.length > 0 &&
+                                selectedProjectFiles.length === projectFiles.length
+                              }
                               onChange={(e) => {
                                 if (e.target.checked) {
                                   setSelectedProjectFiles(projectFiles.map((f) => f.id));
@@ -244,7 +251,7 @@ const UpdateLinkedFilesModal = ({ jobId, existingFiles = [], onClose, onSuccess 
                                   setSelectedProjectFiles([]);
                                 }
                               }}
-                              className="w-4 h-4"
+                              className="w-4 h-4 cursor-pointer"
                             />
                           </th>
                           <th className="px-4 py-2 text-left">Code</th>
@@ -254,22 +261,36 @@ const UpdateLinkedFilesModal = ({ jobId, existingFiles = [], onClose, onSuccess 
                         </tr>
                       </thead>
                       <tbody>
-                        {projectFiles.map((file, index) => (
-                          <tr key={file.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                            <td className="px-4 py-2">
-                              <input
-                                type="checkbox"
-                                checked={selectedProjectFiles.includes(file.id)}
-                                onChange={() => toggleFileSelection(file.id)}
-                                className="w-4 h-4"
-                              />
-                            </td>
-                            <td className="px-4 py-2 text-xs">{file.file_code}</td>
-                            <td className="px-4 py-2 text-xs">{file.original_file_name}</td>
-                            <td className="px-4 py-2 text-xs">{formatFileSize(file.file_size)}</td>
-                            <td className="px-4 py-2 text-xs">{file.category || "—"}</td>
-                          </tr>
-                        ))}
+                        {projectFiles.map((file, index) => {
+                          const isSelected = selectedProjectFiles.includes(file.id);
+                          return (
+                            <tr
+                              key={file.id}
+                              onClick={() => toggleFileSelection(file.id)}
+                              className={`cursor-pointer transition-colors ${
+                                isSelected
+                                  ? "bg-blue-50 hover:bg-blue-100"
+                                  : index % 2 === 0
+                                  ? "bg-white hover:bg-gray-50"
+                                  : "bg-gray-50 hover:bg-gray-100"
+                              }`}
+                            >
+                              <td className="px-4 py-2">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => toggleFileSelection(file.id)}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="w-4 h-4 cursor-pointer"
+                                />
+                              </td>
+                              <td className="px-4 py-2 text-xs">{file.file_code}</td>
+                              <td className="px-4 py-2 text-xs">{file.original_file_name}</td>
+                              <td className="px-4 py-2 text-xs">{formatFileSize(file.file_size)}</td>
+                              <td className="px-4 py-2 text-xs">{file.category || "—"}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

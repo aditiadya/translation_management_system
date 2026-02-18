@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Trash2, Download, Upload, Link as LinkIcon } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import api from "../../../../../utils/axiosInstance";
 import UploadOutputFileModal from "./UploadOutputFileModal";
 
 const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showUrlModal, setShowUrlModal] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
   const formatFileSize = (bytes) => {
@@ -30,12 +30,8 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
   const handleDownloadSingle = async (file) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(
-          file.file_path
-        )}`,
-        {
-          credentials: "include",
-        }
+        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(file.file_path)}`,
+        { credentials: "include" }
       );
 
       if (!response.ok) throw new Error("Download failed");
@@ -65,9 +61,7 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
       setDownloading(true);
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/job-output-files/download-zip?job_id=${jobId}`,
-        {
-          credentials: "include",
-        }
+        { credentials: "include" }
       );
 
       if (!response.ok) throw new Error("Download failed");
@@ -95,56 +89,12 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/job-output-files/${file.id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Failed to delete file");
-      }
-
+      await api.delete(`/job-output-files/${file.id}`, { withCredentials: true });
       alert("File deleted successfully");
       onRefresh();
     } catch (error) {
       console.error("Delete error:", error);
-      alert(error.message || "Failed to delete file");
-    }
-  };
-
-  const handleAddToProjectOutput = async (file) => {
-    if (file.is_project_output) {
-      alert("This file is already added to project output");
-      return;
-    }
-
-    if (!window.confirm(`Add "${file.original_file_name}" to project output?`)) {
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/job-output-files/${file.id}/add-to-project`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Failed to add to project output");
-      }
-
-      alert("File added to project output successfully");
-      onRefresh();
-    } catch (error) {
-      console.error("Add to project output error:", error);
-      alert(error.message || "Failed to add to project output");
+      alert(error.response?.data?.message || "Failed to delete file");
     }
   };
 
@@ -162,15 +112,12 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
               onClick={() => setShowUploadModal(true)}
               className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
             >
-             
               Upload
             </button>
 
             <button
-              
               className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
             >
-              
               Add URL
             </button>
 
@@ -179,7 +126,6 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
               disabled={downloading || files.length === 0}
               className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-             
               {downloading ? "Downloading..." : "Download as zip"}
             </button>
           </div>
@@ -211,10 +157,7 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
               <tbody>
                 {files.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="py-6 text-center text-gray-500 text-xs"
-                    >
+                    <td colSpan={8} className="py-6 text-center text-gray-500 text-xs">
                       No output files found.
                     </td>
                   </tr>
@@ -222,11 +165,7 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
                   files.map((file, index) => (
                     <tr
                       key={file.id || index}
-                      className={
-                        index % 2 === 0
-                          ? "bg-gray-50 hover:bg-gray-100"
-                          : "hover:bg-gray-100"
-                      }
+                      className={index % 2 === 0 ? "bg-gray-50 hover:bg-gray-100" : "hover:bg-gray-100"}
                     >
                       <td className="px-3 py-2 text-xs whitespace-nowrap">
                         {file.file_code || `#${index + 1}`}
@@ -251,28 +190,21 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
 
                       <td className="px-3 py-2 text-xs whitespace-nowrap">
                         {file.adminUploader?.details
-  ? `${file.adminUploader.details.first_name} ${file.adminUploader.details.last_name}`
-  : file.vendorUploader
-  ? `${file.vendorUploader.company_name || "Vendor"}`
-  : "—"}
+                          ? `${file.adminUploader.details.first_name} ${file.adminUploader.details.last_name}`
+                          : file.vendorUploader
+                          ? `${file.vendorUploader.company_name || "Vendor"}`
+                          : "—"}
                       </td>
 
                       <td className="px-3 py-2 text-xs whitespace-nowrap">
                         {file.input_for_job || "—"}
                       </td>
 
-                      <td className="px-3 py-2 text-xs whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-center">
                         {file.is_project_output ? (
-                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">
-                            Yes
-                          </span>
+                          <span className="text-green-600 font-medium">Yes</span>
                         ) : (
-                          <button
-                            onClick={() => handleAddToProjectOutput(file)}
-                            className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium hover:bg-blue-200"
-                          >
-                            Add
-                          </button>
+                          <span className="text-gray-400">No</span>
                         )}
                       </td>
 
@@ -302,18 +234,6 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
           }}
         />
       )}
-
-      {/* Add URL Modal
-      {showUrlModal && (
-        <AddOutputUrlModal
-          jobId={jobId}
-          onClose={() => setShowUrlModal(false)}
-          onSuccess={() => {
-            setShowUrlModal(false);
-            onRefresh();
-          }}
-        />
-      )} */}
     </>
   );
 };

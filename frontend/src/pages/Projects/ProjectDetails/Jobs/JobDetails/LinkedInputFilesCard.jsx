@@ -28,7 +28,6 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
 
   const handleDownloadSingle = async (file) => {
     try {
-      // Determine which file to download (linked or direct)
       const filePath = file.is_linked
         ? file.linkedProjectFile?.file_path
         : file.file_path;
@@ -40,9 +39,7 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
 
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(filePath)}`,
-        {
-          credentials: "include",
-        }
+        { credentials: "include" }
       );
 
       if (!response.ok) throw new Error("Download failed");
@@ -72,9 +69,7 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
       setDownloading(true);
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/job-input-files/download-zip?job_id=${jobId}`,
-        {
-          credentials: "include",
-        }
+        { credentials: "include" }
       );
 
       if (!response.ok) throw new Error("Download failed");
@@ -163,10 +158,7 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
               <tbody>
                 {files.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="py-6 text-center text-gray-500 text-xs"
-                    >
+                    <td colSpan={8} className="py-6 text-center text-gray-500 text-xs">
                       No input files linked.
                     </td>
                   </tr>
@@ -191,11 +183,6 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
                         >
                           {getFileName(file)}
                         </button>
-                        {file.is_linked && (
-                          <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
-                            Linked
-                          </span>
-                        )}
                       </td>
 
                       <td className="px-3 py-2 text-xs whitespace-nowrap">
@@ -216,8 +203,8 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
 
                       <td className="px-3 py-2 text-xs whitespace-nowrap">
                         {file.uploader?.details
-  ? `${file.uploader.details.first_name} ${file.uploader.details.last_name}`
-  : file.uploader?.email || "—"}
+                          ? `${file.uploader.details.first_name} ${file.uploader.details.last_name}`
+                          : file.uploader?.email || "—"}
                       </td>
 
                       <td className="px-3 py-2 text-xs whitespace-nowrap">
@@ -232,10 +219,11 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
         </div>
       </div>
 
-      {/* Update Modal */}
+      {/* Update Modal — pass `files` as existingFiles so modal knows what's already linked */}
       {showModal && (
         <UpdateLinkedFilesModal
           jobId={jobId}
+          existingFiles={files}
           onClose={() => setShowModal(false)}
           onSuccess={() => {
             setShowModal(false);
