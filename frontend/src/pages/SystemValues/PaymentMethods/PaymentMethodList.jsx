@@ -39,19 +39,27 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
   };
 
   const renderPaymentMethodName = (method) => {
-    const type = method.payment_method;
-    if (type === "bank_transfer")
-      return method.bank_transfer_detail?.payment_method_name || "N/A";
-    if (["paypal", "payoneer", "skrill"].includes(type))
-      return (
-        method[`${type}_detail`]?.email ||
-        method.email_payment_detail?.email ||
-        "N/A"
-      );
-    if (type === "other")
-      return method.other_payment_detail?.payment_method_name || "N/A";
-    return "N/A";
-  };
+  const type = method.payment_method;
+  if (type === "bank_transfer")
+    return method.bank_transfer_detail?.payment_method_name || "N/A";
+  if (["paypal", "payoneer", "skrill"].includes(type)) {
+    const detail = method[`${type}_detail`] || method.email_payment_detail;
+    const email = detail?.email;
+    const accountHolder = detail?.account_holder_name;
+    if (!email) return "N/A";
+    return (
+      <div>
+        <div>{email}</div>
+        {accountHolder && (
+          <div className="text-xs text-gray-500">{accountHolder}</div>
+        )}
+      </div>
+    );
+  }
+  if (type === "other")
+    return method.other_payment_detail?.payment_method_name || "N/A";
+  return "N/A";
+};
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -75,7 +83,7 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
         <tbody>
           {methods.length === 0 ? (
             <tr>
-              <td colSpan={7} className="text-center py-4 text-gray-500">
+              <td colSpan={8} className="text-center py-4 text-gray-500">
                 No payment methods added yet.
               </td>
             </tr>
@@ -88,8 +96,15 @@ const PaymentMethodList = ({ methods, onEdit, onDelete }) => {
                 } hover:bg-gray-100`}
               >
                 <td className="py-3 px-4 text-sm text-gray-500 capitalize">
-                  {method.payment_method.replace("_", " ")}
-                </td>
+  <div className="flex items-center gap-2">
+    <span>{method.payment_method.replace("_", " ")}</span>
+    {method.is_default && (
+      <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full border border-blue-300">
+        Default
+      </span>
+    )}
+  </div>
+</td>
 
                 <td className="py-3 px-4 text-sm text-gray-500 font-medium text-gray-800">
                   {renderPaymentMethodName(method)}

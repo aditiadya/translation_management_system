@@ -16,6 +16,7 @@ const INITIAL_STATE = {
   payment_method: "",
   note: "",
   active_flag: true,
+  is_default: false,
   payment_method_name: "",
   beneficiary_name: "",
   beneficiary_address: "",
@@ -31,6 +32,7 @@ const INITIAL_STATE = {
   city: "",
   postal_code: "",
   email: "",
+  account_holder_name: "",
 };
 
 const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
@@ -107,6 +109,7 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
       payment_method: formData.payment_method,
       note: formData.note,
       active_flag: formData.active_flag,
+      is_default: formData.is_default,
       details: {},
     };
 
@@ -127,14 +130,16 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
         city: formData.city,
         postal_code: formData.postal_code,
       };
-    } else if (
-      ["paypal", "payoneer", "skrill"].includes(formData.payment_method)
-    ) {
-      payload.details = { email: formData.email };
+    } else if (["paypal", "payoneer", "skrill"].includes(formData.payment_method)) {
+      payload.details = {
+        email: formData.email,
+        account_holder_name: formData.account_holder_name || null,
+      };
     } else if (formData.payment_method === "other") {
       payload.details = { payment_method_name: formData.payment_method_name };
     }
 
+    console.log("Frontend payload:", JSON.stringify(payload, null, 2));
     onSave(payload);
   };
 
@@ -206,6 +211,15 @@ const PaymentMethodForm = ({ methodToEdit, onSave, onCancel }) => {
                     Fields marked with <span className="text-red-600">*</span> are mandatory.
                   </span>
                 }
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <CheckboxField
+                label="Set as Default"
+                name="is_default"
+                checked={!!formData.is_default}
+                onChange={handleChange}
               />
             </div>
           </div>

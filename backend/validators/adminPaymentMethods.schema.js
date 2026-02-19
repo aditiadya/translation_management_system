@@ -39,8 +39,8 @@ const emailPaymentDetailsSchema = Joi.object({
     "any.required": "Email is required for this payment method",
     "string.email": "Invalid email address",
   }),
+  account_holder_name: Joi.string().trim().max(100).allow("", null).optional(), // <-- add
 });
-
 // Other
 const otherPaymentDetailsSchema = Joi.object({
   payment_method_name: Joi.string().trim().max(100).required().messages({
@@ -53,6 +53,7 @@ export const createPaymentMethodSchema = Joi.object({
   payment_method: paymentMethodEnum,
   note: Joi.string().trim().allow("").optional(),
   active_flag: Joi.boolean().optional(),
+  is_default: Joi.boolean().optional(),   // <-- add
   details: Joi.alternatives()
     .conditional("payment_method", [
       { is: "bank_transfer", then: bankTransferDetailsSchema.required() },
@@ -67,8 +68,9 @@ export const createPaymentMethodSchema = Joi.object({
 
 // Update
 export const updatePaymentMethodSchema = Joi.object({
-  note: Joi.string().trim().optional(),
+  note: Joi.string().trim().allow("").optional(),
   active_flag: Joi.boolean().optional(),
+  is_default: Joi.boolean().optional(),
   details: Joi.object().optional(),
 });
 

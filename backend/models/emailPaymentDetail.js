@@ -22,6 +22,10 @@ const EmailPaymentDetail = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    account_holder_name: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
   },
   {
     tableName: "email_payment_details",

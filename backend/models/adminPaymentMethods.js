@@ -31,6 +31,11 @@ const AdminPaymentMethod = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
+    is_default: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     tableName: "admin_payment_methods",
