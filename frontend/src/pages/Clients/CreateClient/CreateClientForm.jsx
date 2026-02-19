@@ -5,8 +5,10 @@ import FormInput from "../../../components/Form/FormInput";
 import FormSelect from "../../../components/Form/FormSelect";
 import CheckboxField from "../../../components/Form/CheckboxField";
 import FormTextarea from "../../../components/Form/TextArea";
+import { getTimezonesWithOffset } from "../../../utils/constants/timezones";
+import { getCountries } from "../../../utils/constants/countries";
 
-const staticTimezones = ["UTC−12:00", "UTC−11:00", "UTC−10:00", "UTC−09:00"];
+const staticTimezones = getTimezonesWithOffset();
 const clientTypes = ["Company", "Individual"];
 const statuses = ["Active", "Inactive", "Pending"];
 const genders = ["Male", "Female", "Other"];
@@ -16,13 +18,7 @@ const legalEntities = [
   "Sole Proprietorship",
   "Partnership",
 ];
-const countries = [
-  "India",
-  "United States",
-  "United Kingdom",
-  "Germany",
-  "Australia",
-];
+const countries = getCountries();
 
 const CreateClientForm = () => {
   const navigate = useNavigate();

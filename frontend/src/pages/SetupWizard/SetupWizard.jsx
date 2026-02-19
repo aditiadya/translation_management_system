@@ -130,32 +130,34 @@ const SetupWizard = ({ onSubmit }) => {
   const isLastStep = currentStep === stepConfigs.length - 1;
 
   return (
-    <div className="w-full max-w-4xl mx-auto my-10 p-6">
-      <Stepper
-        steps={stepConfigs}
-        currentStep={currentStep}
-        highestStep={highestStepVisited}
-        goToStep={goToStep}
-      />
+    <div className="w-full my-10 p-6">
+      <div className="w-full max-w-5xl mx-auto">
+        <Stepper
+          steps={stepConfigs}
+          currentStep={currentStep}
+          highestStep={highestStepVisited}
+          goToStep={goToStep}
+        />
 
-      <div
-        className="mx-auto mt-6 border rounded-2xl shadow-lg bg-white"
-        style={{ width: "800px", height: "400px" }}
-      >
-        <Suspense
-          fallback={
-            <div className="text-center py-10 text-gray-500">Loading...</div>
-          }
+        <div
+          className="mx-auto border rounded-2xl shadow-lg bg-white"
+          style={{ width: "100%", maxWidth: "1000px", height: "400px" }}
         >
-          <Component
-            data={wizardData[dataKey]}
-            setData={(data) =>
-              setWizardData({ ...wizardData, [dataKey]: data })
+          <Suspense
+            fallback={
+              <div className="text-center py-10 text-gray-500">Loading...</div>
             }
-            onNext={isLastStep ? () => onSubmit(wizardData) : nextStep}
-            onBack={currentStep > 0 ? prevStep : undefined}
-          />
-        </Suspense>
+          >
+            <Component
+              data={wizardData[dataKey]}
+              setData={(data) =>
+                setWizardData({ ...wizardData, [dataKey]: data })
+              }
+              onNext={isLastStep ? () => onSubmit(wizardData) : nextStep}
+              onBack={currentStep > 0 ? prevStep : undefined}
+            />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

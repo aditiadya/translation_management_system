@@ -3,6 +3,7 @@ import FormInput from "../../../../components/Form/FormInput";
 import FormSelect from "../../../../components/Form/FormSelect";
 import BackButton from "../../../../components/Button/BackButton";
 import FormTextarea from "../../../../components/Form/TextArea";
+import { getCountries } from "../../../../utils/constants/countries";
 
 const statuses = ["Active", "Inactive", "Pending"];
 const legalEntities = [
@@ -11,13 +12,7 @@ const legalEntities = [
   "Sole Proprietorship",
   "Partnership",
 ];
-const countries = [
-  "India",
-  "United States",
-  "United Kingdom",
-  "Germany",
-  "Australia",
-];
+const countries = getCountries();
 const clientTypes = ["Company", "Individual"];
 
 const GeneralInfoEditForm = ({ client, onCancel, onSave }) => {

@@ -59,6 +59,7 @@ const App = () => (
   <AuthProvider>
     <Router>
       <Routes>  
+        <Route path="/" element={<HomePage />} />
         <Route path="/create-account" element={<AdminRegisteration />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/account-activation/:token" element={<AccountActivation />} />
@@ -73,9 +74,6 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>} />
         <Route
           path="/setup"
           element={

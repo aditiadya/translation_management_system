@@ -19,11 +19,11 @@ const ALLOWED_FIELDS = [
 
 const toClientError = (error) => {
   if (error?.name === "SequelizeUniqueConstraintError") {
-    return {
-      code: 400,
-      body: { success: false, message: "Duplicate entry detected" },
-    };
-  }
+  return {
+    code: 400,
+    body: { success: false, message: "A contact person with this email already exists" },
+  };
+}
   if (error?.name === "SequelizeValidationError") {
     return {
       code: 400,
@@ -132,10 +132,6 @@ export const updateContactPerson = async (req, res) => {
     }
 
     const data = pickAllowed(req.body, ALLOWED_FIELDS);
-    console.log("Data to update:", data);
-
-    console.log("Headers:", req.headers);
-    console.log("Request body:", req.body);
 
     if (Object.keys(data).length === 0) {
       return res.status(400).json({

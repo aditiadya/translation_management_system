@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import SetupWizard from "./SetupWizard";
-import Navbar from "../../components/Navbar/Navbar";
 
 const SetupWizardPage = () => {
   const [loading, setLoading] = useState(true);
@@ -57,7 +56,6 @@ const SetupWizardPage = () => {
   if (loading) {
     return (
       <div>
-        <Navbar />
         <p className="text-center mt-10">Loading...</p>
       </div>
     );
@@ -65,7 +63,6 @@ const SetupWizardPage = () => {
 
   return (
     <div>
-      <Navbar />
       {setupCompleted ? (
         <div className="flex flex-col items-center justify-center mt-20">
           <svg

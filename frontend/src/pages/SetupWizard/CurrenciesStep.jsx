@@ -92,10 +92,7 @@ const CurrenciesStep = ({ onNext, onBack }) => {
   const canNext = userCurrencies.length > 0;
 
   return (
-    <div
-      className="flex flex-col bg-white shadow-md rounded-lg"
-      style={{ width: "800px", height: "400px" }}
-    >
+    <div className="flex flex-col h-full bg-white shadow-md rounded-lg">
       <div className="p-4 border-b">
         <h2 className="text-2xl font-bold mb-4 text-center">Add Currencies</h2>
 

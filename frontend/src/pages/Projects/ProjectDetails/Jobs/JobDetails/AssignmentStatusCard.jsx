@@ -119,6 +119,8 @@ const AssignmentStatusCard = ({
     return "";
   };
 
+  const isOfferedToVendor = job?.status === "Offered to Vendor";
+
   return (
     <div className="bg-white shadow rounded-lg  space-y-6">
       {/* Header */}
@@ -128,10 +130,15 @@ const AssignmentStatusCard = ({
         </h3>
 
         <div className="flex gap-2 flex-wrap">
-          {job?.status === "Draft" && (
+          {(job?.status === "Draft" || isOfferedToVendor) && (
             <button
-              onClick={onOffer}
-              className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
+              onClick={!isOfferedToVendor ? onOffer : undefined}
+              disabled={isOfferedToVendor}
+              className={`px-3 py-1.5 rounded text-sm text-white ${
+                isOfferedToVendor
+                  ? "bg-blue-400 cursor-not-allowed opacity-60"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
               Offer to Vendor
             </button>
@@ -169,15 +176,6 @@ const AssignmentStatusCard = ({
               className="bg-red-600 text-white px-3 py-1.5 rounded text-sm hover:bg-red-700"
             >
               Cancel
-            </button>
-          )}
-
-          {job?.status !== "Draft" && (
-            <button
-              onClick={onDraft}
-              className="bg-gray-600 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-700"
-            >
-              Move to Draft
             </button>
           )}
         </div>

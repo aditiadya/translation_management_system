@@ -27,12 +27,13 @@ const ClientContactPersons = sequelize.define(
       allowNull: true,
     },
     email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isEmail: true,
-      },
-    },
+  type: DataTypes.STRING,
+  allowNull: false,
+  unique: true,     
+  validate: {
+    isEmail: true,
+  },
+},
     gender: {
       type: DataTypes.ENUM("Male", "Female", "Other"),
       allowNull: true,

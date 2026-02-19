@@ -5,6 +5,8 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import { ChevronDown } from "lucide-react";
+import { getCountries } from "../../utils/constants/countries";
+import { getTimezonesWithOffset } from "../../utils/constants/timezones";
 
 const AdminRegistration = () => {
   const navigate = useNavigate();
@@ -209,19 +211,28 @@ const AdminRegistration = () => {
                 </div>
               )}
 
-              <div>
+              <div className="relative">
                 <label htmlFor="country" className={labelClass}>
                   Country <span className="text-red-600">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="country"
+                <select
                   id="country"
-                  placeholder="Country"
+                  name="country"
                   value={form.country}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={inputClass("country")}
+                  className={`${inputClass("country")} appearance-none pr-10`}
+                >
+                  <option value="">Select a country...</option>
+                  {getCountries().map((country) => (
+                    <option key={country.value} value={country.value}>
+                      {country.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={18}
+                  className="absolute right-3 top-[42px] text-gray-500 pointer-events-none"
                 />
                 {errors.country && (
                   <p className="text-red-500 text-sm mt-1">{errors.country}</p>
@@ -316,19 +327,28 @@ const AdminRegistration = () => {
                 )}
               </div>
 
-              <div>
+              <div className="relative">
                 <label htmlFor="time_zone" className={labelClass}>
                   Time Zone <span className="text-red-600">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="time_zone"
+                <select
                   id="time_zone"
-                  placeholder="Time Zone"
+                  name="time_zone"
                   value={form.time_zone}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={inputClass("time_zone")}
+                  className={`${inputClass("time_zone")} appearance-none pr-10`}
+                >
+                  <option value="">Select a timezone...</option>
+                  {getTimezonesWithOffset().map((tz) => (
+                    <option key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={18}
+                  className="absolute right-3 top-[42px] text-gray-500 pointer-events-none"
                 />
                 {errors.time_zone && (
                   <p className="text-red-500 text-sm mt-1">

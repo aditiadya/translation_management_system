@@ -15,7 +15,7 @@ export async function up(queryInterface, Sequelize) {
       onDelete: 'CASCADE',
     },
     gender: {
-      type: Sequelize.ENUM('male', 'female', 'other'),
+      type: Sequelize.ENUM('Male', 'Female', 'Other'),
       allowNull: true,
     },
     teams_id: {
@@ -44,8 +44,5 @@ export async function up(queryInterface, Sequelize) {
 }
 
 export async function down(queryInterface, Sequelize) {
-  await queryInterface.sequelize.transaction(async (transaction) => {
-    await queryInterface.dropTable('admin_profile', { transaction });
-    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_admin_profile_gender";', { transaction });
-  });
+  await queryInterface.dropTable("admin_profile");
 }

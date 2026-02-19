@@ -45,7 +45,7 @@ const ManagerDetails = sequelize.define(
       allowNull: false,
     },
     gender: {
-      type: DataTypes.ENUM("male", "female", "other"),
+      type: DataTypes.ENUM("Male", "Female", "Other"),
       allowNull: true,
     },
     phone: {

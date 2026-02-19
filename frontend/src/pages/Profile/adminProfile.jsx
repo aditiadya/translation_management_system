@@ -23,6 +23,7 @@ const ProfilePage = () => {
             email: authRes.data.email,
             ...(profileRes?.data?.success ? profileRes.data.data : {}),
           };
+          if (!mergedData.language_email) mergedData.language_email = "English";
           setAdmin(mergedData);
           setFormData(mergedData);
         }

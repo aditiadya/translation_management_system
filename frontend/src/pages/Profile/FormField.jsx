@@ -1,4 +1,6 @@
 import React from "react";
+import { getTimezonesWithOffset } from "../../utils/constants/timezones";
+import { getEmailLanguages } from "../../utils/constants/languages";
 
 const formatDateTime = (value) => {
   if (!value) return "";
@@ -32,6 +34,11 @@ const FormField = React.memo(
       value = value ? formatDateTime(value) : "-";
     }
 
+    // Capitalize gender for display in view mode
+    if (!isEditing && fieldKey === "gender" && value && value !== "-") {
+      value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    }
+
     if (readOnly) {
       return (
         <div>
@@ -55,32 +62,35 @@ const FormField = React.memo(
           type === "select" ? (
             <select
               name={fieldKey}
-              value={fieldKey === "gender" ? value?.toLowerCase() : value}
+              value={value}
               onChange={handleChange}
               className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
             >
               <option value="">Select {label}</option>
               {fieldKey === "gender" && (
                 <>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
                 </>
               )}
 
-              {fieldKey === "language_email" && (
-                <>
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                </>
-              )}
+              {fieldKey === "language_email" &&
+                getEmailLanguages().map((lang) => (
+                  <option key={lang.value} value={lang.value}>
+                    {lang.label}
+                  </option>
+                ))
+              }
 
               {fieldKey === "time_zone" && (
                 <>
-                  <option value="IST">India Standard Time (IST)</option>
-                  <option value="PST">Pacific Standard Time (PST)</option>
-                  <option value="EST">Eastern Standard Time (EST)</option>
+                  <option value="">Select Timezone</option>
+                  {getTimezonesWithOffset().map((tz) => (
+                    <option key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </option>
+                  ))}
                 </>
               )}
             </select>

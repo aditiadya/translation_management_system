@@ -94,12 +94,21 @@ const Navbar = () => {
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {!user ? (
-            <Link
-              to="/login"
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md transition"
-            >
-              Login
-            </Link>
+            <>
+              <Link
+                to="/login"
+                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md transition"
+              >
+                Login
+              </Link>
+              <Link
+                to="/create-account"
+                className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg shadow-md transition border border-gray-500"
+              >
+                Create an Account
+              </Link>
+            </>
+            
           ) : (
             <div className="relative" ref={dropdownRef}>
               <button
