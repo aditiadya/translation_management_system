@@ -2,6 +2,7 @@ export async function up(queryInterface, Sequelize) {
   // Remove the old language_pair_id column
   await queryInterface.removeColumn("project_details", "language_pair_id");
   
+
   console.log("✓ Removed language_pair_id column from project_details");
 }
 

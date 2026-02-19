@@ -67,3 +67,43 @@ export const createUploader = (folderName, maxFileSizeMB = 10) => {
     });
   };
 };
+
+
+export const createImageUploader = (folderName, maxFileSizeMB = 5) => {
+  const uploadDir = path.join("uploads", folderName);
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadDir),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const uniqueName = `profile-${Date.now()}${ext}`;
+      cb(null, uniqueName);
+    },
+  });
+
+  const fileFilter = (req, file, cb) => {
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Invalid file type. Only PNG, JPG, JPEG, WEBP allowed."));
+    }
+    cb(null, true);
+  };
+
+  const limits = { fileSize: maxFileSizeMB * 1024 * 1024 };
+  const upload = multer({ storage, fileFilter, limits }).single("file");
+
+  return (req, res, next) => {
+    req.maxFileSizeMB = maxFileSizeMB;
+    upload(req, res, (err) => {
+      if (err) {
+        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+          return res.status(400).json({ success: false, message: `File too large. Max: ${maxFileSizeMB}MB` });
+        }
+        return res.status(400).json({ success: false, message: err.message || "Upload failed" });
+      }
+      next();
+    });
+  };
+};

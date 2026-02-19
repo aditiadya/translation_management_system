@@ -361,7 +361,6 @@ export const getVendorLanguagePairsForVendor = async (req, res) => {
         price_count: priceCountMap[pair.id] || 0,
       }));
     } else {
-      // ✅ FIXED VERSION - Fetch vendor pairs separately
       const vendorPairs = await VendorLanguagePair.findAll({
         where: { vendor_id: id },
         attributes: ["language_pair_id", "price_count"],

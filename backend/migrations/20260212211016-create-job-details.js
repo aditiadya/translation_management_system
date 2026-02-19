@@ -80,7 +80,7 @@ export default {
 
       status: {
         type: Sequelize.ENUM(
-          "Draft",                      // ✅ MUST be added
+          "Draft",                  
           "Offered to Vendor",
           "Offer Accepted",
           "Offer Rejected",

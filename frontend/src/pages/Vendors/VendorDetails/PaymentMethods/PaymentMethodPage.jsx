@@ -112,7 +112,7 @@ const PaymentMethodsPage = ({ vendorId }) => {
             onClick={() => setDeleteError("")}
             className="text-red-900 hover:text-red-700 ml-4"
           >
-            ✕
+            ×
           </button>
         </div>
       )}

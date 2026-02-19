@@ -382,7 +382,7 @@ export const getClientInputFiles = async (req, res) => {
         "file_code",
         "category",
         "file_size",
-        // "file_type",  ❌ REMOVE THIS LINE
+        // "file_type",  REMOVE THIS LINE
         "uploaded_at",
       ],
       order: [["uploaded_at", "DESC"]],

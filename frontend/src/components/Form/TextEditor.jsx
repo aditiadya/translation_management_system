@@ -53,10 +53,8 @@ const TextEditor = ({ label, value, onChange, error }) => {
         </label>
       )}
 
-      {/* ✅ PROFESSIONAL TOOLBAR */}
       <div className="flex flex-wrap items-center gap-2 border rounded-t-lg p-3 bg-gray-50">
 
-        {/* ✅ FONT FAMILY DROPDOWN */}
         <select
           className="border rounded px-2 py-1 text-sm"
           onChange={(e) =>
@@ -71,7 +69,6 @@ const TextEditor = ({ label, value, onChange, error }) => {
           <option value="Georgia">Georgia</option>
         </select>
 
-        {/* ✅ HEADING DROPDOWN */}
         <select
           className="border rounded px-2 py-1 text-sm"
           onChange={(e) => {
@@ -89,7 +86,6 @@ const TextEditor = ({ label, value, onChange, error }) => {
           <option value="3">H3</option>
         </select>
 
-        {/* ✅ ICON TOOLBAR */}
         <IconBtn icon="𝐁" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()} />
         <IconBtn icon="𝑰" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()} />
         <IconBtn icon="U̲" active={editor.isActive("underline")} onClick={() => editor.chain().focus().toggleUnderline().run()} />
@@ -104,7 +100,6 @@ const TextEditor = ({ label, value, onChange, error }) => {
 
       </div>
 
-      {/* ✅ EDITOR BODY */}
       <div className="border rounded-b-lg p-4 min-h-[200px] max-h-[450px] overflow-y-auto prose focus:outline-none">
         <EditorContent editor={editor} />
       </div>

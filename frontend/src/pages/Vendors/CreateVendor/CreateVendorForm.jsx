@@ -5,8 +5,10 @@ import FormInput from "../../../components/Form/FormInput";
 import FormSelect from "../../../components/Form/FormSelect";
 import FormTextarea from "../../../components/Form/TextArea";
 import CheckboxField from "../../../components/Form/CheckboxField";
+import { getTimezonesWithOffset } from "../../../utils/constants/timezones";
 
-const staticTimezones = ["UTC−12:00", "UTC−11:00", "UTC−10:00", "UTC−09:00"];
+const staticTimezones = getTimezonesWithOffset();
+
 const vendorTypes = ["Company", "Freelance", "In-House"];
 const genders = ["Male", "Female", "Other"];
 const legalEntities = [

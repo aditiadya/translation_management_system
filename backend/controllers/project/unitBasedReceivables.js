@@ -106,7 +106,7 @@ const getWithAssociations = (transaction = null) => ({
       ],
     },
     {
-      model: AdminUnits,  // ✅ Changed from AdminUnit to AdminUnits
+      model: AdminUnits,
       as: "unit",
       attributes: ["id", "name"],
     },
@@ -180,7 +180,7 @@ export const createUnitBasedReceivable = async (req, res) => {
     }
 
     // Validate unit
-    const unit = await AdminUnits.findOne({  // ✅ Changed from AdminUnit to AdminUnits
+    const unit = await AdminUnits.findOne({
       where: { id: payload.unit_id, admin_id: adminId },
     });
     if (!unit)
@@ -368,7 +368,7 @@ export const updateUnitBasedReceivable = async (req, res) => {
 
     // Validate unit if provided
     if (payload.unit_id) {
-      const unit = await AdminUnits.findOne({  // ✅ Changed from AdminUnit to AdminUnits
+      const unit = await AdminUnits.findOne({
         where: { id: payload.unit_id, admin_id: adminId },
       });
       if (!unit)

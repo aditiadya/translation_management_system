@@ -1,19 +1,15 @@
 export async function up(queryInterface, Sequelize) {
   console.log("Updating vendor_price_list foreign keys...");
 
-  /** ✅ Remove OLD foreign keys **/
-
   await queryInterface.removeConstraint(
     "vendor_price_list",
-    "vendor_price_list_ibfk_2" // service_id FK
+    "vendor_price_list_ibfk_2" 
   );
 
   await queryInterface.removeConstraint(
     "vendor_price_list",
-    "vendor_price_list_ibfk_3" // language_pair_id FK
+    "vendor_price_list_ibfk_3"
   );
-
-  /** ✅ Add NEW foreign keys **/
 
   await queryInterface.addConstraint("vendor_price_list", {
     fields: ["service_id"],

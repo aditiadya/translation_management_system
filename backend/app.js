@@ -64,6 +64,7 @@ app.use('/api/auth', authRoutes);
 app.use("/api/admin", authRoutes);
 app.use("/api/admin-details", adminDetailsRoutes);
 app.use("/api/admin-profile", AdminProfileRoutes);
+app.use("/uploads", express.static("uploads"));
 
 app.use('/api/admin-services', adminServiceRoutes);
 app.use('/api/admin-language-pairs', adminLanguageRoutes);

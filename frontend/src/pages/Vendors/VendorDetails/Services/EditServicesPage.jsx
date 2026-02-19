@@ -168,7 +168,7 @@ const EditServicePage = ({ vendorId, onUpdateComplete }) => {
             onClick={() => setError("")}
             className="text-red-900 hover:text-red-700 font-bold"
           >
-            ✕
+            ×
           </button>
         </div>
       )}

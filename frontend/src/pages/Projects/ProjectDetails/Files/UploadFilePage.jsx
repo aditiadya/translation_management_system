@@ -34,10 +34,10 @@ const UploadFilePage = ({ projectId, onClose, onSuccess }) => {
     if (!file) return alert("Please select a file");
 
     const formData = new FormData();
-    formData.append("project_id", projectId);   // ✅ required
+    formData.append("project_id", projectId);  
     formData.append("category", category || ""); 
     formData.append("note", note || "");
-    formData.append("file", file);              // ✅ actual file
+    formData.append("file", file);           
 
     try {
       setUploading(true);
