@@ -48,6 +48,8 @@ export const login = async (req, res, next) => {
       refresh_token_expiry: expiryDate,
     });
 
+    
+
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

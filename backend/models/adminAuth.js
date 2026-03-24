@@ -157,6 +157,14 @@ AdminAuth.associate = (models) => {
       onDelete: "CASCADE",
     });
   }
+
+  if (models.AdminLoginHistory) {
+  AdminAuth.hasMany(models.AdminLoginHistory, {
+    foreignKey: "admin_id",
+    as: "loginHistory",
+    onDelete: "CASCADE",
+  });
+}
 };
 
 export default AdminAuth;
