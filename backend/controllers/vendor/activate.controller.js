@@ -62,20 +62,19 @@ export const activateVendorAccount = async (req, res, next) => {
       return res.status(403).json({ error: "Invalid activation link" });
     }
 
-    // Check if username already exists in VendorPrimaryUserDetails
-    const existingUsername = await VendorPrimaryUserDetails.findOne({
+    // Check if username already exists in AdminAuth
+    const existingUsername = await AdminAuth.findOne({
       where: { username },
     });
     if (existingUsername) {
       return res.status(400).json({ error: "Username already taken" });
     }
 
-    // Update VendorPrimaryUserDetails with username and other editable fields
+    // Update VendorPrimaryUserDetails with other editable fields
     const vendorDetails = vendorAuth.vendor;
     if (vendorDetails && vendorDetails.primary_users) {
       const primaryUser = vendorDetails.primary_users;
       
-      primaryUser.username = username;
       if (first_name) primaryUser.first_name = first_name;
       if (last_name) primaryUser.last_name = last_name;
       if (timezone) primaryUser.timezone = timezone;
@@ -85,11 +84,10 @@ export const activateVendorAccount = async (req, res, next) => {
 
     const password_hash = await bcrypt.hash(password, 12);
 
+    vendorAuth.username = username;
     vendorAuth.password_hash = password_hash;
     vendorAuth.is_active = true;
     vendorAuth.activation_token = null;
-
-    // Allow vendor portal login now that account is active
     await VendorDetails.update(
       { can_login: true },
       { where: { auth_id: vendorAuth.id } }

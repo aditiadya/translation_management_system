@@ -2,51 +2,29 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import Button from "../../components/Button/Button";
-import Navbar from "../../components/Navbar/Navbar";
+import Navbar from "../../components/Navbar/Navbar"; // Still needed for the public view
 import MainLayout from "../../components/Sidebar/MainLayout";
-import VendorMainLayout from "../../components/Sidebar/VendorMainLayout";
-import AdminDashboard from "./AdminDashboard";
-import VendorDashboard from "./VendorDashboard";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { user, loading } = useContext(AuthContext);
 
   if (loading) {
-    console.log("🟡 HomePage: Still loading...");
     return <div className="flex justify-center mt-20">Loading...</div>;
   }
 
-  // If user is logged in, render appropriate dashboard based on role
+  // If user is logged in, render with MainLayout and show dashboard
   if (user) {
-    // Enhanced debug logging
-    console.log("=== HomePage Debug Info ===");
-    console.log("✅ User detected in HomePage");
-    console.log("Current user data:", user);
-    console.log("User roleSlug:", user?.roleSlug);
-    console.log("User role:", user?.role);
-    console.log("User ID:", user?.id);
-    
-    // Check if user is a vendor - more robust check
-    const isVendor = user?.roleSlug === "vendor" || user?.role === "Vendor";
-    console.log("Is vendor (isVendor):", isVendor);
-    
-    if (isVendor) {
-      console.log("✅ VENDOR DETECTED - Rendering VendorMainLayout");
-      console.log("=== End Debug ===");
-      return (
-        <VendorMainLayout>
-          <VendorDashboard />
-        </VendorMainLayout>
-      );
-    }
-
-    // Default to admin/administrator dashboard
-    console.log("❌ NOT VENDOR - Rendering MainLayout (Admin)");
-    console.log("=== End Debug ===");
     return (
       <MainLayout>
-        <AdminDashboard />
+        <div className="p-8 bg-white rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+            Welcome to your Dashboard
+          </h1>
+          <p className="text-gray-600">
+            This is your protected area. The sidebar state is now global!
+          </p>
+        </div>
       </MainLayout>
     );
   }

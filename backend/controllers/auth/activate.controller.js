@@ -42,7 +42,7 @@ export const activateAccount = async (req, res, next) => {
       return res.status(403).json({ error: "Invalid activation link" });
     }
 
-    const existingUsername = await AdminDetails.findOne({ where: { username } });
+    const existingUsername = await AdminAuth.findOne({ where: { username } });
     if (existingUsername) {
       return res.status(400).json({ error: "Username already taken" });
     }
@@ -57,8 +57,7 @@ export const activateAccount = async (req, res, next) => {
 
     const password_hash = await bcrypt.hash(password, 12);
 
-    adminDetails.username = username;
-    await adminDetails.save();
+    adminAuth.username = username;
 
     adminAuth.password_hash = password_hash;
     adminAuth.is_active = true;

@@ -27,30 +27,22 @@ export const login = async (req, res, next) => {
     });
 
     if (!user) {
-      const details = await AdminDetails.findOne({
+      user = await AdminAuth.findOne({
         where: { username: identifier },
         include: [
           {
-            model: AdminAuth,
-            as: "auth",
+            model: UserRoles,
+            as: "role",
             include: [
               {
-                model: UserRoles,
-                as: "role",
-                include: [
-                  {
-                    model: Roles,
-                    as: "role_details",
-                    attributes: ["id", "name", "slug"],
-                  },
-                ],
+                model: Roles,
+                as: "role_details",
+                attributes: ["id", "name", "slug"],
               },
             ],
           },
         ],
       });
-
-      if (details) user = details.auth;
     }
 
     if (!user) {

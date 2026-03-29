@@ -9,7 +9,6 @@ const ALLOWED_FIELDS = [
   "time_zone",
   "first_name",
   "last_name",
-  "username",
   "phone",
 ];
 

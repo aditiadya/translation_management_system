@@ -7,6 +7,5 @@ export const adminDetailsUpdateSchema = Joi.object({
   time_zone: Joi.string().max(64),
   first_name: Joi.string().max(64),
   last_name: Joi.string().max(64),
-  username: Joi.string().min(3).max(64),
   phone: Joi.string().pattern(/^\+?[0-9\-]{7,20}$/),
 }).min(1); 

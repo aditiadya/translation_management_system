@@ -86,7 +86,14 @@ export const createClientDocument = async (req, res) => {
           {
             model: AdminDetails,
             as: "uploader",
-            attributes: ["id", "first_name", "last_name", "username"],
+            attributes: ["id", "first_name", "last_name"],
+            include: [
+              {
+                model: db.AdminAuth,
+                as: "auth",
+                attributes: ["username"],
+              },
+            ],
           },
         ],
       });
@@ -142,7 +149,14 @@ export const getAllClientDocuments = async (req, res) => {
         {
           model: AdminDetails,
           as: "uploader",
-          attributes: ["id", "first_name", "last_name", "username"],
+          attributes: ["id", "first_name", "last_name"],
+          include: [
+            {
+              model: db.AdminAuth,
+              as: "auth",
+              attributes: ["username"],
+            },
+          ],
         },
       ],
       order: [["uploaded_at", "DESC"]],
@@ -172,7 +186,14 @@ export const getClientDocumentById = async (req, res) => {
         {
           model: AdminDetails,
           as: "uploader",
-          attributes: ["id", "first_name", "last_name", "username"],
+          attributes: ["id", "first_name", "last_name"],
+          include: [
+            {
+              model: db.AdminAuth,
+              as: "auth",
+              attributes: ["username"],
+            },
+          ],
         },
       ],
     });
@@ -265,7 +286,14 @@ export const updateClientDocument = async (req, res) => {
         {
           model: AdminDetails,
           as: "uploader",
-          attributes: ["id", "first_name", "last_name", "username"],
+          attributes: ["id", "first_name", "last_name"],
+          include: [
+            {
+              model: db.AdminAuth,
+              as: "auth",
+              attributes: ["username"],
+            },
+          ],
         },
       ],
     });
