@@ -3,9 +3,10 @@ import FormInput from "../../../../components/Form/FormInput";
 import FormSelect from "../../../../components/Form/FormSelect";
 import CheckboxField from "../../../../components/Form/CheckboxField";
 import BackButton from "../../../../components/Button/BackButton";
+import { getTimezonesWithOffset } from "../../../../utils/constants/timezones";
 
 const genders = ["Male", "Female", "Other"];
-const staticTimezones = ["UTC−12:00", "UTC−11:00", "UTC−10:00", "UTC−09:00"];
+const staticTimezones = getTimezonesWithOffset();
 
 const PrimaryUserEditForm = ({ client, onCancel, onSave }) => {
   const primaryUser = client?.primary_user || {};

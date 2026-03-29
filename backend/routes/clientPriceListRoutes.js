@@ -11,6 +11,7 @@ import {
   getServicesWithPriceList,
   getLanguagePairsWithPriceList,
   getCurrenciesWithPriceList,
+  cloneClientPrice
 } from "../controllers/client/clientPriceList.js";
 
 const router = express.Router();
@@ -27,6 +28,7 @@ router.get("/client/:id/currencies", getCurrenciesWithPriceList);
 
 router.get("/:id", getClientPriceById);
 router.put("/:id", updateClientPrice);
+router.post("/:id/clone", cloneClientPrice);
 router.delete("/:id", deleteClientPrice);
 
 export default router;

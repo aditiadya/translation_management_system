@@ -25,8 +25,7 @@ const bankTransferDetailsSchema = Joi.object({
     "any.required": "Account number is required",
     "string.empty": "Account number cannot be empty",
   }),
-  ifsc_code: Joi.string().trim().max(50).required().messages({
-    "any.required": "IFSC code is required",
+  ifsc_code: Joi.string().trim().max(50).allow("", null).optional().messages({
     "string.empty": "IFSC code cannot be empty",
   }),
   swift: Joi.string().trim().max(50).allow("", null).optional(),

@@ -7,7 +7,7 @@ import FormTextarea from "../../../../components/Form/TextArea";
 
 const genders = ["Male", "Female", "Other"];
 
-const AddContactPersonForm = ({ onClose, onSave }) => {
+const AddContactPersonForm = ({ contactPersons = [], onClose, onSave }) => {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -21,6 +21,7 @@ const AddContactPersonForm = ({ onClose, onSave }) => {
     is_active: false,
     is_invoicing: false,
   });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -28,10 +29,23 @@ const AddContactPersonForm = ({ onClose, onSave }) => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    setError("");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Check if email already exists
+    if (formData.email) {
+      const emailExists = contactPersons.some(
+        (person) => person.email && person.email.toLowerCase() === formData.email.toLowerCase()
+      );
+      if (emailExists) {
+        setError("This email already exists in your contact persons list");
+        return;
+      }
+    }
+    
     onSave(formData);
   };
 
@@ -68,6 +82,7 @@ const AddContactPersonForm = ({ onClose, onSave }) => {
             name="email"
             value={formData.email}
             onChange={handleChange}
+            error={error}
             required
           />
 
@@ -129,6 +144,12 @@ const AddContactPersonForm = ({ onClose, onSave }) => {
           checked={formData.is_invoicing}
           onChange={handleChange}
         />
+
+        {error && (
+          <div className="bg-red-100 text-red-700 border border-red-400 rounded p-3 text-center">
+            {error}
+          </div>
+        )}
 
         <span className="text-gray-500 text-sm mt-1">
           Fields marked with <span className="text-red-600">*</span> are

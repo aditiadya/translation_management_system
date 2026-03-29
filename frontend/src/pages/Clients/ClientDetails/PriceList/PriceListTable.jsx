@@ -1,6 +1,6 @@
-import { FaEdit, FaTrash } from "react-icons/fa"; // Add this import at the top
+import { FaEdit, FaTrash, FaClone } from "react-icons/fa";
 
-const PriceListTable = ({ data, onEdit, onDelete }) => {
+const PriceListTable = ({ data, onEdit, onDelete, onClone }) => {
   if (!data.length)
     return <div className="text-gray-500 text-center mt-4">No price list found.</div>;
 
@@ -61,6 +61,13 @@ const PriceListTable = ({ data, onEdit, onDelete }) => {
                     title="Edit"
                   >
                     <FaEdit size={18} />
+                  </button>
+                  <button
+                    onClick={() => onClone(item)}
+                    className="text-green-600 hover:text-green-800 transition-colors"
+                    title="Clone"
+                  >
+                    <FaClone size={16} />
                   </button>
                   <button
                     onClick={() => onDelete(item)}

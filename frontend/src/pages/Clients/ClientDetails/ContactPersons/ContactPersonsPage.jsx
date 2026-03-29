@@ -113,6 +113,7 @@ const ContactPersonsPage = ({ clientId }) => {
 
       {view === "add" && (
         <AddContactPersonForm
+          contactPersons={contactPersons}
           onClose={() => setView("list")}
           onSave={handleAdd}
         />
@@ -121,6 +122,7 @@ const ContactPersonsPage = ({ clientId }) => {
       {view === "edit" && editPerson && (
         <EditContactPersonForm
           person={editPerson}
+          contactPersons={contactPersons}
           onClose={() => {
             setEditPerson(null);
             setView("list");

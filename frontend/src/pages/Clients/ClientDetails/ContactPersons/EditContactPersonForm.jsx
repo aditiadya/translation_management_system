@@ -7,8 +7,9 @@ import FormTextarea from "../../../../components/Form/TextArea";
 
 const genders = ["Male", "Female", "Other"];
 
-const EditContactPersonForm = ({ person, onClose, onSave }) => {
+const EditContactPersonForm = ({ person, contactPersons = [], onClose, onSave }) => {
   const [formData, setFormData] = useState({ ...person });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setFormData({ ...person });
@@ -20,10 +21,23 @@ const EditContactPersonForm = ({ person, onClose, onSave }) => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    setError("");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Check if email already exists (excluding current person)
+    if (formData.email) {
+      const emailExists = contactPersons.some(
+        (p) => p.id !== person.id && p.email && p.email.toLowerCase() === formData.email.toLowerCase()
+      );
+      if (emailExists) {
+        setError("This email already exists in your contact persons list");
+        return;
+      }
+    }
+    
     onSave(person.id, formData);
   };
 
@@ -60,6 +74,7 @@ const EditContactPersonForm = ({ person, onClose, onSave }) => {
             name="email"
             value={formData.email || ""}
             onChange={handleChange}
+            error={error}
             required
           />
 
@@ -126,6 +141,12 @@ const EditContactPersonForm = ({ person, onClose, onSave }) => {
           Fields marked with <span className="text-red-600">*</span> are
           mandatory.
         </span>
+
+        {error && (
+          <div className="bg-red-100 text-red-700 border border-red-400 rounded p-3 text-center">
+            {error}
+          </div>
+        )}
 
         <div className="mt-4 space-x-4">
           <button

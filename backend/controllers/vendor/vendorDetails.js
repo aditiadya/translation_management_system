@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import db from "../../models/index.js";
-const { AdminAuth, VendorDetails, VendorPrimaryUserDetails, VendorSettings, UserRoles, Roles } = db;
+const { AdminAuth, VendorDetails, VendorPrimaryUserDetails, VendorSettings, VendorContactPersons, UserRoles, Roles } = db;
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
 const VENDOR_ALLOWED_FIELDS = [
@@ -131,6 +131,24 @@ export const createVendor = async (req, res) => {
         works_with_all_services: true,
         works_with_all_language_pairs: true,
         works_with_all_specializations: true,
+      },
+      { transaction }
+    );
+
+    // Register vendor primary user as a contact person automatically
+    await VendorContactPersons.create(
+      {
+        vendor_id: vendorDetails.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        gender: data.gender?.trim() || null,
+        phone: data.phone,
+        teams_id: data.teams_id,
+        zoom_id: data.zoom_id,
+        position: "Primary User",
+        notes: data.note || "Primary user record",
+        is_active: true,
       },
       { transaction }
     );

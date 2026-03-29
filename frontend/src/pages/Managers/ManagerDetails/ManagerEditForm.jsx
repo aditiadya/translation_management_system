@@ -4,6 +4,9 @@ import FormInput from "../../../components/Form/FormInput";
 import FormSelect from "../../../components/Form/FormSelect";
 import CheckboxField from "../../../components/Form/CheckboxField";
 import BackButton from "../../../components/Button/BackButton";
+import { getTimezonesWithOffset } from "../../../utils/constants/timezones";
+
+const staticTimezones = getTimezonesWithOffset();
 
 const ManagerEditForm = ({
   manager,
@@ -67,6 +70,10 @@ const ManagerEditForm = ({
       client_pool_id: formData.client_pool_id
         ? Number(formData.client_pool_id)
         : null,
+      gender: formData.gender || null,
+      phone: formData.phone || null,
+      teams_id: formData.teams_id || null,
+      zoom_id: formData.zoom_id || null,
     };
 
     await api.put(`/managers/${id}`, payload, { withCredentials: true });
@@ -168,11 +175,12 @@ const ManagerEditForm = ({
             value={formData.zoom_id}
             onChange={handleChange}
           />
-          <FormInput
+          <FormSelect
             label="Timezone"
             name="timezone"
             value={formData.timezone}
             onChange={handleChange}
+            options={staticTimezones}
           />
           <CheckboxField
             label="Can Login"

@@ -1,4 +1,8 @@
 import FormInput from "../../../../components/Form/FormInput";
+import FormSelect from "../../../../components/Form/FormSelect";
+import { getCountries } from "../../../../utils/constants/countries";
+
+const countries = getCountries();
 
 const PaymentMethodFields = ({ formData, handleChange }) => {
   switch (formData.payment_method) {
@@ -43,7 +47,6 @@ const PaymentMethodFields = ({ formData, handleChange }) => {
             name="ifsc_code"
             value={formData.ifsc_code}
             onChange={handleChange}
-            required
           />
           <FormInput
             label="SWIFT"
@@ -73,11 +76,12 @@ const PaymentMethodFields = ({ formData, handleChange }) => {
             onChange={handleChange}
             required
           />
-          <FormInput
+          <FormSelect
             label="Country"
             name="country"
             value={formData.country}
             onChange={handleChange}
+            options={countries}
             required
           />
           <FormInput

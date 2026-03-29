@@ -68,6 +68,23 @@ const PriceListPage = ({ clientId }) => {
     setShowDeleteModal(true);
   };
 
+  const handleClone = async (item) => {
+    try {
+      const res = await api.post(`/client-price-list/${item.id}/clone`, null, {
+        withCredentials: true,
+      });
+
+      // Reload list for proper relational data + consistent UI
+      await fetchPriceList();
+
+      // Optionally keep the clone selected or show a toast
+      console.log("Successfully cloned item", res.data.data);
+    } catch (err) {
+      console.error("Error cloning price list entry:", err);
+      alert(err.response?.data?.message || "Failed to clone price list entry");
+    }
+  };
+
   const handleDeleteConfirm = async () => {
     try {
       await api.delete(`/client-price-list/${itemToDelete.id}`, {
@@ -139,6 +156,7 @@ const PriceListPage = ({ clientId }) => {
             data={priceList}
             onEdit={handleEdit}
             onDelete={handleDeleteClick}
+            onClone={handleClone}
           />
         </>
       ) : (

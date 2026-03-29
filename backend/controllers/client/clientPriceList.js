@@ -501,6 +501,75 @@ export const deleteClientPrice = async (req, res) => {
   }
 };
 
+// CLONE
+export const cloneClientPrice = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
+  try {
+    const adminId = req.user.id;
+    const { id } = req.params;
+
+    const existing = await ClientPriceList.findOne({
+      where: { id },
+      include: [{ model: ClientDetails, as: "client", attributes: ["admin_id"] }],
+      transaction,
+    });
+
+    if (!existing) {
+      await transaction.rollback();
+      return res.status(404).json({ success: false, message: "Client price entry not found" });
+    }
+
+    if (existing.client.admin_id !== adminId) {
+      await transaction.rollback();
+      return res.status(403).json({ success: false, message: "You do not have access to this client price entry" });
+    }
+
+    const cloneData = {
+      client_id: existing.client_id,
+      service_id: existing.service_id,
+      language_pair_id: existing.language_pair_id,
+      specialization_id: existing.specialization_id,
+      unit: existing.unit,
+      price_per_unit: existing.price_per_unit,
+      currency_id: existing.currency_id,
+      note: existing.note,
+    };
+
+    const clonedEntry = await ClientPriceList.create(cloneData, { transaction });
+    await transaction.commit();
+
+    // Return new entry with relations for frontend to show immediately.
+    const clonedItem = await ClientPriceList.findByPk(clonedEntry.id, {
+      include: [
+        { model: ClientDetails, as: "client", attributes: ["id", "company_name", "admin_id"] },
+        { model: AdminService, as: "service", attributes: ["id", "name"] },
+        {
+          model: AdminLanguagePair,
+          as: "languagePair",
+          attributes: ["id", "source_language_id", "target_language_id"],
+          include: [
+            { model: Language, as: "sourceLanguage", attributes: ["id", "name", "code"] },
+            { model: Language, as: "targetLanguage", attributes: ["id", "name", "code"] },
+          ],
+        },
+        { model: AdminSpecialization, as: "specialization", attributes: ["id", "name"] },
+        {
+          model: AdminCurrency,
+          as: "currency",
+          include: [{ model: Currency, as: "currency", attributes: ["id", "name", "code", "symbol"] }],
+        },
+      ],
+    });
+
+    res.status(201).json({ success: true, data: clonedItem });
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Error cloning client price entry:", error);
+    const err = toClientError(error);
+    res.status(err.code).json(err.body);
+  }
+};
+
 // GET SERVICES WITH PRICE LIST FOR CLIENT
 export const getServicesWithPriceList = async (req, res) => {
   try {

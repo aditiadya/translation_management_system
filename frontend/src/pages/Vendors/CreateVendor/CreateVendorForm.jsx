@@ -6,6 +6,7 @@ import FormSelect from "../../../components/Form/FormSelect";
 import FormTextarea from "../../../components/Form/TextArea";
 import CheckboxField from "../../../components/Form/CheckboxField";
 import { getTimezonesWithOffset } from "../../../utils/constants/timezones";
+import { getCountries } from "../../../utils/constants/countries";
 
 const staticTimezones = getTimezonesWithOffset();
 
@@ -17,13 +18,7 @@ const legalEntities = [
   "Sole Proprietorship",
   "Partnership",
 ];
-const countries = [
-  "India",
-  "United States",
-  "United Kingdom",
-  "Germany",
-  "Australia",
-];
+const countries = getCountries();
 
 const CreateVendorForm = () => {
   const navigate = useNavigate();
