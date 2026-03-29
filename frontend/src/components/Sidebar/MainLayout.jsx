@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../Navbar/Navbar";
 import Sidebar from "../Sidebar/Sidebar";
 
-const MainLayout = () => {
+const MainLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     const savedState = localStorage.getItem("sidebar-open");
     return savedState !== null ? JSON.parse(savedState) : false;
@@ -39,7 +39,7 @@ const MainLayout = () => {
       >
  
         <div className="p-8">
-           <Outlet />
+           {children || <Outlet />}
         </div>
       </main>
     </div>

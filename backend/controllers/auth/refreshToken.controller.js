@@ -1,15 +1,13 @@
 import jwt from "jsonwebtoken";
 import db from "../../models/index.js";
-const { AdminAuth } = db;
-import {
-  generateAccessToken,
-  generateRefreshToken,
-} from "../../utils/tokenUtils.js";
+import { generateAccessToken, generateRefreshToken } from "../../utils/tokenUtils.js";
 
+const { AdminAuth, UserRoles, Roles } = db;
 
 export const refreshToken = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
+
     if (!token) {
       return res.status(401).json({ error: "Refresh token required" });
     }
@@ -26,7 +24,21 @@ export const refreshToken = async (req, res, next) => {
 
     const user = await AdminAuth.findOne({
       where: { id: payload.userId, refresh_token: token },
+      include: [
+        {
+          model: UserRoles,
+          as: "role",
+          include: [
+            {
+              model: Roles,
+              as: "role_details",
+              attributes: ["id", "name", "slug"],
+            },
+          ],
+        },
+      ],
     });
+
     if (!user) {
       return res.status(403).json({ error: "Invalid refresh token" });
     }
@@ -54,7 +66,13 @@ export const refreshToken = async (req, res, next) => {
       });
     }
 
-    const newAccessToken = generateAccessToken(user);
+    const roleEntry = user.role?.role_details;
+    if (!roleEntry) {
+      console.error(`[AUTH] User ${user.id} has no role during token refresh`);
+      return res.status(500).json({ error: "User account has no role assigned" });
+    }
+
+    const newAccessToken = generateAccessToken(user, roleEntry.name, roleEntry.slug);
 
     const cookieOptions = {
       httpOnly: true,
@@ -73,9 +91,7 @@ export const refreshToken = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      message: "Access token refreshed",
-    });
+    res.status(200).json({ message: "Access token refreshed" });
   } catch (err) {
     next(err);
   }

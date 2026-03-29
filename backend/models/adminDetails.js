@@ -40,11 +40,6 @@ const AdminDetails = sequelize.define('AdminDetails', {
     type: DataTypes.STRING(64),
     allowNull: false
   },
-  username: {
-    type: DataTypes.STRING(64),
-    allowNull: true,
-    unique: true,
-  },
   phone: {
     type: DataTypes.STRING(32),
     allowNull: true,
@@ -71,7 +66,6 @@ AdminDetails.associate = (models) => {
     });
   }
 
-  // Add reverse association with ClientDocuments
   if (models.ClientDocuments) {
     AdminDetails.hasMany(models.ClientDocuments, {
       foreignKey: "uploaded_by",
@@ -79,7 +73,6 @@ AdminDetails.associate = (models) => {
     });
   }
 
-  // NEW: Add reverse association with VendorDocuments
   if (models.VendorDocuments) {
     AdminDetails.hasMany(models.VendorDocuments, {
       foreignKey: "uploaded_by",

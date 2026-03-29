@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import db from "../../models/index.js";
 import { generateAccessToken, generateRefreshToken } from "../../utils/tokenUtils.js";
 
-const { AdminAuth, AdminDetails } = db;
+const { AdminAuth, AdminDetails, UserRoles, Roles } = db;
 
 export const activateAccount = async (req, res, next) => {
   try {
@@ -11,6 +11,19 @@ export const activateAccount = async (req, res, next) => {
 
     const adminAuth = await AdminAuth.findOne({
       where: { activation_token: token },
+      include: [
+        {
+          model: UserRoles,
+          as: "role",
+          include: [
+            {
+              model: Roles,
+              as: "role_details",
+              attributes: ["name", "slug"],
+            },
+          ],
+        },
+      ],
     });
 
     if (!adminAuth) {
@@ -23,22 +36,26 @@ export const activateAccount = async (req, res, next) => {
         .json({ error: "Account already activated. Please login." });
     }
 
-    const existingUsername = await AdminDetails.findOne({
-      where: { username },
-    });
+    // Verify this is actually an admin activation link
+    const roleSlug = adminAuth.role?.role_details?.slug;
+    if (roleSlug !== "administrator") {
+      return res.status(403).json({ error: "Invalid activation link" });
+    }
+
+    const existingUsername = await AdminDetails.findOne({ where: { username } });
     if (existingUsername) {
       return res.status(400).json({ error: "Username already taken" });
     }
-
-    const password_hash = await bcrypt.hash(password, 12);
 
     const adminDetails = await AdminDetails.findOne({
       where: { admin_id: adminAuth.id },
     });
 
     if (!adminDetails) {
-      return res.status(500).json({ error: "No account detected." });
+      return res.status(500).json({ error: "No account details found." });
     }
+
+    const password_hash = await bcrypt.hash(password, 12);
 
     adminDetails.username = username;
     await adminDetails.save();
@@ -46,10 +63,9 @@ export const activateAccount = async (req, res, next) => {
     adminAuth.password_hash = password_hash;
     adminAuth.is_active = true;
     adminAuth.activation_token = null;
-    await adminAuth.save();
 
-    // Auto login after activation
-    const accessToken = generateAccessToken(adminAuth);
+    const roleEntry = adminAuth.role.role_details;
+    const accessToken = generateAccessToken(adminAuth, roleEntry.name, roleEntry.slug);
     const refreshToken = generateRefreshToken(adminAuth);
 
     const expiryDate = new Date();
@@ -60,30 +76,32 @@ export const activateAccount = async (req, res, next) => {
 
     await adminAuth.save();
 
-    res.cookie("accessToken", accessToken, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000,
       path: "/",
+    };
+
+    res.cookie("accessToken", accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
     });
 
     res.status(200).json({
       message: "Account activated & logged in successfully",
-      accessToken,
+      role: roleEntry.slug,
     });
   } catch (err) {
     next(err);
   }
 };
+
 
 export const verifyActivationToken = async (req, res, next) => {
   try {
@@ -99,11 +117,10 @@ export const verifyActivationToken = async (req, res, next) => {
         .json({ valid: false, error: "Invalid or expired token" });
     }
 
-    if (adminAuth.is_active) {
-      return res.status(200).json({ valid: true, is_active: true });
-    }
-
-    return res.status(200).json({ valid: true, is_active: false });
+    return res.status(200).json({
+      valid: true,
+      is_active: adminAuth.is_active,
+    });
   } catch (err) {
     next(err);
   }

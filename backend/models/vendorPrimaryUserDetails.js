@@ -13,7 +13,7 @@ const VendorPrimaryUserDetails = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "client_details",
+        model: "vendor_details", 
         key: "id",
       },
       onDelete: "CASCADE",
@@ -50,11 +50,19 @@ const VendorPrimaryUserDetails = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    language_email: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+    },
+    registered_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: "Timestamp when the vendor completed activation and registered their account",
+    },
   },
   {
     tableName: "vendor_primary_user_details",
     timestamps: true,
-    indexes: [{ fields: ["vendor_id"] }],
   }
 );
 

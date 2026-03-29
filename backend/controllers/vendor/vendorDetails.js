@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import db from "../../models/index.js";
-const { AdminAuth, VendorDetails, VendorPrimaryUserDetails, VendorSettings} = db;
+const { AdminAuth, VendorDetails, VendorPrimaryUserDetails, VendorSettings, UserRoles, Roles } = db;
 import { pickAllowed } from "../../utils/pickAllowed.js";
 
 const VENDOR_ALLOWED_FIELDS = [
@@ -65,10 +65,24 @@ export const createVendor = async (req, res) => {
       ? crypto.randomBytes(32).toString("hex")
       : null;
 
+    const vendorRole = await Roles.findOne({ where: { slug: "vendor" } });
+    if (!vendorRole) {
+      await transaction.rollback();
+      return res.status(500).json({ success: false, message: "Vendor role not found. Run roles seeder first." });
+    }
+
     const vendorAuth = await AdminAuth.create(
       {
         email: data.email,
         activation_token: activationToken,
+      },
+      { transaction }
+    );
+
+    await UserRoles.create(
+      {
+        auth_id: vendorAuth.id,
+        role_id: vendorRole.id,
       },
       { transaction }
     );

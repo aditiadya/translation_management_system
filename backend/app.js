@@ -44,6 +44,8 @@ import projectFinancesRoutes from "./routes/projectFinances.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import jobFileRoutes from "./routes/jobFileRoutes.js";
 
+import vendorAuthRoutes from "./routes/vendorAuthRoutes.js";
+
 const app = express();
 
 const corsOptions = {
@@ -103,5 +105,43 @@ app.use("/api/project-finances", projectFinancesRoutes);
 
 app.use("/api", jobRoutes);
 app.use("/api", jobFileRoutes);
+
+app.use("/api/vendor", vendorAuthRoutes);
+
+// Global error handler middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err);
+  
+  // Sequelize validation errors
+  if (err.name === "SequelizeValidationError") {
+    return res.status(400).json({
+      error: "Validation error",
+      details: err.errors?.map((e) => e.message),
+    });
+  }
+  
+  // Sequelize unique constraint errors
+  if (err.name === "SequelizeUniqueConstraintError") {
+    const field = err.errors?.[0]?.path || "value";
+    return res.status(409).json({
+      error: `${field} already exists`,
+    });
+  }
+  
+  // Sequelize foreign key errors
+  if (err.name === "SequelizeForeignKeyConstraintError") {
+    return res.status(400).json({
+      error: "Invalid reference ID",
+    });
+  }
+  
+  // Default error response
+  const status = err.status || 500;
+  const message = err.message || "Internal server error";
+  
+  res.status(status).json({
+    error: message,
+  });
+});
 
 export default app;

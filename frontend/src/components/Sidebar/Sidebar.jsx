@@ -6,20 +6,52 @@ import {
   FiChevronLeft,
   FiGrid,
   FiUsers,
+  FiBriefcase,
+  FiBarChart2,
 } from "react-icons/fi";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navLinks = [
-    { to: "/", icon: FiHome, label: "Dashboard" },
-    { to: "/profile", icon: FiUser, label: "My Profile" },
-    { to: "/managers", icon: FiGrid, label: "Managers" },
-    { to: "/clients", icon: FiSettings, label: "Clients" },
-    { to: "/client-pools", icon: FiUsers, label: "Client Pools" },
-    { to: "/system-values", icon: FiUsers, label: "System Values" },
-    { to: "/vendors", icon: FiUsers, label: "Vendors" },
-    { to: "/projects", icon: FiUsers, label: "Projects" },
-    { to: "/jobs", icon: FiUsers, label: "Jobs" },
+    { to: "/", icon: FiHome, label: "Dashboard", category: "main" },
+    { to: "/profile", icon: FiUser, label: "My Profile", category: "main" },
+    
+    // Management Section
+    { to: "/managers", icon: FiUsers, label: "Managers", category: "management" },
+    { to: "/clients", icon: FiUsers, label: "Clients", category: "management" },
+    { to: "/vendors", icon: FiUsers, label: "Vendors", category: "management" },
+    { to: "/client-pools", icon: FiGrid, label: "Client Pools", category: "management" },
+    
+    // Operations Section
+    { to: "/projects", icon: FiBriefcase, label: "Projects", category: "operations" },
+    { to: "/jobs", icon: FiBriefcase, label: "Jobs", category: "operations" },
+    
+    // System Section
+    { to: "/system-values", icon: FiBarChart2, label: "System Values", category: "system" },
+    { to: "/settings", icon: FiSettings, label: "Settings", category: "system" },
   ];
+
+  const groupedLinks = {
+    main: navLinks.filter(link => link.category === "main"),
+    management: navLinks.filter(link => link.category === "management"),
+    operations: navLinks.filter(link => link.category === "operations"),
+    system: navLinks.filter(link => link.category === "system"),
+  };
+
+  const renderSection = (label, links) => (
+    <>
+      {isOpen && (
+        <p className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          {label}
+        </p>
+      )}
+      {links.map((link) => (
+        <NavLink to={link.to} className={linkClasses} key={link.to}>
+          <link.icon size={22} className="flex-shrink-0" />
+          {isOpen && <span>{link.label}</span>}
+        </NavLink>
+      ))}
+    </>
+  );
 
   const linkClasses = ({ isActive }) =>
     `flex items-center space-x-4 w-full p-3 rounded-lg font-medium transition-all duration-200 group
@@ -54,31 +86,27 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       </button>
 
       {/* Top Section */}
-      <div className="p-4">
+      <div className="p-4 space-y-4">
         <nav className="flex flex-col space-y-2">
-          {navLinks.map((link) => (
-            <NavLink to={link.to} className={linkClasses} key={link.to}>
-              <link.icon size={22} className="flex-shrink-0" />
-              {isOpen && <span>{link.label}</span>}
-            </NavLink>
-          ))}
+          {/* Main */}
+          {renderSection("", groupedLinks.main)}
+        </nav>
+
+        <nav className="flex flex-col space-y-2 border-t pt-4">
+          {/* Management */}
+          {renderSection(isOpen ? "Management" : "", groupedLinks.management)}
+        </nav>
+
+        <nav className="flex flex-col space-y-2 border-t pt-4">
+          {/* Operations */}
+          {renderSection(isOpen ? "Operations" : "", groupedLinks.operations)}
+        </nav>
+
+        <nav className="flex flex-col space-y-2 border-t pt-4">
+          {/* System */}
+          {renderSection(isOpen ? "System" : "", groupedLinks.system)}
         </nav>
       </div>
-
-      {/* Bottom Section
-      <div className="border-t pr-6 pt-3 pb-3">
-        <div className="flex items-center w-full group">
-          {isOpen && (
-            <div className="ml-3 whitespace-nowrap">
-              <p className="text-sm font-semibold text-gray-800">John Doe</p>
-              <p className="text-xs text-gray-500">john.doe@example.com</p>
-            </div>
-          )}
-          <button className="ml-auto p-2 rounded-lg text-gray-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200">
-            <FiLogOut size={20} />
-          </button>
-        </div>
-      </div> */}
     </aside>
   );
 };

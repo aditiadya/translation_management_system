@@ -17,6 +17,12 @@ const AdminAuth = sequelize.define(
         isEmail: true,
       },
     },
+    username: {
+    type: DataTypes.STRING(64),
+    allowNull: true,
+    unique: true,
+    after: "email",
+},
     password_hash: {
       type: DataTypes.STRING(255),
       allowNull: true,
@@ -52,11 +58,6 @@ const AdminAuth = sequelize.define(
   {
     tableName: "admin_auth",
     timestamps: true,
-    indexes: [
-      { fields: ["activation_token"] },
-      { fields: ["reset_token"] },
-      { fields: ["refresh_token"] },
-    ],
   }
 );
 
@@ -146,6 +147,14 @@ AdminAuth.associate = (models) => {
     AdminAuth.hasMany(models.ClientDetails, {
       foreignKey: "admin_id",
       as: "clients",
+      onDelete: "CASCADE",
+    });
+  }
+
+  if (models.VendorDetails) {
+    AdminAuth.hasOne(models.VendorDetails, {
+      foreignKey: "auth_id",
+      as: "vendor",
       onDelete: "CASCADE",
     });
   }

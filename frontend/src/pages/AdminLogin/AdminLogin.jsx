@@ -53,8 +53,16 @@ const AdminLogin = () => {
       console.log("Login response:", response.data);
 
       const meRes = await api.get("/auth/me", { withCredentials: true });
+      console.log("=== /auth/me Response ===");
+      console.log("Full response:", meRes.data);
+      console.log("roleSlug:", meRes.data?.roleSlug);
+      console.log("role:", meRes.data?.role);
+      console.log("id:", meRes.data?.id);
+      console.log("email:", meRes.data?.email);
+      console.log("=== End Response ===");
 
       setUser(meRes.data);
+      console.log("User set in context with data:", meRes.data);
 
       if (meRes.data.setup_completed) {
         navigate("/");

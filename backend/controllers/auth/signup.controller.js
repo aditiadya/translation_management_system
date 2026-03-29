@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import db from "../../models/index.js";
 
-const { AdminAuth, AdminDetails, AdminSetup, AdminTerms } = db;
+const { AdminAuth, AdminDetails, AdminSetup, AdminTerms, UserRoles, Roles } = db;
 
 export const signup = async (req, res, next) => {
   try {
@@ -28,6 +28,12 @@ export const signup = async (req, res, next) => {
         .json({ error: "You must accept the terms and conditions" });
     }
 
+    const adminRole = await Roles.findOne({ where: { slug: "administrator" } });
+    if (!adminRole) {
+      console.error("[SIGNUP] Admin role not found. Run roles seeder first.");
+      return res.status(500).json({ error: "Server configuration error" });
+    }
+
     const activationToken = crypto.randomBytes(32).toString("hex");
 
     const adminAuth = await AdminAuth.create({
@@ -36,15 +42,13 @@ export const signup = async (req, res, next) => {
       is_active: false,
     });
 
-    await AdminSetup.create({
-      admin_id: adminAuth.id,
+    await UserRoles.create({
+      auth_id: adminAuth.id,
+      role_id: adminRole.id,
     });
 
-    await AdminTerms.create({
-      admin_id: adminAuth.id,
-      terms_accepted: true,
-    });
-
+    await AdminSetup.create({ admin_id: adminAuth.id });
+    await AdminTerms.create({ admin_id: adminAuth.id, terms_accepted: true });
     await AdminDetails.create({
       admin_id: adminAuth.id,
       account_type,
@@ -57,11 +61,11 @@ export const signup = async (req, res, next) => {
     });
 
     res.status(200).json({
-      message: "Account Registered Successfully. Activation needed!",
+      message: "Account registered successfully. Activation needed!",
       activationToken,
     });
   } catch (err) {
-    console.error("Signup Error:", err);
+    console.error("Admin signup error:", err);
     next(err);
   }
 };

@@ -31,9 +31,6 @@ const UserRoles = sequelize.define(
   {
     tableName: 'user_roles',
     timestamps: true,
-    indexes: [
-      { unique: true, fields: ['auth_id', 'role_id'] },
-    ],
   }
 );
 
@@ -53,12 +50,6 @@ UserRoles.associate = (models) => {
       onDelete: 'CASCADE',
     });
   }
-
-  UserRoles.belongsTo(models.ManagerDetails, {
-    foreignKey: "auth_id",
-    targetKey: "auth_id",
-    as: "manager",
-  });
 };
 
 export default UserRoles;

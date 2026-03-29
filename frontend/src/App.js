@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import SetupWizardPage from "./pages/SetupWizard/SetupWizardPage";
 import AccountActivation from "./pages/AccountActivation/AccountActivation";
+import VendorActivation from "./pages/VendorActivation/VendorActivation";
 import AdminProfile from "./pages/Profile/adminProfile";
 import RequestReset from "./pages/AdminLogin/ForgotPassword/requestReset";
 import ResetPassword from "./pages/AdminLogin/ForgotPassword/resetPassword";
@@ -35,6 +36,14 @@ import VendorsPage from "./pages/Vendors/VendorList/VendorsPage";
 import VendorDetailPage from "./pages/Vendors/VendorDetails/VendorDetailPage";
 
 import MainLayout from "./components/Sidebar/MainLayout";
+import VendorMainLayout from "./components/Sidebar/VendorMainLayout";
+
+// Vendor Pages
+import VendorJobsPage from "./pages/Vendor/VendorJobsPage";
+import VendorReceivablesPage from "./pages/Vendor/VendorReceivablesPage";
+import VendorInvoicesPage from "./pages/Vendor/VendorInvoicesPage";
+import VendorPaymentsPage from "./pages/Vendor/VendorPaymentsPage";
+import VendorSettingsPage from "./pages/Vendor/VendorSettingsPage";
 
 import ProjectsPage  from "./pages/Projects/ProjectList/ProjectsPage";
 import CreateProjectPage from "./pages/Projects/CreateProject/CreateProjectPage";
@@ -63,6 +72,7 @@ const App = () => (
         <Route path="/create-account" element={<AdminRegisteration />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/account-activation/:token" element={<AccountActivation />} />
+        <Route path="/vendor/activate/:token" element={<VendorActivation />} />
         <Route path="/request-reset" element={<RequestReset />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route element={<MainLayout />}>
@@ -312,6 +322,51 @@ const App = () => (
           />
 
           </Route>
+
+        {/* Vendor Routes */}
+        <Route element={<VendorMainLayout />}>
+          <Route
+            path="/vendor/jobs"
+            element={
+              <ProtectedRoute>
+                <VendorJobsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/receivables"
+            element={
+              <ProtectedRoute>
+                <VendorReceivablesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/invoices"
+            element={
+              <ProtectedRoute>
+                <VendorInvoicesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/payments"
+            element={
+              <ProtectedRoute>
+                <VendorPaymentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendor/settings"
+            element={
+              <ProtectedRoute>
+                <VendorSettingsPage />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+
       </Routes>
     </Router>
   </AuthProvider>
