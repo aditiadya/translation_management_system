@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import { authenticateToken } from './middlewares/authMiddleware.js';
+import { requireRole, ADMIN, ADMIN_AND_MANAGERS, requireSetupCompleted } from './middlewares/requireRole.js';
 
 import authRoutes from './routes/authRoutes.js';
 import adminDetailsRoutes from "./routes/adminDetailsRoutes.js"
@@ -64,43 +66,43 @@ app.use("/uploads", express.static("uploads"));
 
 app.use('/api/auth', authRoutes);
 app.use("/api/admin", authRoutes);
-app.use("/api/admin-details", adminDetailsRoutes);
-app.use("/api/admin-profile", AdminProfileRoutes);
+app.use("/api/admin-details", authenticateToken, requireRole(...ADMIN), requireSetupCompleted, adminDetailsRoutes);
+app.use("/api/admin-profile", authenticateToken, requireRole(...ADMIN), requireSetupCompleted, AdminProfileRoutes);
 app.use("/uploads", express.static("uploads"));
 
-app.use('/api/admin-services', adminServiceRoutes);
-app.use('/api/admin-language-pairs', adminLanguageRoutes);
-app.use("/api/admin-specializations", adminSpecializationRoutes);
-app.use("/api/admin-units", adminUnitsRoutes);
-app.use("/api/admin-currencies", adminCurrencyRoutes);
-app.use("/api/admin-payment-methods", adminPaymentMethodRoutes);
+app.use('/api/admin-services', authenticateToken, requireRole(...ADMIN), adminServiceRoutes);
+app.use('/api/admin-language-pairs', authenticateToken, requireRole(...ADMIN), adminLanguageRoutes);
+app.use("/api/admin-specializations", authenticateToken, requireRole(...ADMIN), adminSpecializationRoutes);
+app.use("/api/admin-units", authenticateToken, requireRole(...ADMIN), adminUnitsRoutes);
+app.use("/api/admin-currencies", authenticateToken, requireRole(...ADMIN), adminCurrencyRoutes);
+app.use("/api/admin-payment-methods", authenticateToken, requireRole(...ADMIN), adminPaymentMethodRoutes);
 
 app.use("/api/languages", languageRoutes);
 app.use("/api/currencies", currencyRoutes);
 
-app.use("/api/managers", managerDetailsRoutes);
-app.use("/api/manager-roles", managerRolesRoutes);
+app.use("/api/managers", authenticateToken, requireRole(...ADMIN), requireSetupCompleted, managerDetailsRoutes);
+app.use("/api/manager-roles", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, managerRolesRoutes);
 
-app.use("/api/clients", clientDetailsRoutes);
-app.use("/api/client-pools", clientPoolRoutes);
-app.use("/api/client/contact-persons", clientContactPersonRoutes);
-app.use("/api/client-documents", clientDocumentsRoutes);
-app.use("/api/client-price-list", clientPriceListRoutes);
+app.use("/api/clients", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, clientDetailsRoutes);
+app.use("/api/client-pools", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, clientPoolRoutes);
+app.use("/api/client/contact-persons", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, clientContactPersonRoutes);
+app.use("/api/client-documents", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, clientDocumentsRoutes);
+app.use("/api/client-price-list", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, clientPriceListRoutes);
 
-app.use("/api/vendors", vendorDetailsRoutes);
-app.use("/api/vendor/contact-persons", vendorContactPersonRoutes);
-app.use("/api/vendor-documents", vendorDocumentsRoutes);
-app.use("/api/vendor-services", vendorServicesRoutes);
-app.use("/api/vendor-specializations", vendorSpecializationsRoutes);
-app.use("/api/vendor-language-pairs", vendorLanguagePairsRoutes);
-app.use("/api/vendor-settings", vendorSettingRoutes);
-app.use("/api/vendor-payment-methods", vendorPaymentMethodRoutes);
-app.use("/api/vendor-price-list", vendorPriceListRoutes);
+app.use("/api/vendors", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorDetailsRoutes);
+app.use("/api/vendor/contact-persons", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorContactPersonRoutes);
+app.use("/api/vendor-documents", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorDocumentsRoutes);
+app.use("/api/vendor-services", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorServicesRoutes);
+app.use("/api/vendor-specializations", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorSpecializationsRoutes);
+app.use("/api/vendor-language-pairs", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorLanguagePairsRoutes);
+app.use("/api/vendor-settings", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorSettingRoutes);
+app.use("/api/vendor-payment-methods", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorPaymentMethodRoutes);
+app.use("/api/vendor-price-list", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorPriceListRoutes);
 
-app.use("/api/projects", projectDetailsRoutes);
-app.use("/api/project-status-history", projectStatusHistoryRoutes);
+app.use("/api/projects", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, projectDetailsRoutes);
+app.use("/api/project-status-history", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, projectStatusHistoryRoutes);
 app.use("/api", projectFileRoutes);
-app.use("/api/project-finances", projectFinancesRoutes);
+app.use("/api/project-finances", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, projectFinancesRoutes);
 
 
 app.use("/api", jobRoutes);

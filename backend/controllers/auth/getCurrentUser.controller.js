@@ -1,6 +1,6 @@
 import db from "../../models/index.js";
 
-const { AdminAuth, UserRoles, Roles } = db;
+const { AdminAuth, UserRoles, Roles, AdminSetup } = db;
 
 export const getCurrentUser = async (req, res) => {
   try {
@@ -31,6 +31,13 @@ export const getCurrentUser = async (req, res) => {
 
     const roleEntry = user.role?.role_details;
 
+    // Fetch setup status for administrators
+    let setup_completed = null;
+    if (roleEntry?.slug === "administrator") {
+      const setup = await AdminSetup.findOne({ where: { admin_id: user.id } });
+      setup_completed = setup?.setup_completed ?? false;
+    }
+
     res.status(200).json({
       id: user.id,
       email: user.email,
@@ -38,6 +45,7 @@ export const getCurrentUser = async (req, res) => {
       is_active: user.is_active,
       role: roleEntry?.name ?? null,
       roleSlug: roleEntry?.slug ?? null,
+      setup_completed,
     });
   } catch (err) {
     console.error("getCurrentUser error:", err);

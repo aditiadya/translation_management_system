@@ -20,10 +20,12 @@ import {
   downloadProjectOutputFilesAsZip,
 } from "../controllers/project/projectOutputFiles.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
+import { requireRole, ADMIN_AND_MANAGERS } from "../middlewares/requireRole.js";
 
 const router = express.Router();
 
 router.use(authenticateToken);
+router.use(requireRole(...ADMIN_AND_MANAGERS));
 
 router.get("/client/:id/input-files", getClientInputFiles);
 

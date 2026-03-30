@@ -1,4 +1,6 @@
 import { NavLink } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import {
   FiHome,
   FiUser,
@@ -8,9 +10,25 @@ import {
   FiUsers,
   FiBriefcase,
   FiBarChart2,
+  FiFileText,
+  FiDollarSign,
+  FiCreditCard,
 } from "react-icons/fi";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
+  const { user } = useContext(AuthContext);
+  const isVendor = user?.roleSlug === "vendor";
+  const isAdminSetupIncomplete =
+    user?.roleSlug === "administrator" && !user?.setup_completed;
+
+  const vendorLinks = [
+    { to: "/jobs", icon: FiBriefcase, label: "Jobs" },
+    { to: "/vendor/tenders", icon: FiFileText, label: "Tenders" },
+    { to: "/vendor/receivables", icon: FiDollarSign, label: "Receivables" },
+    { to: "/vendor/invoices", icon: FiFileText, label: "Invoices" },
+    { to: "/vendor/payments", icon: FiCreditCard, label: "Payments" },
+  ];
+
   const navLinks = [
     { to: "/", icon: FiHome, label: "Dashboard", category: "main" },
     { to: "/profile", icon: FiUser, label: "My Profile", category: "main" },
@@ -60,6 +78,79 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
          ? "bg-blue-100 text-blue-700"
          : "text-gray-500 hover:bg-gray-100 hover:text-gray-800"
      }`;
+
+  if (isAdminSetupIncomplete) {
+    return (
+      <aside
+        className={`fixed left-0 top-16 bottom-0
+          bg-white border-r shadow-sm transition-all duration-300 ease-in-out
+          flex flex-col
+          overflow-y-auto overflow-x-hidden
+          ${isOpen ? "w-64" : "w-20"}`}
+      >
+        <button
+          onClick={() => {
+            const newState = !isOpen;
+            setIsOpen(newState);
+            localStorage.setItem("sidebar-open", newState);
+          }}
+          className="absolute -right-3 top-9 z-10 p-1.5 bg-white border rounded-full shadow-md hover:bg-gray-100 transition-transform duration-300"
+        >
+          <FiChevronLeft
+            className={`transition-transform duration-300 ${!isOpen && "rotate-180"}`}
+          />
+        </button>
+        <div className="p-4 space-y-4">
+          {isOpen && (
+            <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              Complete setup to unlock all features.
+            </p>
+          )}
+          <nav className="flex flex-col space-y-2 mt-2">
+            <NavLink to="/setup" className={linkClasses}>
+              <FiSettings size={22} className="flex-shrink-0" />
+              {isOpen && <span>Complete Setup</span>}
+            </NavLink>
+          </nav>
+        </div>
+      </aside>
+    );
+  }
+
+  if (isVendor) {
+    return (
+      <aside
+        className={`fixed left-0 top-16 bottom-0
+          bg-white border-r shadow-sm transition-all duration-300 ease-in-out
+          flex flex-col justify-between
+          overflow-y-auto overflow-x-hidden
+          ${isOpen ? "w-64" : "w-20"}`}
+      >
+        <button
+          onClick={() => {
+            const newState = !isOpen;
+            setIsOpen(newState);
+            localStorage.setItem("sidebar-open", newState);
+          }}
+          className="absolute -right-3 top-9 z-10 p-1.5 bg-white border rounded-full shadow-md hover:bg-gray-100 transition-transform duration-300"
+        >
+          <FiChevronLeft
+            className={`transition-transform duration-300 ${!isOpen && "rotate-180"}`}
+          />
+        </button>
+        <div className="p-4 space-y-4">
+          <nav className="flex flex-col space-y-2">
+            {vendorLinks.map((link) => (
+              <NavLink to={link.to} className={linkClasses} key={link.to}>
+                <link.icon size={22} className="flex-shrink-0" />
+                {isOpen && <span>{link.label}</span>}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside

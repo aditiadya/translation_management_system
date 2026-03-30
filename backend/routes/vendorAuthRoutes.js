@@ -5,7 +5,7 @@ import {
   verifyVendorActivationToken,
 } from "../controllers/vendor/index.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
-import { requireRole } from "../middlewares/requireRole.js";
+import { requireRole, ADMIN } from "../middlewares/requireRole.js";
 import { validateVendorActivation } from "../middlewares/validateVendorActivation.js";
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.post("/activate/:token", validateVendorActivation, activateVendorAccount)
 router.post(
   "/invite",
   authenticateToken,
-  requireRole("admin"),
+  requireRole(...ADMIN),
   inviteVendor
 );
 

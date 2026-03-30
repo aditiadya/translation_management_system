@@ -1,32 +1,32 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import api from "../../utils/axiosInstance";
 import { Link } from "react-router-dom";
 import { User, LogOut } from "lucide-react";
 import LogoutConfirmModal from "../Modals/LogoutConfirmModal";
 import { motion, AnimatePresence } from "framer-motion";
+import { AuthContext } from "../../context/AuthContext";
 
 const Navbar = () => {
-  const [user, setUser] = useState(null); // from /auth/me
+  const { user } = useContext(AuthContext); // single source of truth
   const [profile, setProfile] = useState(null); // from /admin-details
   const [open, setOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
     api
-      .get("/auth/me")
-      .then((res) => {
-        setUser(res.data);
-        return api.get("/admin-details");
-      })
+      .get("/admin-details")
       .then((res) => {
         setProfile(res.data?.data || res.data);
       })
       .catch(() => {
-        setUser(null);
         setProfile(null);
       });
-  }, []);
+  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -48,7 +48,6 @@ const Navbar = () => {
   }, [open]);
 
   const handleLogout = () => {
-    setUser(null);
     setProfile(null);
     setShowLogoutConfirm(false);
     setOpen(false);
@@ -70,7 +69,7 @@ const Navbar = () => {
         />
       );
     }
-    const initial = profile?.username?.[0]?.toUpperCase() || "U";
+    const initial = (profile?.username || user?.username)?.[0]?.toUpperCase() || "U";
     return (
       <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
         {initial}
@@ -117,7 +116,7 @@ const Navbar = () => {
               >
                 {getAvatar()}
                 <span className="hidden sm:inline font-medium">
-                  {profile?.username}
+                  {profile?.username || user?.username}
                 </span>
               </button>
 
@@ -131,9 +130,9 @@ const Navbar = () => {
                     className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg overflow-hidden text-gray-800"
                   >
                     <div className="px-4 py-3 border-b bg-gray-50">
-                      <p className="font-semibold">{profile?.username}</p>
+                      <p className="font-semibold">{profile?.username || user?.username}</p>
                       <p className="text-sm text-gray-500">
-                        {user?.email || "Admin"}
+                        {user?.email || ""}
                       </p>
                     </div>
 

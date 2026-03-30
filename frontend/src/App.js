@@ -54,6 +54,12 @@ import UnitBasedPayablePage from "./pages/Projects/ProjectDetails/Jobs/PayableTo
 import EditFlatRatePayable from "./pages/Projects/ProjectDetails/Jobs/PayableToVendors/EditFlatRatePayable";
 import EditUnitBasedPayablePage from "./pages/Projects/ProjectDetails/Jobs/PayableToVendors/EditUnitBasedPayable";
 
+import VendorTendersPage from "./pages/Vendor/VendorTendersPage";
+import VendorReceivablesPage from "./pages/Vendor/VendorReceivablesPage";
+import VendorInvoicesPage from "./pages/Vendor/VendorInvoicesPage";
+import VendorPaymentsPage from "./pages/Vendor/VendorPaymentsPage";
+import { ADMIN, ADMIN_AND_MANAGERS, VENDOR, ALL_STAFF } from "./utils/constants/roles";
+
 
 
 const App = () => (
@@ -71,7 +77,7 @@ const App = () => (
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ALL_STAFF}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -79,7 +85,7 @@ const App = () => (
         <Route
           path="/setup"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN}>
               <SetupWizardPage />
             </ProtectedRoute>
           }
@@ -87,7 +93,7 @@ const App = () => (
         <Route
           path="/profile"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
               <AdminProfile />
             </ProtectedRoute>
           }
@@ -95,7 +101,7 @@ const App = () => (
         <Route
           path="/change-password"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
               <ChangePassword />
             </ProtectedRoute>
           }
@@ -103,7 +109,7 @@ const App = () => (
         <Route
           path="managers/create-manager"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN}>
               <CreateManager />
             </ProtectedRoute>
           }
@@ -111,7 +117,7 @@ const App = () => (
         <Route
           path="/managers"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN}>
               <ManagersPage />
             </ProtectedRoute>
           }
@@ -119,7 +125,7 @@ const App = () => (
         <Route
           path="managers/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN}>
               <ManagerDetailPage />
             </ProtectedRoute>
           }
@@ -127,7 +133,7 @@ const App = () => (
         <Route
           path="clients/create-client"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
               <CreateClientPage />
             </ProtectedRoute>
           }
@@ -135,7 +141,7 @@ const App = () => (
         <Route
           path="/clients"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
               <ClientsPage />
             </ProtectedRoute>
           }
@@ -143,7 +149,7 @@ const App = () => (
         <Route
           path="clients/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
               <ClientDetailPage />
             </ProtectedRoute>
           }
@@ -151,7 +157,7 @@ const App = () => (
         <Route
           path="/client-pools"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
               <ClientPoolsPage />
             </ProtectedRoute>
           }
@@ -159,7 +165,7 @@ const App = () => (
         <Route
           path="/add-client-pool"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
               <AddClientPoolPage />
             </ProtectedRoute>
           }
@@ -167,7 +173,7 @@ const App = () => (
         <Route
           path="client-pools/:id"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
               <ClientPoolDetailsPage />
             </ProtectedRoute>
           }
@@ -175,7 +181,7 @@ const App = () => (
           <Route
             path="system-values/services"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN}>
                 <ServicesPage />
               </ProtectedRoute>
             }
@@ -183,7 +189,7 @@ const App = () => (
           <Route
             path="system-values/language-pairs"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN}>
                 <LanguagePairsPage />
               </ProtectedRoute>
             }
@@ -191,7 +197,7 @@ const App = () => (
           <Route
             path="system-values/specializations"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN}>
                 <SpecializationPage />
               </ProtectedRoute>
             }
@@ -199,7 +205,7 @@ const App = () => (
           <Route
             path="system-values/units"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN}>
                 <UnitPage />
               </ProtectedRoute>
             }
@@ -207,7 +213,7 @@ const App = () => (
           <Route
             path="system-values/currencies"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN}>
                 <CurrencyPage />
               </ProtectedRoute>
             }
@@ -215,7 +221,7 @@ const App = () => (
           <Route
             path="system-values/payment-methods"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN}>
                 <PaymentMethodPage />
               </ProtectedRoute>
             }
@@ -223,7 +229,7 @@ const App = () => (
           <Route
             path="system-values"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN}>
                 <SystemValuesPage />
               </ProtectedRoute>
             }
@@ -231,7 +237,7 @@ const App = () => (
           <Route
             path="vendors/create-vendor"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
                 <CreateVendorPage />
               </ProtectedRoute>
             }
@@ -239,7 +245,7 @@ const App = () => (
           <Route
             path="/vendors"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
                 <VendorsPage />
               </ProtectedRoute>
             }
@@ -247,7 +253,7 @@ const App = () => (
           <Route
             path="/vendors/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
                 <VendorDetailPage />
               </ProtectedRoute>
             }
@@ -255,7 +261,7 @@ const App = () => (
           <Route
             path="/projects"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
                 <ProjectsPage />
               </ProtectedRoute>
             }
@@ -263,7 +269,7 @@ const App = () => (
           <Route
             path="/projects/create-project"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
                 <CreateProjectPage />
               </ProtectedRoute>
             }
@@ -271,34 +277,34 @@ const App = () => (
           <Route
             path="/project/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
                 <ProjectDetailPage />
               </ProtectedRoute>
             }
           />
 
-          <Route path="/project/edit/:id" element={<EditProjectDetails />} />
+          <Route path="/project/edit/:id" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><EditProjectDetails /></ProtectedRoute>} />
           
-          <Route path="/project/:id/new-flat-rate-receivable" element={<CreateFlatRateReceivablePage />} />
-          <Route path="/project/:id/new-unit-based-receivable" element={<CreateUnitBasedReceivablePage />} />
+          <Route path="/project/:id/new-flat-rate-receivable" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><CreateFlatRateReceivablePage /></ProtectedRoute>} />
+          <Route path="/project/:id/new-unit-based-receivable" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><CreateUnitBasedReceivablePage /></ProtectedRoute>} />
           {/* <Route path="/project/:id/new-cat-log" element={<CreateCATLogPage />} /> */}
-          <Route path="/project/:id/edit-flat-rate-receivable/:receivableId" element={<EditFlatRateReceivable />} />
-          <Route path="/project/:id/edit-unit-based-receivable/:receivableId" element={<EditUnitBasedReceivablePage />} />
+          <Route path="/project/:id/edit-flat-rate-receivable/:receivableId" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><EditFlatRateReceivable /></ProtectedRoute>} />
+          <Route path="/project/:id/edit-unit-based-receivable/:receivableId" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><EditUnitBasedReceivablePage /></ProtectedRoute>} />
 
 
-          <Route path="/project/:id/job/:jobId/new-flat-rate-receivable" element={<CreateFlatRatePayablePage />} />
-          <Route path="/project/:id/job/:jobId/new-unit-based-receivable" element={<UnitBasedPayablePage />} />
+          <Route path="/project/:id/job/:jobId/new-flat-rate-receivable" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><CreateFlatRatePayablePage /></ProtectedRoute>} />
+          <Route path="/project/:id/job/:jobId/new-unit-based-receivable" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><UnitBasedPayablePage /></ProtectedRoute>} />
           {/* <Route path="/project/:id/job/:jobId/:id/new-cat-log" element={<CreateCATLogPage />} /> */}
-          <Route path="/project/:id/job/:jobId/edit-flat-rate-receivable/:payableId" element={<EditFlatRatePayable />} />
-          <Route path="/project/:id/job/:jobId/edit-unit-based-receivable/:payableId" element={<EditUnitBasedPayablePage />} />
+          <Route path="/project/:id/job/:jobId/edit-flat-rate-receivable/:payableId" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><EditFlatRatePayable /></ProtectedRoute>} />
+          <Route path="/project/:id/job/:jobId/edit-unit-based-receivable/:payableId" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><EditUnitBasedPayablePage /></ProtectedRoute>} />
 
 
-          <Route path="/project/:id/create-job" element={<CreateJobsPage />} />
+          <Route path="/project/:id/create-job" element={<ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}><CreateJobsPage /></ProtectedRoute>} />
 
            <Route
             path="/jobs"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ALL_STAFF}>
                 <JobsPage />
               </ProtectedRoute>
             }
@@ -307,11 +313,16 @@ const App = () => (
           <Route
             path="/project/:id/job/:jobId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
                 <JobDetailPage />
               </ProtectedRoute>
             }
           />
+
+          <Route path="/vendor/tenders" element={<ProtectedRoute allowedRoles={VENDOR}><VendorTendersPage /></ProtectedRoute>} />
+          <Route path="/vendor/receivables" element={<ProtectedRoute allowedRoles={VENDOR}><VendorReceivablesPage /></ProtectedRoute>} />
+          <Route path="/vendor/invoices" element={<ProtectedRoute allowedRoles={VENDOR}><VendorInvoicesPage /></ProtectedRoute>} />
+          <Route path="/vendor/payments" element={<ProtectedRoute allowedRoles={VENDOR}><VendorPaymentsPage /></ProtectedRoute>} />
 
           </Route>
       </Routes>

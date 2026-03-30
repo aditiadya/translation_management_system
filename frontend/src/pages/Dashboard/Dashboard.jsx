@@ -1,16 +1,13 @@
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
+import AdminDashboard from "./AdminDashboard";
+import VendorDashboard from "./VendorDashboard";
+
 const Dashboard = () => {
-  return (
-    <>
-        <div className="p-8 bg-white rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            Welcome to your Dashboard
-          </h1>
-          <p className="text-gray-600">
-            This is your protected area. Enjoy your stay!
-          </p>
-        </div>
-    </>
-  );
+  const { user } = useContext(AuthContext);
+
+  if (user?.roleSlug === "vendor") return <VendorDashboard />;
+  return <AdminDashboard />;
 };
 
 export default Dashboard;

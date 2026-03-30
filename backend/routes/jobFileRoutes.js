@@ -25,10 +25,12 @@ import {
   downloadJobOutputFilesByProjectAsZip,
 } from "../controllers/jobs/jobOutputFiles.js";
 import { authenticateToken } from "../middlewares/authMiddleware.js";
+import { requireRole, ADMIN_AND_MANAGERS } from "../middlewares/requireRole.js";
 
 const router = express.Router();
 
 router.use(authenticateToken);
+router.use(requireRole(...ADMIN_AND_MANAGERS));
 
 // ========== JOB INPUT FILES ==========
 router.post("/job-input-files", jobInputUpload, createJobInputFile);

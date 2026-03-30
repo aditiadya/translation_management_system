@@ -64,7 +64,10 @@ const AdminLogin = () => {
       setUser(meRes.data);
       console.log("User set in context with data:", meRes.data);
 
-      if (meRes.data.setup_completed) {
+      const roleSlug = meRes.data?.roleSlug;
+      if (roleSlug === "vendor" || roleSlug === "client") {
+        navigate("/");
+      } else if (meRes.data.setup_completed) {
         navigate("/");
       } else {
         navigate("/setup");
