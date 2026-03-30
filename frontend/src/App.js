@@ -8,7 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import SetupWizardPage from "./pages/SetupWizard/SetupWizardPage";
 import AccountActivation from "./pages/AccountActivation/AccountActivation";
 import VendorActivation from "./pages/VendorActivation/VendorActivation";
-import AdminProfile from "./pages/Profile/adminProfile";
+import ProfilePage from "./pages/Profile/ProfilePage";
 import RequestReset from "./pages/AdminLogin/ForgotPassword/requestReset";
 import ResetPassword from "./pages/AdminLogin/ForgotPassword/resetPassword";
 import ChangePassword from "./pages/Profile/ChangePasswordPage";
@@ -93,15 +93,15 @@ const App = () => (
         <Route
           path="/profile"
           element={
-            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
-              <AdminProfile />
+            <ProtectedRoute allowedRoles={ALL_STAFF}>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />
         <Route
           path="/change-password"
           element={
-            <ProtectedRoute allowedRoles={ADMIN_AND_MANAGERS}>
+            <ProtectedRoute allowedRoles={ALL_STAFF}>
               <ChangePassword />
             </ProtectedRoute>
           }

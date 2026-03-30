@@ -3,7 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { authenticateToken } from './middlewares/authMiddleware.js';
-import { requireRole, ADMIN, ADMIN_AND_MANAGERS, requireSetupCompleted } from './middlewares/requireRole.js';
+import { requireRole, ADMIN, ADMIN_AND_MANAGERS, VENDOR, requireSetupCompleted } from './middlewares/requireRole.js';
 
 import authRoutes from './routes/authRoutes.js';
 import adminDetailsRoutes from "./routes/adminDetailsRoutes.js"
@@ -29,12 +29,14 @@ import clientDocumentsRoutes from "./routes/clientDocumentsRoutes.js"
 import clientPriceListRoutes from "./routes/clientPriceListRoutes.js"
 
 import vendorDetailsRoutes from "./routes/vendorDetailsRoutes.js"
+import vendorSelfDetailsRoutes from "./routes/vendorSelfDetailsRoutes.js"
 import vendorContactPersonRoutes from "./routes/vendorContactPersonRoutes.js"
 import vendorDocumentsRoutes from "./routes/vendorDocumentsRoutes.js"
 import vendorServicesRoutes from "./routes/vendorServicesRoutes.js"
 import vendorSpecializationsRoutes from "./routes/vendorSpecializationsRoutes.js"
 import vendorLanguagePairsRoutes from "./routes/vendorLanguagePairsRoutes.js"
 import vendorSettingRoutes from "./routes/vendorSettingRoutes.js"
+import vendorProfileRoutes from "./routes/vendorProfileRoutes.js"
 import vendorPaymentMethodRoutes from "./routes/vendorPaymentMethodRoutes.js"
 import vendorPriceListRoutes from "./routes/vendorPriceListRoutes.js"
 
@@ -96,6 +98,8 @@ app.use("/api/vendor-services", authenticateToken, requireRole(...ADMIN_AND_MANA
 app.use("/api/vendor-specializations", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorSpecializationsRoutes);
 app.use("/api/vendor-language-pairs", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorLanguagePairsRoutes);
 app.use("/api/vendor-settings", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorSettingRoutes);
+app.use("/api/vendor-profile", authenticateToken, requireRole(...VENDOR), vendorProfileRoutes); // Vendor portal only
+app.use("/api/vendor-self", authenticateToken, requireRole(...VENDOR), vendorSelfDetailsRoutes); // Vendor portal only self details
 app.use("/api/vendor-payment-methods", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorPaymentMethodRoutes);
 app.use("/api/vendor-price-list", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorPriceListRoutes);
 

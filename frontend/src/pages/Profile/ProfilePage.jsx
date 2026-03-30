@@ -1,36 +1,70 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import api from "../../utils/axiosInstance";
 import ProfileInfoCard from "./ProfileInfoCard";
 import ChangePasswordSection from "./ChangePasswordSection";
+import { AuthContext } from "../../context/AuthContext";
 
 const ProfilePage = () => {
+  const { user } = useContext(AuthContext);
   const [admin, setAdmin] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [profileImage, setProfileImage] = useState(null); // holds the full image URL
 
+  const isVendor = user?.roleSlug === "vendor";
+  const detailsEndpoint = isVendor ? "/vendor-self" : "/admin-details";
+  const profileEndpoint = isVendor ? "/vendor-profile" : "/admin-profile";
+  const profileImageMetaEndpoint = `${profileEndpoint}/image/meta`;
+
+  const mapVendorDataToForm = (details) => {
+    if (!details) return details;
+
+    const primary = details.primary_users || {};
+    const timezone = primary.timezone || details.timezone || details.time_zone || "";
+
+    return {
+      ...details,
+      first_name: primary.first_name || details.first_name || "",
+      last_name: primary.last_name || details.last_name || "",
+      phone: primary.phone || details.phone || "",
+      gender: primary.gender || details.gender || "",
+      nationality: primary.nationality || details.nationality || "",
+      teams_id: primary.teams_id || details.teams_id || "",
+      zoom_id: primary.zoom_id || details.zoom_id || "",
+      time_zone: timezone,
+      username: details.username || details.auth?.email || details.email || "",
+      email: details.auth?.email || details.email || "",
+    };
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const [detailsRes, authRes, profileRes, imageRes] = await Promise.all([
-          api.get("/admin-details"),
+          api.get(detailsEndpoint),
           api.get("/auth/me"),
-          api.get("/admin-profile").catch(() => null),
-          api.get("/admin-profile/image/meta").catch(() => null), // fetch image metadata
+          api.get(profileEndpoint).catch(() => null),
+          api.get(profileImageMetaEndpoint).catch(() => null),
         ]);
 
         if (detailsRes.data.success && authRes.data) {
+          let baseData = detailsRes.data.data;
+
+          if (isVendor) {
+            baseData = mapVendorDataToForm(baseData);
+          }
+
           const mergedData = {
-            ...detailsRes.data.data,
+            ...baseData,
             email: authRes.data.email,
             ...(profileRes?.data?.success ? profileRes.data.data : {}),
           };
+
           if (!mergedData.language_email) mergedData.language_email = "English";
           setAdmin(mergedData);
           setFormData(mergedData);
         }
 
-        // Set image URL if exists
         if (imageRes?.data?.success) {
           setProfileImage(imageRes.data.data.image_url);
         }
@@ -39,7 +73,7 @@ const ProfilePage = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [detailsEndpoint, profileEndpoint, profileImageMetaEndpoint, isVendor]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -48,14 +82,14 @@ const ProfilePage = () => {
     try {
       const { email, gender, teams_id, zoom_id, language_email, ...updateData } = formData;
 
-      const res = await api.put("/admin-details", updateData);
+      const res = await api.put(detailsEndpoint, updateData);
 
       if (gender || teams_id || zoom_id || language_email) {
         try {
-          await api.put("/admin-profile", { gender, teams_id, zoom_id, language_email });
+          await api.put(profileEndpoint, { gender, teams_id, zoom_id, language_email });
         } catch (err) {
           if (err.response?.status === 404) {
-            await api.post("/admin-profile", { gender, teams_id, zoom_id, language_email });
+            await api.post(profileEndpoint, { gender, teams_id, zoom_id, language_email });
           } else throw err;
         }
       }
@@ -74,24 +108,21 @@ const ProfilePage = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      // Let the browser set the Content-Type (including boundary)
-      const res = await api.post("/admin-profile/image", formData);
+      const res = await api.post(`${profileEndpoint}/image`, formData);
 
       if (res.data.success) {
         setProfileImage(res.data.data.image_url);
       }
     } catch (err) {
-      // Surface backend error message when available
       const message = err.response?.data?.message || err.response?.data?.error || err.message;
       console.error("Failed to upload image", message, err);
-      // Basic user feedback
       alert(`Image upload failed: ${message}`);
     }
   };
 
   const handleImageDelete = async () => {
     try {
-      const res = await api.delete("/admin-profile/image");
+      const res = await api.delete(`${profileEndpoint}/image`);
       if (res.data.success) {
         setProfileImage(null);
       }

@@ -306,6 +306,112 @@ export const getVendorById = async (req, res) => {
   }
 };
 
+// Get current vendor (vendor portal)
+export const getSelfVendorDetails = async (req, res) => {
+  try {
+    const vendor = await VendorDetails.findOne({
+      where: { auth_id: req.user.id },
+      include: [
+        { model: AdminAuth, as: "auth", attributes: ["email"] },
+        { model: VendorPrimaryUserDetails, as: "primary_users" },
+      ],
+    });
+
+    if (!vendor)
+      return res.status(404).json({ success: false, message: "Vendor not found" });
+
+    return res.status(200).json({ success: true, data: vendor });
+  } catch (error) {
+    console.error(error);
+    const err = toClientError(error);
+    return res.status(err.code).json(err.body);
+  }
+};
+
+export const updateSelfVendorDetails = async (req, res) => {
+  try {
+    const vendor = await VendorDetails.findOne({ where: { auth_id: req.user.id } });
+    if (!vendor)
+      return res.status(404).json({ success: false, message: "Vendor not found" });
+
+    const vendorFields = [
+      "type",
+      "company_name",
+      "legal_entity",
+      "country",
+      "state_region",
+      "city",
+      "postal_code",
+      "address",
+      "pan_tax_number",
+      "gstin_vat_number",
+      "website",
+      "note",
+      "can_login",
+      "assignable_to_jobs",
+      "finances_visible",
+    ];
+
+    const primaryUserFields = [
+      "first_name",
+      "last_name",
+      "timezone",
+      "time_zone",
+      "phone",
+      "zoom_id",
+      "teams_id",
+      "gender",
+      "nationality",
+    ];
+
+    // update vendor detail fields
+    vendorFields.forEach((field) => {
+      if (req.body.hasOwnProperty(field)) {
+        vendor[field] = req.body[field];
+      }
+    });
+
+    await vendor.save();
+
+    // update primary user details (merged fields for vendor profile)
+    const primaryUser = await VendorPrimaryUserDetails.findOne({ where: { vendor_id: vendor.id } });
+    const primaryData = {};
+
+    primaryUserFields.forEach((field) => {
+      if (req.body.hasOwnProperty(field)) {
+        if (field === "time_zone") {
+          primaryData.timezone = req.body[field];
+        } else {
+          primaryData[field] = req.body[field];
+        }
+      }
+    });
+
+    if (Object.keys(primaryData).length > 0) {
+      if (primaryUser) {
+        Object.assign(primaryUser, primaryData);
+        await primaryUser.save();
+      } else {
+        await VendorPrimaryUserDetails.create({ vendor_id: vendor.id, ...primaryData });
+      }
+    }
+
+    const updatedVendor = await VendorDetails.findOne({
+      where: { id: vendor.id },
+      include: [
+        { model: AdminAuth, as: "auth", attributes: ["email"] },
+        { model: VendorPrimaryUserDetails, as: "primary_users" },
+      ],
+    });
+
+    return res.status(200).json({ success: true, data: updatedVendor });
+  } catch (error) {
+    console.error(error);
+    const err = toClientError(error);
+    return res.status(err.code).json(err.body);
+  }
+};
+
 // Get all vendors
 export const getAllVendors = async (req, res) => {
   const adminId = req.user.id;
