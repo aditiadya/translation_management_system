@@ -22,8 +22,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     user?.roleSlug === "administrator" && !user?.setup_completed;
 
   const vendorLinks = [
+    { to: "/dashboard", icon: FiBriefcase, label: "Dashboard" },
     { to: "/jobs", icon: FiBriefcase, label: "Jobs" },
-    { to: "/vendor/tenders", icon: FiFileText, label: "Tenders" },
     { to: "/vendor/receivables", icon: FiDollarSign, label: "Receivables" },
     { to: "/vendor/invoices", icon: FiFileText, label: "Invoices" },
     { to: "/vendor/payments", icon: FiCreditCard, label: "Payments" },
