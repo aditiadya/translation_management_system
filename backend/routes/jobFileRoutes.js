@@ -32,6 +32,12 @@ const router = express.Router();
 router.use(authenticateToken);
 router.use(requireRole(...ADMIN_AND_MANAGERS));
 
+// ========== ZIP DOWNLOAD ROUTES (before :id to avoid conflict) ==========
+router.get("/job-input-files/download-zip", downloadJobInputFilesAsZip);
+router.get("/job-output-files/download-zip", downloadJobOutputFilesAsZip);
+router.get("/job-input-files/download-zip-by-project", downloadJobInputFilesByProjectAsZip);
+router.get("/job-output-files/download-zip-by-project", downloadJobOutputFilesByProjectAsZip);
+
 // ========== JOB INPUT FILES ==========
 router.post("/job-input-files", jobInputUpload, createJobInputFile);
 router.post("/job-input-files/link", linkProjectFileToJob);
@@ -47,29 +53,5 @@ router.get("/job-output-files/:id", getJobOutputFileById);
 router.put("/job-output-files/:id", jobOutputUpload, updateJobOutputFile);
 router.delete("/job-output-files/:id", deleteJobOutputFile);
 router.post("/job-output-files/:id/add-to-project", addToProjectOutput);
-
-// Download routes
-router.get("/download-file", authenticateToken, downloadFile);
-router.get(
-  "/job-input-files/download-zip",
-  authenticateToken,
-  downloadJobInputFilesAsZip
-);
-router.get(
-  "/job-output-files/download-zip",
-  authenticateToken,
-  downloadJobOutputFilesAsZip
-);
-router.get(
-  "/job-input-files/download-zip-by-project",
-  authenticateToken,
-  downloadJobInputFilesByProjectAsZip
-);
-
-router.get(
-  "/job-output-files/download-zip-by-project",
-  authenticateToken,
-  downloadJobOutputFilesByProjectAsZip
-);
 
 export default router;

@@ -62,7 +62,7 @@ const ProjectOutputFilesCard = ({ projectId, files = [], onRefresh }) => {
   const handleDownloadSingle = async (file) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(file.file_path)}`,
+        `http://localhost:5000/api/download-file?path=${encodeURIComponent(file.file_path)}`,
         { credentials: "include" },
       );
       if (!response.ok) throw new Error("Download failed");
@@ -86,7 +86,7 @@ const ProjectOutputFilesCard = ({ projectId, files = [], onRefresh }) => {
     try {
       setDownloading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/project-output-files/download-zip?project_id=${projectId}`,
+        `http://localhost:5000/api/project-output-files/download-zip?project_id=${projectId}`,
         { credentials: "include" },
       );
       if (!response.ok) throw new Error("Download failed");
@@ -116,7 +116,7 @@ const ProjectOutputFilesCard = ({ projectId, files = [], onRefresh }) => {
       return;
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/project-output-files/${file.id}`,
+        `http://localhost:5000/api/project-output-files/${file.id}`,
         { method: "DELETE", credentials: "include" },
       );
       if (!response.ok) {

@@ -18,8 +18,9 @@ const Navbar = () => {
       setProfile(null);
       return;
     }
+    const endpoint = user?.roleSlug === "vendor" ? "/vendor-self" : "/admin-details";
     api
-      .get("/admin-details")
+      .get(endpoint)
       .then((res) => {
         setProfile(res.data?.data || res.data);
       })
@@ -59,6 +60,23 @@ const Navbar = () => {
   };
 
   // Avatar (fallback to initials if no image)
+  const getDisplayName = () => {
+    if (user?.roleSlug === "vendor") {
+      // username from admin_auth table (via /auth/me)
+      return (
+        user?.username ||
+        profile?.company_name ||
+        (profile?.primary_users
+          ? `${profile.primary_users.first_name || ""} ${profile.primary_users.last_name || ""}`.trim()
+          : null) ||
+        user?.email ||
+        "V"
+      );
+    }
+    return profile?.username || user?.username || user?.email || "U";
+  };
+
+  // Avatar (fallback to initials if no image)
   const getAvatar = () => {
     if (profile?.avatarUrl) {
       return (
@@ -69,7 +87,8 @@ const Navbar = () => {
         />
       );
     }
-    const initial = (profile?.username || user?.username)?.[0]?.toUpperCase() || "U";
+    const displayName = getDisplayName();
+    const initial = displayName?.[0]?.toUpperCase() || "U";
     return (
       <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
         {initial}
@@ -116,7 +135,7 @@ const Navbar = () => {
               >
                 {getAvatar()}
                 <span className="hidden sm:inline font-medium">
-                  {profile?.username || user?.username}
+                  {getDisplayName()}
                 </span>
               </button>
 
@@ -130,7 +149,7 @@ const Navbar = () => {
                     className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg overflow-hidden text-gray-800"
                   >
                     <div className="px-4 py-3 border-b bg-gray-50">
-                      <p className="font-semibold">{profile?.username || user?.username}</p>
+                      <p className="font-semibold">{getDisplayName()}</p>
                       <p className="text-sm text-gray-500">
                         {user?.email || ""}
                       </p>

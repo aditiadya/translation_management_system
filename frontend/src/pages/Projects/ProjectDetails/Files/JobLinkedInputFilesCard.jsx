@@ -20,7 +20,7 @@ const LinkedInputFilesCard = ({ projectId, files = [] }) => {
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(filePath)}`,
+        `http://localhost:5000/api/download-file?path=${encodeURIComponent(filePath)}`,
         { credentials: "include" }
       );
 

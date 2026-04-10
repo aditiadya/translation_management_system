@@ -38,7 +38,7 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(filePath)}`,
+        `http://localhost:5000/api/download-file?path=${encodeURIComponent(filePath)}`,
         { credentials: "include" }
       );
 
@@ -68,7 +68,7 @@ const LinkedInputFilesCard = ({ jobId, files = [], onRefresh }) => {
     try {
       setDownloading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/job-input-files/download-zip?job_id=${jobId}`,
+        `http://localhost:5000/api/job-input-files/download-zip?job_id=${jobId}`,
         { credentials: "include" }
       );
 

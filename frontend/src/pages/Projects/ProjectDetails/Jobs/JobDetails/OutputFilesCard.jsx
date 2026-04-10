@@ -30,7 +30,7 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
   const handleDownloadSingle = async (file) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(file.file_path)}`,
+        `http://localhost:5000/api/download-file?path=${encodeURIComponent(file.file_path)}`,
         { credentials: "include" }
       );
 
@@ -60,7 +60,7 @@ const OutputFilesCard = ({ jobId, files = [], onRefresh }) => {
     try {
       setDownloading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/job-output-files/download-zip?job_id=${jobId}`,
+        `http://localhost:5000/api/job-output-files/download-zip?job_id=${jobId}`,
         { credentials: "include" }
       );
 

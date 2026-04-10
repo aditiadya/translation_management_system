@@ -11,7 +11,7 @@ const STATUS_TRANSITIONS = {
   "Offer Rejected": ["Offered to Vendor", "Cancelled"],
   Started: ["Completed", "Hold", "Cancelled"],
   Hold: ["Started", "Cancelled"],
-  Completed: ["Completion Accepted", "Completion Rejected"],
+  Completed: ["Completion Accepted", "Completion Rejected", "Draft"],
   "Completion Accepted": [],
   "Completion Rejected": ["Started", "Cancelled"],
   Cancelled: [],

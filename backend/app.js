@@ -3,6 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { authenticateToken } from './middlewares/authMiddleware.js';
+import { downloadFile } from './controllers/jobs/jonInputFiles.js';
 import { requireRole, ADMIN, ADMIN_AND_MANAGERS, VENDOR, requireSetupCompleted } from './middlewares/requireRole.js';
 
 import authRoutes from './routes/authRoutes.js';
@@ -49,6 +50,8 @@ import jobRoutes from "./routes/jobRoutes.js";
 import jobFileRoutes from "./routes/jobFileRoutes.js";
 
 import vendorAuthRoutes from "./routes/vendorAuthRoutes.js";
+import vendorJobRoutes from "./routes/vendorJobRoutes.js";
+import vendorReceivableRoutes from "./routes/vendorReceivableRoutes.js";
 
 const app = express();
 
@@ -65,6 +68,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/uploads", express.static("uploads"));
+
+// Download file — accessible to any authenticated user (admin, manager, vendor, client)
+app.get("/api/download-file", authenticateToken, downloadFile);
 
 app.use('/api/auth', authRoutes);
 app.use("/api/admin", authRoutes);
@@ -100,6 +106,8 @@ app.use("/api/vendor-language-pairs", authenticateToken, requireRole(...ADMIN_AN
 app.use("/api/vendor-settings", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorSettingRoutes);
 app.use("/api/vendor-profile", authenticateToken, requireRole(...VENDOR), vendorProfileRoutes); // Vendor portal only
 app.use("/api/vendor-self", authenticateToken, requireRole(...VENDOR), vendorSelfDetailsRoutes); // Vendor portal only self details
+app.use("/api/vendor-jobs", authenticateToken, requireRole(...VENDOR), vendorJobRoutes); // Vendor portal jobs
+app.use("/api/vendor-receivables", authenticateToken, requireRole(...VENDOR), vendorReceivableRoutes); // Vendor portal receivables
 app.use("/api/vendor-payment-methods", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorPaymentMethodRoutes);
 app.use("/api/vendor-price-list", authenticateToken, requireRole(...ADMIN_AND_MANAGERS), requireSetupCompleted, vendorPriceListRoutes);
 

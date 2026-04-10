@@ -258,41 +258,39 @@ export const getJobInputFileById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const files = await JobInputFiles.findAll({
-  where,
-  include: [
-    {
-      model: ProjectInputFiles,
-      as: "linkedProjectFile",
-      attributes: [
-        "id",
-        "file_code",
-        "original_file_name",
-        "file_path",
-        "file_size",
-        "category",
-      ],
-    },
-    {
-      model: JobDetails,
-      as: "job",
-      attributes: ["id", "name"],
-    },
-    {
-      model: db.AdminAuth,
-      as: "uploader",
-      attributes: ["id", "email"],
+    const file = await JobInputFiles.findByPk(id, {
       include: [
         {
-          model: AdminDetails,
-          as: "details",
-          attributes: ["first_name", "last_name"],
+          model: ProjectInputFiles,
+          as: "linkedProjectFile",
+          attributes: [
+            "id",
+            "file_code",
+            "original_file_name",
+            "file_path",
+            "file_size",
+            "category",
+          ],
+        },
+        {
+          model: JobDetails,
+          as: "job",
+          attributes: ["id", "name", "admin_id"],
+        },
+        {
+          model: db.AdminAuth,
+          as: "uploader",
+          attributes: ["id", "email"],
+          include: [
+            {
+              model: AdminDetails,
+              as: "details",
+              attributes: ["first_name", "last_name"],
+            },
+          ],
         },
       ],
-    },
-  ],
-  order: [["uploaded_at", "DESC"]],
-});
+    });
 
     if (!file) {
       return res.status(404).json({

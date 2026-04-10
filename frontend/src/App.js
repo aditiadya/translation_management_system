@@ -58,7 +58,19 @@ import VendorTendersPage from "./pages/Vendor/VendorTendersPage";
 import VendorReceivablesPage from "./pages/Vendor/VendorReceivablesPage";
 import VendorInvoicesPage from "./pages/Vendor/VendorInvoicesPage";
 import VendorPaymentsPage from "./pages/Vendor/VendorPaymentsPage";
+import VendorJobsPage from "./pages/Vendor/VendorJobsPage";
+import VendorJobDetailPage from "./pages/Vendor/VendorJobDetailPage";
+import VendorReceivableDetailPage from "./pages/Vendor/VendorReceivableDetailPage";
 import { ADMIN, ADMIN_AND_MANAGERS, VENDOR, ALL_STAFF } from "./utils/constants/roles";
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
+
+// Wrapper that renders the right Jobs page based on user role
+const JobsPageRouter = () => {
+  const { user } = useContext(AuthContext);
+  if (user?.roleSlug === "vendor") return <VendorJobsPage />;
+  return <JobsPage />;
+};
 
 
 
@@ -305,7 +317,7 @@ const App = () => (
             path="/jobs"
             element={
               <ProtectedRoute allowedRoles={ALL_STAFF}>
-                <JobsPage />
+                <JobsPageRouter />
               </ProtectedRoute>
             }
           />
@@ -320,7 +332,9 @@ const App = () => (
           />
 
           <Route path="/vendor/tenders" element={<ProtectedRoute allowedRoles={VENDOR}><VendorTendersPage /></ProtectedRoute>} />
+          <Route path="/vendor/job/:jobId" element={<ProtectedRoute allowedRoles={VENDOR}><VendorJobDetailPage /></ProtectedRoute>} />
           <Route path="/vendor/receivables" element={<ProtectedRoute allowedRoles={VENDOR}><VendorReceivablesPage /></ProtectedRoute>} />
+          <Route path="/vendor/receivable/:id" element={<ProtectedRoute allowedRoles={VENDOR}><VendorReceivableDetailPage /></ProtectedRoute>} />
           <Route path="/vendor/invoices" element={<ProtectedRoute allowedRoles={VENDOR}><VendorInvoicesPage /></ProtectedRoute>} />
           <Route path="/vendor/payments" element={<ProtectedRoute allowedRoles={VENDOR}><VendorPaymentsPage /></ProtectedRoute>} />
 

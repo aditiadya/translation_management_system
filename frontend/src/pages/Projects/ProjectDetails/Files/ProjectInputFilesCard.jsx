@@ -26,7 +26,7 @@ const ProjectInputFilesCard = ({ files = [], loading, onDelete, onUpload, onRefr
   const handleDownload = async (doc) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/download-file?path=${encodeURIComponent(doc.file_path)}`,
+        `http://localhost:5000/api/download-file?path=${encodeURIComponent(doc.file_path)}`,
         { credentials: "include" }
       );
       if (!response.ok) throw new Error("Download failed");
